@@ -17,12 +17,11 @@ module.exports = {
       // Application name
       name: 'duoq-tracker',
 
-      // Entry point (TypeScript with tsx)
-      script: 'tsx',
-      args: './src/start.ts',
+      // Entry point (TypeScript file)
+      script: './src/start.ts',
 
-      // Interpreter (npx to use local tsx from node_modules)
-      interpreter: 'npx',
+      // Use node with tsx loader from node_modules
+      interpreter: './node_modules/.bin/tsx',
 
       // Number of instances (1 for Discord bot - no clustering needed)
       instances: 1,
