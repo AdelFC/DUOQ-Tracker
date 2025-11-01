@@ -17,11 +17,11 @@ module.exports = {
       // Application name
       name: 'duoq-tracker',
 
-      // Entry point (compiled JS from TypeScript)
-      script: './dist/start.js',
+      // Entry point (TypeScript with tsx)
+      script: './src/start.ts',
 
-      // Interpreter
-      interpreter: 'node',
+      // Interpreter (tsx for TypeScript execution)
+      interpreter: 'tsx',
 
       // Number of instances (1 for Discord bot - no clustering needed)
       instances: 1,
