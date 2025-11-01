@@ -1,0 +1,53 @@
+{
+  "name": "duoq-tracker",
+  "version": "0.1.0",
+  "description": "DuoQ Challenge Tracker - Bot Discord pour challenge temporaire",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/start.ts",
+    "dev": "tsx watch src/main.ts",
+    "bot": "tsx src/bot/index.ts",
+    "bot:watch": "tsx watch src/bot/index.ts",
+    "deploy": "tsx src/bot/deploy-commands.ts",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "league-of-legends",
+    "duoq",
+    "challenge",
+    "typescript"
+  ],
+  "author": "AdelFC",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.13.1",
+    "better-sqlite3": "^9.6.0",
+    "discord.js": "^14.23.2",
+    "dotenv": "^16.6.1",
+    "drizzle-orm": "^0.44.6",
+    "node-cron": "^4.2.1",
+    "node-schedule": "^2.1.1",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.10.6",
+    "@types/node-cron": "^3.0.11",
+    "@types/node-schedule": "^2.1.8",
+    "@vitest/coverage-v8": "^1.1.0",
+    "drizzle-kit": "^0.31.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}
