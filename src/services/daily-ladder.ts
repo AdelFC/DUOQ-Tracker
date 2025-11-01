@@ -7,7 +7,7 @@
 import schedule from 'node-schedule'
 import type { Client } from 'discord.js'
 import type { State } from '../types/state.js'
-import { dailyLadderEmbed } from '../formatters/index.js'
+import { formatDailyLadder } from '../formatters/embeds.js'
 import type { Duo } from '../types/duo.js'
 
 export class DailyLadderService {
@@ -108,11 +108,10 @@ export class DailyLadderService {
       }))
 
       // Create embed with ALL duos (no limit)
-      const embed = dailyLadderEmbed(
-        rankedDuos,
-        rankedDuos.length,
-        new Date()
-      )
+      const embed = formatDailyLadder({
+        topDuos: rankedDuos,
+        date: new Date()
+      })
 
       // Send to tracker channel
       const channel = await this.client.channels.fetch(trackerChannelId)

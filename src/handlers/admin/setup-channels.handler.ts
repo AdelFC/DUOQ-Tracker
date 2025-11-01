@@ -1,22 +1,18 @@
 /**
- * Handler: /setup channels
- * Configure les channels Discord utilisés par le bot
+ * Handler pour /setup channels
+ * Configure les channels Discord (general + tracker)
  */
 
 import type { Message, Response } from '../../types/message.js'
-import type { State } from '../../types/state.js'
 import { MessageType } from '../../types/message.js'
-import { setupChannelsSuccessEmbed, setupChannelsIdenticalErrorEmbed, errorEmbed } from '../../formatters/index.js'
+import type { State } from '../../types/state.js'
+import { formatSetupChannels, formatError } from '../../formatters/embeds.js'
 
 interface SetupChannelsPayload {
   generalChannelId: string
   trackerChannelId: string
 }
 
-/**
- * Handler pour /setup channels
- * Configure les channels Discord (general + tracker)
- */
 export async function handleSetupChannels(
   message: Message,
   state: State,
@@ -29,7 +25,9 @@ export async function handleSetupChannels(
     responses.push({
       type: MessageType.ERROR,
       targetId: message.sourceId,
-      content: setupChannelsIdenticalErrorEmbed(),
+      content: JSON.stringify(
+        formatError({ error: 'Les channels général et tracker doivent être différents.' })
+      ),
       ephemeral: true,
     })
     return
@@ -40,23 +38,30 @@ export async function handleSetupChannels(
     responses.push({
       type: MessageType.ERROR,
       targetId: message.sourceId,
-      content: errorEmbed('Channels requis', 'Les deux channels (général et tracker) sont requis pour configurer le bot.'),
+      content: JSON.stringify(
+        formatError({ error: 'Les deux channels (général et tracker) sont requis.' })
+      ),
       ephemeral: true,
     })
     return
   }
 
   // Stocker dans le state
-  if ('set' in state.config) {
-    await state.config.set('generalChannelId', generalChannelId)
-    await state.config.set('trackerChannelId', trackerChannelId)
+  if ('setSync' in state.config) {
+    state.config.setSync('generalChannelId', generalChannelId)
+    state.config.setSync('trackerChannelId', trackerChannelId)
   }
 
   // Response de succès avec embed
+  const embed = formatSetupChannels({
+    generalChannelId,
+    trackerChannelId,
+  })
+
   responses.push({
     type: MessageType.SUCCESS,
     targetId: message.sourceId,
-    content: setupChannelsSuccessEmbed(generalChannelId, trackerChannelId),
+    content: JSON.stringify(embed),
     ephemeral: false,
   })
 

@@ -22,7 +22,6 @@ import { historyHandler } from '../handlers/stats/history.handler'
 import { handleSetupChannels } from '../handlers/admin/setup-channels.handler'
 import { handleSetupEvent } from '../handlers/admin/setup-event.handler'
 import { handleSetupStatus } from '../handlers/admin/setup-status.handler'
-import { handleSetupReset } from '../handlers/admin/setup-reset.handler'
 import { handleTestIntegration } from '../handlers/admin/test-integration.handler'
 import { handleDevAdd } from '../handlers/dev/dev-add.handler'
 import { handleDevRemove } from '../handlers/dev/dev-remove.handler'
@@ -197,19 +196,24 @@ class DiscordRouter {
         break
 
       case MessageType.SETUP_CHANNELS:
-        handleSetupChannels(msg, this.state, responses)
+        await handleSetupChannels(msg, this.state, responses)
         break
 
       case MessageType.SETUP_EVENT:
-        handleSetupEvent(msg, this.state, responses)
+        await handleSetupEvent(msg, this.state, responses)
         break
 
       case MessageType.SETUP_STATUS:
-        handleSetupStatus(msg, this.state, responses)
+        await handleSetupStatus(msg, this.state, responses)
         break
 
       case MessageType.SETUP_RESET:
-        handleSetupReset(msg, this.state, responses)
+        responses.push({
+          type: MessageType.ERROR,
+          targetId: msg.sourceId,
+          content: '❌ Commande /setup reset non implémentée.',
+          ephemeral: true,
+        })
         break
 
       case MessageType.TEST_INTEGRATION:
@@ -333,6 +337,7 @@ class DiscordRouter {
         break
       }
 
+
       case 'setup': {
         const subcommand = interaction.options.getSubcommand()
 
@@ -355,22 +360,12 @@ class DiscordRouter {
             payload = {
               startDate,
               endDate,
-              timezone: 'Europe/Paris', // Hardcoded timezone
             }
             break
           }
 
           case 'status': {
             messageType = MessageType.SETUP_STATUS
-            break
-          }
-
-          case 'reset': {
-            messageType = MessageType.SETUP_RESET
-            const confirm = interaction.options.getBoolean('confirm')
-            payload = {
-              confirm: confirm || false,
-            }
             break
           }
 

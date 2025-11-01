@@ -6,7 +6,7 @@
 import type { Message, Response } from '../../types/message.js'
 import { MessageType } from '../../types/message.js'
 import type { State } from '../../types/state.js'
-import { setupStatusEmbed } from '../../formatters/index.js'
+import { formatSetupStatus } from '../../formatters/embeds.js'
 
 export async function handleSetupStatus(
   message: Message,
@@ -14,36 +14,40 @@ export async function handleSetupStatus(
   responses: Response[]
 ): Promise<void> {
   // Récupérer la configuration
-  const generalChannelId = await state.config.get('generalChannelId')
-  const trackerChannelId = await state.config.get('trackerChannelId')
-  const eventStartDate = await state.config.get('eventStartDate')
-  const eventEndDate = await state.config.get('eventEndDate')
-  const eventTimezone = await state.config.get('eventTimezone')
-  const riotApiKey = await state.config.get('riotApiKey')
+  const generalChannelId = 'getSync' in state.config ? state.config.getSync('generalChannelId') : null
+  const trackerChannelId = 'getSync' in state.config ? state.config.getSync('trackerChannelId') : null
+  const eventStartDate = 'getSync' in state.config ? state.config.getSync('eventStartDate') : null
+  const eventEndDate = 'getSync' in state.config ? state.config.getSync('eventEndDate') : null
+  const eventTimezone = 'getSync' in state.config ? state.config.getSync('eventTimezone') : 'Europe/Paris'
 
   // Vérifier si l'événement est actif
-  const isActive = await state.config.isEventActive()
+  let isActive = false
+  if (eventStartDate && eventEndDate) {
+    const now = new Date()
+    const start = new Date(eventStartDate)
+    const end = new Date(eventEndDate)
+    isActive = now >= start && now <= end
+  }
 
-  // Compter les stats
-  const playerCount = state.players.size
-  const duoCount = state.duos.size
-  const gameCount = state.games.size
+  // Formater les dates
+  const startDate = eventStartDate ? new Date(eventStartDate) : null
+  const endDate = eventEndDate ? new Date(eventEndDate) : null
+
+  const embed = formatSetupStatus({
+    hasChannels: !!(generalChannelId && trackerChannelId),
+    hasEvent: !!(eventStartDate && eventEndDate),
+    generalChannelId,
+    trackerChannelId,
+    startDate,
+    endDate,
+    timezone: eventTimezone as string,
+    isActive,
+  })
 
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
-    content: setupStatusEmbed(
-      generalChannelId,
-      trackerChannelId,
-      eventStartDate,
-      eventEndDate,
-      eventTimezone,
-      riotApiKey,
-      isActive,
-      playerCount,
-      duoCount,
-      gameCount
-    ),
+    content: JSON.stringify(embed),
     ephemeral: false,
   })
 }

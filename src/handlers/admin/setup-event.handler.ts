@@ -1,17 +1,16 @@
 /**
  * Handler pour /setup event
- * Configure les dates de début et fin de l'événement
+ * Configure les dates de l'événement
  */
 
 import type { Message, Response } from '../../types/message.js'
 import { MessageType } from '../../types/message.js'
 import type { State } from '../../types/state.js'
-import { setupEventSuccessEmbed, setupEventErrorEmbed, setupEventPastDateWarningEmbed, errorEmbed } from '../../formatters/index.js'
+import { formatSetupEvent, formatError } from '../../formatters/embeds.js'
 
 interface SetupEventPayload {
-  startDate: string // ISO 8601 format
-  endDate: string // ISO 8601 format
-  timezone?: string // Optional, default: Europe/Paris
+  startDate: string
+  endDate: string
 }
 
 export async function handleSetupEvent(
@@ -19,87 +18,78 @@ export async function handleSetupEvent(
   state: State,
   responses: Response[]
 ): Promise<void> {
-  const payload = message.payload as SetupEventPayload
+  const { startDate, endDate } = message.payload as SetupEventPayload
 
-  // Validation: dates requises
-  if (!payload.startDate || !payload.endDate) {
+  // Valider les dates
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  if (isNaN(start.getTime())) {
     responses.push({
       type: MessageType.ERROR,
       targetId: message.sourceId,
-      content: errorEmbed('Dates requises', 'Les dates de début et de fin sont requises.\n\nUtilisation: `/setup event start:<date> end:<date> [timezone:<tz>]`'),
+      content: JSON.stringify(
+        formatError({ error: 'Date de début invalide. Format requis : ISO 8601 (ex: 2025-11-01T00:00:00Z)' })
+      ),
       ephemeral: true,
     })
     return
   }
 
-  // Validation: formats de dates
-  let startDate: Date
-  let endDate: Date
-
-  try {
-    startDate = new Date(payload.startDate)
-    endDate = new Date(payload.endDate)
-
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      throw new Error('Invalid date format')
-    }
-  } catch (error) {
+  if (isNaN(end.getTime())) {
     responses.push({
       type: MessageType.ERROR,
       targetId: message.sourceId,
-      content: setupEventErrorEmbed('Format de date invalide'),
+      content: JSON.stringify(
+        formatError({ error: 'Date de fin invalide. Format requis : ISO 8601 (ex: 2025-11-30T23:59:59Z)' })
+      ),
       ephemeral: true,
     })
     return
   }
 
-  // Validation: date de début < date de fin
-  if (startDate >= endDate) {
+  if (end <= start) {
     responses.push({
       type: MessageType.ERROR,
       targetId: message.sourceId,
-      content: setupEventErrorEmbed('La date de début doit être antérieure à la date de fin'),
+      content: JSON.stringify(
+        formatError({ error: 'La date de fin doit être après la date de début.' })
+      ),
       ephemeral: true,
     })
     return
-  }
-
-  // Validation: dates dans le futur (optionnel, peut être retiré pour les tests)
-  const now = new Date()
-  if (endDate < now) {
-    responses.push({
-      type: MessageType.ERROR,
-      targetId: message.sourceId,
-      content: setupEventPastDateWarningEmbed(),
-      ephemeral: true,
-    })
-    // Continue quand même pour permettre les tests
-  }
-
-  // Stocker la configuration
-  const timezone = payload.timezone || 'Europe/Paris'
-  if ('set' in state.config) {
-    await state.config.set('eventStartDate', payload.startDate)
-    await state.config.set('eventEndDate', payload.endDate)
-    await state.config.set('eventTimezone', timezone)
   }
 
   // Calculer la durée
-  const durationMs = endDate.getTime() - startDate.getTime()
+  const durationMs = end.getTime() - start.getTime()
   const durationDays = Math.floor(durationMs / (1000 * 60 * 60 * 24))
   const durationHours = Math.floor((durationMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
 
-  // Utiliser le nouveau formatter
+  // Vérifier si l'événement est actif
+  const now = new Date()
+  const isActive = now >= start && now <= end
+
+  // Stocker dans le state
+  if ('setSync' in state.config) {
+    state.config.setSync('eventStartDate', startDate)
+    state.config.setSync('eventEndDate', endDate)
+    state.config.setSync('eventTimezone', 'Europe/Paris')
+  }
+
+  // Response de succès
+  const embed = formatSetupEvent({
+    startDate: start,
+    endDate: end,
+    timezone: 'Europe/Paris',
+    durationDays,
+    durationHours,
+    isActive,
+  })
+
   responses.push({
     type: MessageType.SUCCESS,
     targetId: message.sourceId,
-    content: setupEventSuccessEmbed(
-      payload.startDate,
-      payload.endDate,
-      timezone,
-      durationDays,
-      durationHours
-    ),
+    content: JSON.stringify(embed),
     ephemeral: false,
   })
 }
