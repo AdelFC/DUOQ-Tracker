@@ -36,6 +36,7 @@
     "drizzle-orm": "^0.44.6",
     "node-cron": "^4.2.1",
     "node-schedule": "^2.1.1",
+    "tsx": "^4.7.0",
     "winston": "^3.18.3",
     "winston-daily-rotate-file": "^5.0.0"
   },
@@ -46,7 +47,6 @@
     "@types/node-schedule": "^2.1.8",
     "@vitest/coverage-v8": "^1.1.0",
     "drizzle-kit": "^0.31.5",
-    "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0"
   }
