@@ -3,6 +3,7 @@ import { unregisterHandler } from '../../../handlers/auth/unregister.handler'
 import type { State } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
 import { MessageType } from '../../../types/message.js'
+import { createTestPlayer, createTestDuo, createTestConfig } from '../../helpers/fixtures.js'
 
 function createTestState(): State {
   return {
@@ -10,17 +11,7 @@ function createTestState(): State {
     duos: new Map(),
     games: new Map(),
     devs: new Map(),
-    config: {
-      discordToken: 'test',
-      guildId: 'test',
-      adminRoleId: 'test',
-      riotApiKey: 'test',
-      region: 'EUW1',
-      challengeStartDate: new Date(),
-      challengeEndDate: new Date(),
-      gameCheckInterval: 60000,
-      maxGamesPerCheck: 10,
-    },
+    config: createTestConfig(),
   }
 }
 
@@ -45,19 +36,15 @@ describe('Handler Unregister', () => {
   describe('Cas de succès', () => {
     it('devrait supprimer un joueur seul (pas dans un duo)', () => {
       // Setup: joueur inscrit mais pas en duo
-      state.players.set('player1', {
+      state.players.set('player1', createTestPlayer({
         discordId: 'player1',
         gameName: 'TestPlayer',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: undefined,
+        duoId: 0,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 50 },
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
       const msg = createMessage('player1')
       unregisterHandler(msg, state, responses)
@@ -70,44 +57,28 @@ describe('Handler Unregister', () => {
 
     it('devrait dissoudre le duo et supprimer le joueur', () => {
       // Setup: deux joueurs en duo
-      state.players.set('player1', {
+      state.players.set('player1', createTestPlayer({
         discordId: 'player1',
         gameName: 'Noob',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 1,
-        initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
-        currentRank: { tier: 'GOLD', division: 'III', lp: 50 },
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('player2', {
+      state.players.set('player2', createTestPlayer({
         discordId: 'player2',
         gameName: 'Carry',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'player1',
         carryId: 'player2',
         name: 'Test Duo',
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
       const msg = createMessage('player1')
       unregisterHandler(msg, state, responses)
@@ -136,24 +107,19 @@ describe('Handler Unregister', () => {
 
     it('devrait notifier le partenaire quand un duo est dissous', () => {
       // Setup: deux joueurs en duo
-      state.players.set('player1', {
+      state.players.set('player1', createTestPlayer({
         discordId: 'player1',
         gameName: 'Noob',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 1,
-        initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
-        currentRank: { tier: 'GOLD', division: 'III', lp: 50 },
         totalPoints: 100,
         wins: 5,
         losses: 2,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('player2', {
+      state.players.set('player2', createTestPlayer({
         discordId: 'player2',
         gameName: 'Carry',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
@@ -161,19 +127,17 @@ describe('Handler Unregister', () => {
         totalPoints: 120,
         wins: 5,
         losses: 2,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'player1',
         carryId: 'player2',
         name: 'Test Duo',
         totalPoints: 220,
         wins: 5,
         losses: 2,
-        registeredAt: new Date(),
-      })
+      }))
 
       const msg = createMessage('player1')
       unregisterHandler(msg, state, responses)
