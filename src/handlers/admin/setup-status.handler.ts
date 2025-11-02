@@ -19,6 +19,7 @@ export async function handleSetupStatus(
   const eventStartDate = 'getSync' in state.config ? state.config.getSync('eventStartDate') : null
   const eventEndDate = 'getSync' in state.config ? state.config.getSync('eventEndDate') : null
   const eventTimezone = 'getSync' in state.config ? state.config.getSync('eventTimezone') : 'Europe/Paris'
+  const riotApiKey = 'getSync' in state.config ? state.config.getSync('riotApiKey') : null
 
   // Vérifier si l'événement est actif
   let isActive = false
@@ -33,6 +34,11 @@ export async function handleSetupStatus(
   const startDate = eventStartDate ? new Date(eventStartDate) : null
   const endDate = eventEndDate ? new Date(eventEndDate) : null
 
+  // Compter les stats
+  const playerCount = state.players.size
+  const duoCount = state.duos.size
+  const gameCount = state.games.size
+
   const embed = formatSetupStatus({
     hasChannels: !!(generalChannelId && trackerChannelId),
     hasEvent: !!(eventStartDate && eventEndDate),
@@ -42,6 +48,10 @@ export async function handleSetupStatus(
     endDate,
     timezone: eventTimezone as string,
     isActive,
+    playerCount,
+    duoCount,
+    gameCount,
+    hasApiKey: !!riotApiKey,
   })
 
   responses.push({

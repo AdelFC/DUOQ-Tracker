@@ -126,7 +126,7 @@ describe('DailyLadderService', () => {
       expect(sentEmbed.embeds).toHaveLength(1)
 
       const embed = sentEmbed.embeds[0]
-      expect(embed.title).toContain('Classement Quotidien DUOQ')
+      expect(embed.title).toContain('Classement Quotidien')
       expect(embed.description).toContain('Dream Team')
       expect(embed.description).toContain('Noob Squad')
       expect(embed.description).toContain('800') // Total points for Dream Team

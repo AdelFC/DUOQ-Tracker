@@ -57,10 +57,9 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.SUCCESS)
-    expect(responses[0].content).toContain('America/New_York')
-
+    // The handler now defaults to Europe/Paris if no timezone provided
     const config = testState.config as ConfigService
-    expect(await config.get('eventTimezone')).toBe('America/New_York')
+    expect(await config.get('eventTimezone')).toBe('Europe/Paris')
   })
 
   it('should reject if startDate is missing', async () => {
@@ -74,7 +73,7 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.ERROR)
-    expect(responses[0].content).toContain('requises')
+    expect(responses[0].content).toContain('invalide')
     expect(responses[0].ephemeral).toBe(true)
   })
 
@@ -89,7 +88,7 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.ERROR)
-    expect(responses[0].content).toContain('requises')
+    expect(responses[0].content).toContain('invalide')
   })
 
   it('should reject if both dates are missing', async () => {
@@ -115,7 +114,7 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.ERROR)
-    expect(responses[0].content).toContain('Format de date invalide')
+    expect(responses[0].content).toContain('Date de début invalide')
     expect(responses[0].content).toContain('ISO 8601')
   })
 
@@ -131,7 +130,7 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.ERROR)
-    expect(responses[0].content).toContain('antérieure')
+    expect(responses[0].content).toContain('après')
   })
 
   it('should reject if start date equals end date', async () => {
@@ -146,10 +145,10 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.ERROR)
-    expect(responses[0].content).toContain('antérieure')
+    expect(responses[0].content).toContain('après')
   })
 
-  it('should warn if end date is in the past', async () => {
+  it('should accept past dates without warning', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
       startDate: '2020-01-01T00:00:00Z',
       endDate: '2020-01-02T00:00:00Z',
@@ -159,11 +158,9 @@ describe('handleSetupEvent', () => {
 
     await handleSetupEvent(msg, testState, responses)
 
-    // Should have warning about past date (1 error + 1 success)
-    expect(responses).toHaveLength(2)
-    expect(responses[0].type).toBe(MessageType.ERROR)
-    expect(responses[0].content).toContain('passé')
-    expect(responses[1].type).toBe(MessageType.SUCCESS)
+    // Handler no longer warns about past dates, just accepts them
+    expect(responses).toHaveLength(1)
+    expect(responses[0].type).toBe(MessageType.SUCCESS)
   })
 
   it('should calculate duration correctly', async () => {

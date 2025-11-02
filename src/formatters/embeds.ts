@@ -489,8 +489,25 @@ export function formatSetupStatus(payload: {
   endDate?: Date
   timezone?: string
   isActive?: boolean
+  playerCount?: number
+  duoCount?: number
+  gameCount?: number
+  hasApiKey?: boolean
 }): DiscordEmbed {
-  const { hasChannels, hasEvent, generalChannelId, trackerChannelId, startDate, endDate, timezone, isActive } = payload
+  const {
+    hasChannels,
+    hasEvent,
+    generalChannelId,
+    trackerChannelId,
+    startDate,
+    endDate,
+    timezone,
+    isActive,
+    playerCount = 0,
+    duoCount = 0,
+    gameCount = 0,
+    hasApiKey = false,
+  } = payload
 
   const channelsStatus = hasChannels ? `${EMOJIS.check} Configurés` : `${EMOJIS.warning} Non configurés`
   const eventStatus = hasEvent ? `${EMOJIS.check} Configuré` : `${EMOJIS.warning} Non configuré`
@@ -541,7 +558,24 @@ export function formatSetupStatus(payload: {
     })
   }
 
-  const allConfigured = hasChannels && hasEvent
+  // Stats
+  const playerPlural = playerCount === 1 ? 'joueur' : 'joueurs'
+  const duoPlural = duoCount === 1 ? 'duo' : 'duos'
+  const gamePlural = gameCount === 1 ? 'match' : 'matchs'
+  fields.push({
+    name: '📊 Statistiques',
+    value: `${playerCount} ${playerPlural}\n${duoCount} ${duoPlural}\n${gameCount} ${gamePlural}`,
+    inline: false,
+  })
+
+  // API Key
+  fields.push({
+    name: '🔑 Clé API Riot',
+    value: hasApiKey ? `${EMOJIS.check} Configurée` : `${EMOJIS.warning} Non configurée\nUtilise \`/key set\``,
+    inline: false,
+  })
+
+  const allConfigured = hasChannels && hasEvent && hasApiKey
   const color = allConfigured ? COLORS.success : COLORS.warning
 
   return {
