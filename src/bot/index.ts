@@ -146,6 +146,18 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
       // Import scoring engine
       const { calculateGameScore } = await import('../services/scoring/engine.js')
 
+      // Helper: Convert user-friendly role to Riot API lane
+      const roleToLane = (role: string): string => {
+        const mapping: Record<string, string> = {
+          'TOP': 'TOP',
+          'JUNGLE': 'JUNGLE',
+          'MID': 'MIDDLE',
+          'ADC': 'BOTTOM',
+          'SUPPORT': 'UTILITY'
+        }
+        return mapping[role.toUpperCase()] || role
+      }
+
       // Fetch current ranks from Riot API
       let noobNewRank = noob.currentRank
       let carryNewRank = carry.currentRank
@@ -189,7 +201,7 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
           assists: noobData.assists,
           previousRank: noob.currentRank,
           newRank: noobNewRank,
-          isOffRole: false, // TODO: Detect off-role
+          isOffRole: noob.mainRoleString ? roleToLane(noob.mainRoleString) !== noobData.teamPosition : false,
           isOffChampion: noob.mainChampion ? noob.mainChampion !== noobData.championName : false
         },
         carryStats: {
@@ -204,7 +216,7 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
           assists: carryData.assists,
           previousRank: carry.currentRank,
           newRank: carryNewRank,
-          isOffRole: false,
+          isOffRole: carry.mainRoleString ? roleToLane(carry.mainRoleString) !== carryData.teamPosition : false,
           isOffChampion: carry.mainChampion ? carry.mainChampion !== carryData.championName : false,
         },
       }
