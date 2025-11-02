@@ -14,7 +14,7 @@ import { MessageType } from '../types/message.js'
 import type { ConfigService } from './config/index.js'
 
 export interface RoutedResponse extends Response {
-  channel: 'general' | 'tracker' | 'source' | 'both'
+  channel: 'general' | 'tracker' | 'source'
 }
 
 export class ChannelRouter {
@@ -45,7 +45,7 @@ export class ChannelRouter {
   private getChannelForMessageType(
     type: MessageType,
     ephemeral?: boolean
-  ): 'general' | 'tracker' | 'source' | 'both' {
+  ): 'general' | 'tracker' | 'source' {
     // Les messages ephemeral vont toujours à la source (user)
     if (ephemeral) {
       return 'source'
