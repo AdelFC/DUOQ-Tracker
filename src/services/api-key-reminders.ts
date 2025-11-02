@@ -17,10 +17,20 @@ import type { Response } from '../types/message.js'
 export function checkApiKeyReminders(state: State, responses: Response[]): void {
   const { config, devs } = state
 
+  // Type guard for ConfigService
+  const isConfigService = 'getSync' in config
+
+  // Get riotApiKeyUpdatedAt
+  const updatedAtStr = isConfigService
+    ? (config as any).getSync('riotApiKeyUpdatedAt')
+    : (config as any).riotApiKeyUpdatedAt
+
   // Vérifier qu'on a une clé API et un timestamp
-  if (!config.riotApiKeyUpdatedAt) {
+  if (!updatedAtStr) {
     return // Pas de clé configurée
   }
+
+  const updatedAt = typeof updatedAtStr === 'string' ? new Date(updatedAtStr) : updatedAtStr
 
   // Vérifier qu'on a des devs à notifier
   if (devs.size === 0) {
@@ -29,24 +39,29 @@ export function checkApiKeyReminders(state: State, responses: Response[]): void 
 
   // Calculer l'âge de la clé en heures
   const now = Date.now()
-  const keyAge = now - config.riotApiKeyUpdatedAt.getTime()
+  const keyAge = now - updatedAt.getTime()
   const keyAgeHours = keyAge / (60 * 60 * 1000)
 
-  // Initialiser les rappels si nécessaire
-  if (!config.riotApiKeyReminders) {
-    config.riotApiKeyReminders = []
+  // Get reminders
+  const remindersStr = isConfigService
+    ? (config as any).getSync('riotApiKeyReminders')
+    : (config as any).riotApiKeyReminders
+
+  let reminders: Date[] = []
+  if (remindersStr) {
+    reminders = typeof remindersStr === 'string' ? JSON.parse(remindersStr) : remindersStr
   }
 
   // Déterminer quel rappel envoyer
   let reminderType: '22h' | '23h' | '23h30' | '24h' | null = null
 
-  if (keyAgeHours >= 24 && config.riotApiKeyReminders.length < 4) {
+  if (keyAgeHours >= 24 && reminders.length < 4) {
     reminderType = '24h'
-  } else if (keyAgeHours >= 23.5 && config.riotApiKeyReminders.length < 3) {
+  } else if (keyAgeHours >= 23.5 && reminders.length < 3) {
     reminderType = '23h30'
-  } else if (keyAgeHours >= 23 && config.riotApiKeyReminders.length < 2) {
+  } else if (keyAgeHours >= 23 && reminders.length < 2) {
     reminderType = '23h'
-  } else if (keyAgeHours >= 22 && config.riotApiKeyReminders.length < 1) {
+  } else if (keyAgeHours >= 22 && reminders.length < 1) {
     reminderType = '22h'
   }
 
@@ -56,7 +71,15 @@ export function checkApiKeyReminders(state: State, responses: Response[]): void 
   }
 
   // Enregistrer le rappel
-  config.riotApiKeyReminders.push(new Date())
+  reminders.push(new Date())
+  if (isConfigService) {
+    ;(config as any).setSync('riotApiKeyReminders', JSON.stringify(reminders))
+  } else {
+    ;(config as any).riotApiKeyReminders = reminders
+  }
+
+  // Get riotApiKey for display
+  const riotApiKey = isConfigService ? (config as any).getSync('riotApiKey') : (config as any).riotApiKey
 
   // Générer le message selon le type de rappel
   let message: string
@@ -67,7 +90,7 @@ export function checkApiKeyReminders(state: State, responses: Response[]): void 
 
 La clé API a **22 heures**. Elle expirera dans **2 heures**.
 
-🔑 Clé actuelle : \`${config.riotApiKey}\`
+🔑 Clé actuelle : \`${riotApiKey}\`
 
 💡 *Pensez à la changer avant l'expiration pour éviter les interruptions du tracking.*
 
@@ -79,7 +102,7 @@ La clé API a **22 heures**. Elle expirera dans **2 heures**.
 
 La clé API a **23 heures**. Elle expirera dans **1 heure**.
 
-🔑 Clé actuelle : \`${config.riotApiKey}\`
+🔑 Clé actuelle : \`${riotApiKey}\`
 
 💡 *Il est temps de changer la clé !*
 
@@ -91,7 +114,7 @@ La clé API a **23 heures**. Elle expirera dans **1 heure**.
 
 La clé API a **23h30**. Elle expirera dans **30 minutes** !
 
-🔑 Clé actuelle : \`${config.riotApiKey}\`
+🔑 Clé actuelle : \`${riotApiKey}\`
 
 🚨 *Changez la clé MAINTENANT pour éviter l'interruption du service !*
 
@@ -103,7 +126,7 @@ La clé API a **23h30**. Elle expirera dans **30 minutes** !
 
 La clé API a **24 heures** et est maintenant **expirée** !
 
-🔑 Clé actuelle : \`${config.riotApiKey}\`
+🔑 Clé actuelle : \`${riotApiKey}\`
 
 ❌ *Le tracking de games est actuellement INTERROMPU.*
 

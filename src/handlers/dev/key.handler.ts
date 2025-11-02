@@ -58,13 +58,25 @@ export function keyHandler(msg: Message, state: State, responses: Response[]): v
     return
   }
 
+  // Type guard for ConfigService
+  const isConfigService = 'getSync' in state.config
+
   // Vérifier si c'est la même clé
-  const isSameKey = state.config.riotApiKey === newKey
+  const currentKey = isConfigService
+    ? (state.config as any).getSync('riotApiKey')
+    : (state.config as any).riotApiKey
+  const isSameKey = currentKey === newKey
 
   // Mettre à jour la clé
-  state.config.riotApiKey = newKey
-  state.config.riotApiKeyUpdatedAt = new Date()
-  state.config.riotApiKeyReminders = []
+  if (isConfigService) {
+    ;(state.config as any).setSync('riotApiKey', newKey)
+    ;(state.config as any).setSync('riotApiKeyUpdatedAt', new Date().toISOString())
+    ;(state.config as any).setSync('riotApiKeyReminders', JSON.stringify([]))
+  } else {
+    ;(state.config as any).riotApiKey = newKey
+    ;(state.config as any).riotApiKeyUpdatedAt = new Date()
+    ;(state.config as any).riotApiKeyReminders = []
+  }
 
   // Message de confirmation
   let message = '✅ **Clé API Riot mise à jour avec succès !**\n\n'

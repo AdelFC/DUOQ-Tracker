@@ -34,9 +34,21 @@ export function createMockParticipant(
     assists: 8,
     totalDamageDealtToChampions: 25000,
     goldEarned: 15000,
-    totalMinionsKilled: 200,
-    neutralMinionsKilled: 30,
     visionScore: 40,
+    champLevel: 18,
+    teamPosition: 'BOTTOM',
+    role: 'CARRY',
+    lane: 'BOTTOM',
+    item0: 3031,
+    item1: 3094,
+    item2: 3006,
+    item3: 3072,
+    item4: 3036,
+    item5: 3046,
+    item6: 3340,
+    summoner1Id: 4,
+    summoner2Id: 7,
+    timePlayed: 1800,
     win: true,
     ...overrides,
   }
@@ -87,6 +99,7 @@ export function createMockMatch(overrides: Partial<MatchData> = {}): MatchData {
 
   return {
     metadata: {
+      dataVersion: '2',
       matchId: 'EUW1_1234567890',
       participants: [...bluePlayers, ...redPlayers].map((p) => p.puuid),
     },
@@ -103,6 +116,7 @@ export function createMockMatch(overrides: Partial<MatchData> = {}): MatchData {
       mapId: 11, // Summoner's Rift
       platformId: 'EUW1',
       queueId: 420, // Solo/Duo Ranked
+      tournamentCode: '',
       participants: [...bluePlayers, ...redPlayers],
       teams: [
         {

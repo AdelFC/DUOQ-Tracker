@@ -13,8 +13,8 @@ import {
  * Slash Command Definition
  */
 export interface CommandDefinition {
-  data: SlashCommandBuilder
-  execute: (interaction: ChatInputCommandInteraction) => Promise<void>
+  data: SlashCommandBuilder | any // SlashCommandSubcommandsOnlyBuilder
+  execute?: (interaction: ChatInputCommandInteraction) => Promise<void>
 }
 
 /**
