@@ -357,15 +357,26 @@ class DiscordRouter {
             messageType = MessageType.SETUP_EVENT
             const startDate = interaction.options.getString('start', true)
             const endDate = interaction.options.getString('end', true)
+            const timezone = interaction.options.getString('timezone')
             payload = {
               startDate,
               endDate,
+              timezone: timezone || 'Europe/Paris',
             }
             break
           }
 
           case 'status': {
             messageType = MessageType.SETUP_STATUS
+            break
+          }
+
+          case 'reset': {
+            messageType = MessageType.SETUP_RESET
+            const confirm = interaction.options.getBoolean('confirm', true)
+            payload = {
+              confirm,
+            }
             break
           }
 
