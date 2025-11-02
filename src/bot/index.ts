@@ -171,7 +171,7 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
           previousRank: noob.currentRank,
           newRank: noob.currentRank, // TODO: Fetch actual rank change from Riot API
           isOffRole: false, // TODO: Detect off-role
-          isOffChampion: false, // TODO: Detect off-champion
+          isOffChampion: noob.mainChampion ? noob.mainChampion !== noobData.championName : false
         },
         carryStats: {
           puuid: carry.puuid || '',
@@ -186,7 +186,7 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
           previousRank: carry.currentRank,
           newRank: carry.currentRank, // TODO: Fetch actual rank change from Riot API
           isOffRole: false,
-          isOffChampion: false,
+          isOffChampion: carry.mainChampion ? carry.mainChampion !== carryData.championName : false,
         },
       }
 
