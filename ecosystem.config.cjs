@@ -17,9 +17,6 @@ module.exports = {
       // Application name
       name: 'duoq-tracker',
 
-      // Working directory (absolute path)
-      cwd: '/home/afc/Desktop/LePacte/DUOQ-Tracker',
-
       // Entry point - production uses compiled code, dev uses tsx
       script: process.env.NODE_ENV === 'production' ? './start-bot-prod.sh' : './start-bot.sh',
 
@@ -47,10 +44,10 @@ module.exports = {
       },
 
       // Error logs
-      error_file: './logs/pm2-error.log',
+      error_file: 'logs/pm2-error.log',
 
       // Combined logs
-      out_file: './logs/pm2-out.log',
+      out_file: 'logs/pm2-out.log',
 
       // Log date format
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
