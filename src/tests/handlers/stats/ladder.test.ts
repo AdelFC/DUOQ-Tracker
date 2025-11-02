@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { ladderHandler } from '../../../handlers/stats/ladder.handler'
 import type { State } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
+import { MessageType } from '../../../types/message.js'
 
 function createTestState(): State {
   return {
@@ -25,7 +26,7 @@ function createTestState(): State {
 
 function createMessage(sourceId: string, payload: { page?: number } = {}): Message {
   return {
-    type: 'ladder',
+    type: MessageType.LADDER,
     sourceId,
     payload,
   }
@@ -45,11 +46,11 @@ describe('Handler Ladder', () => {
       // Setup: 3 duos avec différents scores
       // Duo 1: 150 pts, 10W-2L
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Player1',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'II', lp: 75 },
         totalPoints: 80,
@@ -60,11 +61,11 @@ describe('Handler Ladder', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Player2',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'I', lp: 50 },
         totalPoints: 70,
@@ -75,7 +76,7 @@ describe('Handler Ladder', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Les Zinzins',
@@ -87,11 +88,11 @@ describe('Handler Ladder', () => {
 
       // Duo 2: 100 pts, 8W-4L
       state.players.set('p3', {
-        userId: 'p3',
+        discordId: 'p3',
         gameName: 'Player3',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo2',
+        duoId: 2,
         initialRank: { tier: 'SILVER', division: 'I', lp: 80 },
         currentRank: { tier: 'GOLD', division: 'IV', lp: 20 },
         totalPoints: 55,
@@ -102,11 +103,11 @@ describe('Handler Ladder', () => {
       })
 
       state.players.set('p4', {
-        userId: 'p4',
+        discordId: 'p4',
         gameName: 'Player4',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo2',
+        duoId: 2,
         initialRank: { tier: 'GOLD', division: 'IV', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 60 },
         totalPoints: 45,
@@ -117,7 +118,7 @@ describe('Handler Ladder', () => {
       })
 
       state.duos.set('duo2', {
-        duoId: 'duo2',
+        duoId: 2,
         noobId: 'p3',
         carryId: 'p4',
         name: 'Les Pros',
@@ -129,11 +130,11 @@ describe('Handler Ladder', () => {
 
       // Duo 3: 50 pts, 5W-5L
       state.players.set('p5', {
-        userId: 'p5',
+        discordId: 'p5',
         gameName: 'Player5',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo3',
+        duoId: 3,
         initialRank: { tier: 'BRONZE', division: 'I', lp: 90 },
         currentRank: { tier: 'SILVER', division: 'IV', lp: 10 },
         totalPoints: 25,
@@ -144,11 +145,11 @@ describe('Handler Ladder', () => {
       })
 
       state.players.set('p6', {
-        userId: 'p6',
+        discordId: 'p6',
         gameName: 'Player6',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo3',
+        duoId: 3,
         initialRank: { tier: 'SILVER', division: 'III', lp: 40 },
         currentRank: { tier: 'SILVER', division: 'II', lp: 60 },
         totalPoints: 25,
@@ -159,7 +160,7 @@ describe('Handler Ladder', () => {
       })
 
       state.duos.set('duo3', {
-        duoId: 'duo3',
+        duoId: 3,
         noobId: 'p5',
         carryId: 'p6',
         name: 'Les Noobs',
@@ -214,11 +215,11 @@ describe('Handler Ladder', () => {
     it('devrait gérer un seul duo', () => {
       // Setup: 1 seul duo
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Player1',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 50 },
         totalPoints: 30,
@@ -229,11 +230,11 @@ describe('Handler Ladder', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Player2',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         totalPoints: 30,
@@ -244,7 +245,7 @@ describe('Handler Ladder', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Solo Duo',
@@ -270,11 +271,11 @@ describe('Handler Ladder', () => {
     it('devrait afficher le format avec les noms de joueurs', () => {
       // Setup: 1 duo
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Noob',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 50 },
         totalPoints: 40,
@@ -285,11 +286,11 @@ describe('Handler Ladder', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Carry',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         totalPoints: 40,
@@ -300,7 +301,7 @@ describe('Handler Ladder', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
@@ -399,11 +400,11 @@ describe('Handler Ladder', () => {
     it('devrait gérer les duos avec 0 points', () => {
       // Setup: duo avec 0 points (nouveau)
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'New1',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 50 },
         totalPoints: 0,
@@ -414,11 +415,11 @@ describe('Handler Ladder', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'New2',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         totalPoints: 0,
@@ -429,7 +430,7 @@ describe('Handler Ladder', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Fresh Duo',
@@ -455,11 +456,11 @@ describe('Handler Ladder', () => {
     it('devrait gérer les duos avec points négatifs', () => {
       // Setup: duo avec points négatifs (feeding hard)
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Feeder1',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'SILVER', division: 'II', lp: 20 },
         totalPoints: -50,
@@ -470,11 +471,11 @@ describe('Handler Ladder', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Feeder2',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 10 },
         totalPoints: -50,
@@ -485,7 +486,7 @@ describe('Handler Ladder', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Feeders United',

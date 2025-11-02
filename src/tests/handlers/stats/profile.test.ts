@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { profileHandler } from '../../../handlers/stats/profile.handler'
 import type { State } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
+import { MessageType } from '../../../types/message.js'
 
 function createTestState(): State {
   return {
@@ -25,7 +26,7 @@ function createTestState(): State {
 
 function createMessage(sourceId: string, payload: { targetId?: string } = {}): Message {
   return {
-    type: 'profile',
+    type: MessageType.PROFILE,
     sourceId,
     payload,
   }
@@ -44,11 +45,11 @@ describe('Handler Profile', () => {
     it('devrait afficher le profil complet d\'un joueur avec duo', () => {
       // Setup: Joueur avec duo et statistiques
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'TestPlayer',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'II', lp: 75 },
         totalPoints: 120,
@@ -59,11 +60,11 @@ describe('Handler Profile', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'PartnerPlayer',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'IV', lp: 20 },
         currentRank: { tier: 'PLATINUM', division: 'III', lp: 50 },
         totalPoints: 130,
@@ -74,7 +75,7 @@ describe('Handler Profile', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Dream Team',
@@ -110,7 +111,7 @@ describe('Handler Profile', () => {
     it('devrait afficher le profil d\'un joueur sans duo', () => {
       // Setup: Joueur solo (pas encore de duo)
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'SoloPlayer',
         tagLine: 'EUW',
         role: 'noob',
@@ -139,7 +140,7 @@ describe('Handler Profile', () => {
     it('devrait afficher le profil d\'un autre joueur via mention', () => {
       // Setup: 2 joueurs
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Requester',
         tagLine: 'EUW',
         role: 'noob',
@@ -154,7 +155,7 @@ describe('Handler Profile', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'TargetPlayer',
         tagLine: 'EUW',
         role: 'carry',
@@ -187,7 +188,7 @@ describe('Handler Profile', () => {
     it('devrait calculer le winrate correctement', () => {
       // Setup: joueur avec 7W/3L = 70% winrate
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Player',
         tagLine: 'EUW',
         role: 'noob',
@@ -216,7 +217,7 @@ describe('Handler Profile', () => {
     it('devrait afficher la progression de rank', () => {
       // Setup: joueur avec progression visible
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Climber',
         tagLine: 'EUW',
         role: 'noob',
@@ -246,7 +247,7 @@ describe('Handler Profile', () => {
     it('devrait afficher la winstreak actuelle', () => {
       // Setup: joueur avec winstreak de 5
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'OnFire',
         tagLine: 'EUW',
         role: 'carry',
@@ -292,7 +293,7 @@ describe('Handler Profile', () => {
     it('devrait retourner une erreur si le joueur mentionné n\'existe pas', () => {
       // Setup: p1 existe mais pas p2
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Player1',
         tagLine: 'EUW',
         role: 'noob',
@@ -322,7 +323,7 @@ describe('Handler Profile', () => {
     it('devrait gérer un joueur avec 0 games', () => {
       // Setup: nouveau joueur (0W/0L)
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Newbie',
         tagLine: 'EUW',
         role: 'noob',
@@ -351,7 +352,7 @@ describe('Handler Profile', () => {
     it('devrait gérer des points négatifs', () => {
       // Setup: joueur avec points négatifs (hard stuck)
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Hardstuck',
         tagLine: 'EUW',
         role: 'noob',
@@ -379,7 +380,7 @@ describe('Handler Profile', () => {
     it('devrait gérer une winstreak de 0', () => {
       // Setup: joueur qui vient de perdre (winstreak = 0)
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Player',
         tagLine: 'EUW',
         role: 'carry',

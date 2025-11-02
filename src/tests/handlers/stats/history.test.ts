@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { historyHandler } from '../../../handlers/stats/history.handler'
 import type { State } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
+import { MessageType } from '../../../types/message.js'
 
 function createTestState(): State {
   return {
@@ -25,7 +26,7 @@ function createTestState(): State {
 
 function createMessage(sourceId: string, payload: { targetId?: string; page?: number } = {}): Message {
   return {
-    type: 'history',
+    type: MessageType.HISTORY,
     sourceId,
     payload,
   }
@@ -44,11 +45,11 @@ describe('Handler History', () => {
     it('devrait afficher l\'historique complet d\'un duo avec plusieurs games', () => {
       // Setup: duo avec 5 games
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Noob',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'II', lp: 75 },
         totalPoints: 150,
@@ -59,11 +60,11 @@ describe('Handler History', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Carry',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'I', lp: 50 },
         totalPoints: 160,
@@ -74,7 +75,7 @@ describe('Handler History', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
@@ -90,7 +91,7 @@ describe('Handler History', () => {
         state.games.set(`match${i}`, {
           id: `match${i}`,
           matchId: `match${i}`,
-          duoId: 'duo1',
+          duoId: 1,
           startTime: gameDate,
           endTime: new Date(gameDate.getTime() + 1800000),
           createdAt: gameDate,
@@ -132,7 +133,7 @@ describe('Handler History', () => {
     it('devrait afficher l\'historique d\'un joueur solo (sans duo)', () => {
       // Setup: joueur sans duo
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'SoloPlayer',
         tagLine: 'EUW',
         role: 'noob',
@@ -160,11 +161,11 @@ describe('Handler History', () => {
     it('devrait afficher l\'historique trié par date (plus récent en premier)', () => {
       // Setup
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Noob',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 75 },
         totalPoints: 100,
@@ -175,11 +176,11 @@ describe('Handler History', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Carry',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 55 },
         totalPoints: 120,
@@ -190,7 +191,7 @@ describe('Handler History', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
@@ -205,7 +206,7 @@ describe('Handler History', () => {
       state.games.set('match1', {
         id: 'match1',
         matchId: 'match1',
-        duoId: 'duo1',
+        duoId: 1,
         startTime: game1Date,
         endTime: new Date(game1Date.getTime() + 1800000),
         createdAt: game1Date, // Ancienne
@@ -229,7 +230,7 @@ describe('Handler History', () => {
       state.games.set('match2', {
         id: 'match2',
         matchId: 'match2',
-        duoId: 'duo1',
+        duoId: 1,
         startTime: game2Date,
         endTime: new Date(game2Date.getTime() + 1500000),
         createdAt: game2Date, // Plus récente
@@ -253,7 +254,7 @@ describe('Handler History', () => {
       state.games.set('match3', {
         id: 'match3',
         matchId: 'match3',
-        duoId: 'duo1',
+        duoId: 1,
         startTime: game3Date,
         endTime: new Date(game3Date.getTime() + 2100000),
         createdAt: game3Date, // Milieu
@@ -293,11 +294,11 @@ describe('Handler History', () => {
     it('devrait afficher les KDA et points de chaque game', () => {
       // Setup: duo avec 1 game
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Noob',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 70 },
         totalPoints: 50,
@@ -308,11 +309,11 @@ describe('Handler History', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Carry',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 50 },
         totalPoints: 55,
@@ -323,7 +324,7 @@ describe('Handler History', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
@@ -337,7 +338,7 @@ describe('Handler History', () => {
       state.games.set('match1', {
         id: 'match1',
         matchId: 'match1',
-        duoId: 'duo1',
+        duoId: 1,
         startTime: gameDate,
         endTime: new Date(gameDate.getTime() + 1800000),
         createdAt: gameDate,
@@ -377,11 +378,11 @@ describe('Handler History', () => {
     it('devrait paginer l\'historique (10 games par page)', () => {
       // Setup: duo avec 25 games
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Noob',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'I', lp: 80 },
         totalPoints: 500,
@@ -392,11 +393,11 @@ describe('Handler History', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Carry',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'I', lp: 60 },
         totalPoints: 550,
@@ -407,7 +408,7 @@ describe('Handler History', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
@@ -423,7 +424,7 @@ describe('Handler History', () => {
         state.games.set(`match${i}`, {
           id: `match${i}`,
           matchId: `match${i}`,
-          duoId: 'duo1',
+          duoId: 1,
           startTime: gameDate,
           endTime: new Date(gameDate.getTime() + 1800000),
           createdAt: gameDate,
@@ -461,11 +462,11 @@ describe('Handler History', () => {
     it('devrait afficher l\'historique d\'un autre duo via mention', () => {
       // Setup: 2 duos
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Noob1',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 70 },
         totalPoints: 50,
@@ -476,11 +477,11 @@ describe('Handler History', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Carry1',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 50 },
         totalPoints: 55,
@@ -491,7 +492,7 @@ describe('Handler History', () => {
       })
 
       state.players.set('p3', {
-        userId: 'p3',
+        discordId: 'p3',
         gameName: 'Noob2',
         tagLine: 'EUW',
         role: 'noob',
@@ -506,7 +507,7 @@ describe('Handler History', () => {
       })
 
       state.players.set('p4', {
-        userId: 'p4',
+        discordId: 'p4',
         gameName: 'Carry2',
         tagLine: 'EUW',
         role: 'carry',
@@ -521,7 +522,7 @@ describe('Handler History', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Duo 1',
@@ -597,7 +598,7 @@ describe('Handler History', () => {
     it('devrait retourner une erreur si le joueur mentionné n\'existe pas', () => {
       // Setup: p1 existe mais pas p2
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Player1',
         tagLine: 'EUW',
         role: 'noob',
@@ -627,11 +628,11 @@ describe('Handler History', () => {
     it('devrait afficher 0 games pour un duo qui vient d\'être créé', () => {
       // Setup: duo sans games
       state.players.set('p1', {
-        userId: 'p1',
+        discordId: 'p1',
         gameName: 'Newbie',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'GOLD', division: 'IV', lp: 0 },
         currentRank: { tier: 'GOLD', division: 'IV', lp: 0 },
         totalPoints: 0,
@@ -642,11 +643,11 @@ describe('Handler History', () => {
       })
 
       state.players.set('p2', {
-        userId: 'p2',
+        discordId: 'p2',
         gameName: 'Newbie2',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo1',
+        duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'IV', lp: 0 },
         currentRank: { tier: 'PLATINUM', division: 'IV', lp: 0 },
         totalPoints: 0,
@@ -657,7 +658,7 @@ describe('Handler History', () => {
       })
 
       state.duos.set('duo1', {
-        duoId: 'duo1',
+        duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Fresh Duo',
