@@ -122,7 +122,7 @@ describe('DailyLadderService', () => {
       expect(mockChannel.send).toHaveBeenCalledTimes(1)
 
       // Verify embed structure
-      const sentEmbed = vi.mocked(mockChannel.send).mock.calls[0][0]
+      const sentEmbed = vi.mocked(mockChannel.send).mock.calls[0][0] as { embeds: any[] }
       expect(sentEmbed).toHaveProperty('embeds')
       expect(sentEmbed.embeds).toHaveLength(1)
 
@@ -154,7 +154,7 @@ describe('DailyLadderService', () => {
 
       await service.postDailyLadder()
 
-      const sentEmbed = vi.mocked(mockChannel.send).mock.calls[0][0]
+      const sentEmbed = vi.mocked(mockChannel.send).mock.calls[0][0] as { embeds: any[] }
       const embed = sentEmbed.embeds[0]
 
       // High Team should be first (rank 1)
@@ -202,7 +202,7 @@ describe('DailyLadderService', () => {
 
       await service.postDailyLadder()
 
-      const sentEmbed = vi.mocked(mockChannel.send).mock.calls[0][0]
+      const sentEmbed = vi.mocked(mockChannel.send).mock.calls[0][0] as { embeds: any[] }
       const embed = sentEmbed.embeds[0]
 
       // Should show custom team name for duo1
