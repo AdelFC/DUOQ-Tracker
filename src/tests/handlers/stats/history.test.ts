@@ -404,7 +404,7 @@ describe('Handler History', () => {
       }
 
       // Page 1
-      const msg = createMessage('p1', [])
+      const msg = createMessage('p1', {})
       historyHandler(msg, state, responses)
 
       expect(responses).toHaveLength(1)

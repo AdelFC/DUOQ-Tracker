@@ -3,6 +3,7 @@ import { ladderHandler } from '../../../handlers/stats/ladder.handler'
 import type { State } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
 import { MessageType } from '../../../types/message.js'
+import { createTestPlayer, createTestDuo } from '../../helpers/fixtures.js'
 
 function createTestState(): State {
   return {
@@ -28,6 +29,7 @@ function createMessage(sourceId: string, payload: { page?: number } = {}): Messa
   return {
     type: MessageType.LADDER,
     sourceId,
+    timestamp: new Date(),
     payload,
   }
 }
@@ -45,7 +47,7 @@ describe('Handler Ladder', () => {
     it('devrait afficher le classement avec plusieurs duos', () => {
       // Setup: 3 duos avec différents scores
       // Duo 1: 150 pts, 10W-2L
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Player1',
         tagLine: 'EUW',
@@ -56,11 +58,10 @@ describe('Handler Ladder', () => {
         totalPoints: 80,
         wins: 10,
         losses: 2,
-        winStreak: 3,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 3, longestWin: 3, longestLoss: 0 },
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Player2',
         tagLine: 'EUW',
@@ -71,23 +72,21 @@ describe('Handler Ladder', () => {
         totalPoints: 70,
         wins: 10,
         losses: 2,
-        winStreak: 3,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 3, longestWin: 3, longestLoss: 0 },
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Les Zinzins',
         totalPoints: 150,
         wins: 10,
         losses: 2,
-        createdAt: Date.now(),
-      })
+      }))
 
       // Duo 2: 100 pts, 8W-4L
-      state.players.set('p3', {
+      state.players.set('p3', createTestPlayer({
         discordId: 'p3',
         gameName: 'Player3',
         tagLine: 'EUW',
@@ -98,11 +97,10 @@ describe('Handler Ladder', () => {
         totalPoints: 55,
         wins: 8,
         losses: 4,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.players.set('p4', {
+      state.players.set('p4', createTestPlayer({
         discordId: 'p4',
         gameName: 'Player4',
         tagLine: 'EUW',
@@ -113,23 +111,21 @@ describe('Handler Ladder', () => {
         totalPoints: 45,
         wins: 8,
         losses: 4,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.duos.set(2, {
-        duoId: 2,
+      state.duos.set(2, createTestDuo({
+        id: 2,
         noobId: 'p3',
         carryId: 'p4',
         name: 'Les Pros',
         totalPoints: 100,
         wins: 8,
         losses: 4,
-        createdAt: Date.now(),
-      })
+      }))
 
       // Duo 3: 50 pts, 5W-5L
-      state.players.set('p5', {
+      state.players.set('p5', createTestPlayer({
         discordId: 'p5',
         gameName: 'Player5',
         tagLine: 'EUW',
@@ -140,11 +136,10 @@ describe('Handler Ladder', () => {
         totalPoints: 25,
         wins: 5,
         losses: 5,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.players.set('p6', {
+      state.players.set('p6', createTestPlayer({
         discordId: 'p6',
         gameName: 'Player6',
         tagLine: 'EUW',
@@ -155,20 +150,18 @@ describe('Handler Ladder', () => {
         totalPoints: 25,
         wins: 5,
         losses: 5,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.duos.set(3, {
-        duoId: 3,
+      state.duos.set(3, createTestDuo({
+        id: 3,
         noobId: 'p5',
         carryId: 'p6',
         name: 'Les Noobs',
         totalPoints: 50,
         wins: 5,
         losses: 5,
-        createdAt: Date.now(),
-      })
+      }))
 
       const msg = createMessage('user1')
       ladderHandler(msg, state, responses)
@@ -214,7 +207,7 @@ describe('Handler Ladder', () => {
 
     it('devrait gérer un seul duo', () => {
       // Setup: 1 seul duo
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Player1',
         tagLine: 'EUW',
@@ -225,11 +218,10 @@ describe('Handler Ladder', () => {
         totalPoints: 30,
         wins: 3,
         losses: 1,
-        winStreak: 2,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 2, longestWin: 2, longestLoss: 0 },
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Player2',
         tagLine: 'EUW',
@@ -240,20 +232,18 @@ describe('Handler Ladder', () => {
         totalPoints: 30,
         wins: 3,
         losses: 1,
-        winStreak: 2,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 2, longestWin: 2, longestLoss: 0 },
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Solo Duo',
         totalPoints: 60,
         wins: 3,
         losses: 1,
-        createdAt: Date.now(),
-      })
+      }))
 
       const msg = createMessage('user1')
       ladderHandler(msg, state, responses)
@@ -270,7 +260,7 @@ describe('Handler Ladder', () => {
 
     it('devrait afficher le format avec les noms de joueurs', () => {
       // Setup: 1 duo
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Noob',
         tagLine: 'EUW',
@@ -281,11 +271,10 @@ describe('Handler Ladder', () => {
         totalPoints: 40,
         wins: 5,
         losses: 2,
-        winStreak: 1,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 1, longestWin: 1, longestLoss: 0 },
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Carry',
         tagLine: 'EUW',
@@ -296,20 +285,18 @@ describe('Handler Ladder', () => {
         totalPoints: 40,
         wins: 5,
         losses: 2,
-        winStreak: 1,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 1, longestWin: 1, longestLoss: 0 },
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
         totalPoints: 80,
         wins: 5,
         losses: 2,
-        createdAt: Date.now(),
-      })
+      }))
 
       const msg = createMessage('user1')
       ladderHandler(msg, state, responses)
@@ -329,46 +316,43 @@ describe('Handler Ladder', () => {
     it('devrait afficher le classement complet avec plus de 10 duos', () => {
       // Setup: 15 duos
       for (let i = 1; i <= 15; i++) {
-        state.players.set(`p${i}a`, {
-          userId: `p${i}a`,
+        state.players.set(`p${i}a`, createTestPlayer({
+          discordId: `p${i}a`,
           gameName: `Noob${i}`,
           tagLine: 'EUW',
           role: 'noob',
-          duoId: `duo${i}`,
+          duoId: i,
           initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
           currentRank: { tier: 'GOLD', division: 'III', lp: 50 },
           totalPoints: 50 - i,
           wins: 5,
           losses: 2,
-          winStreak: 0,
-          createdAt: Date.now(),
-        })
+          streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+        }))
 
-        state.players.set(`p${i}b`, {
-          userId: `p${i}b`,
+        state.players.set(`p${i}b`, createTestPlayer({
+          discordId: `p${i}b`,
           gameName: `Carry${i}`,
           tagLine: 'EUW',
           role: 'carry',
-          duoId: `duo${i}`,
+          duoId: i,
           initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
           currentRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
           totalPoints: 50 - i,
           wins: 5,
           losses: 2,
-          winStreak: 0,
-          createdAt: Date.now(),
-        })
+          streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+        }))
 
-        state.duos.set(`duo${i}`, {
-          duoId: `duo${i}`,
+        state.duos.set(i, createTestDuo({
+          id: i,
           noobId: `p${i}a`,
           carryId: `p${i}b`,
           name: `Duo ${i}`,
           totalPoints: 100 - i * 2,
           wins: 5,
           losses: 2,
-          createdAt: Date.now(),
-        })
+        }))
       }
 
       const msg = createMessage('user1')
@@ -399,7 +383,7 @@ describe('Handler Ladder', () => {
   describe('Cas spéciaux', () => {
     it('devrait gérer les duos avec 0 points', () => {
       // Setup: duo avec 0 points (nouveau)
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'New1',
         tagLine: 'EUW',
@@ -410,11 +394,10 @@ describe('Handler Ladder', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'New2',
         tagLine: 'EUW',
@@ -425,20 +408,18 @@ describe('Handler Ladder', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Fresh Duo',
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        createdAt: Date.now(),
-      })
+      }))
 
       const msg = createMessage('user1')
       ladderHandler(msg, state, responses)
@@ -455,7 +436,7 @@ describe('Handler Ladder', () => {
 
     it('devrait gérer les duos avec points négatifs', () => {
       // Setup: duo avec points négatifs (feeding hard)
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Feeder1',
         tagLine: 'EUW',
@@ -466,11 +447,10 @@ describe('Handler Ladder', () => {
         totalPoints: -50,
         wins: 2,
         losses: 10,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Feeder2',
         tagLine: 'EUW',
@@ -481,20 +461,18 @@ describe('Handler Ladder', () => {
         totalPoints: -50,
         wins: 2,
         losses: 10,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Feeders United',
         totalPoints: -100,
         wins: 2,
         losses: 10,
-        createdAt: Date.now(),
-      })
+      }))
 
       const msg = createMessage('user1')
       ladderHandler(msg, state, responses)
