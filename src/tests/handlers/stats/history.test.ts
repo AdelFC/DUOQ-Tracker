@@ -3,6 +3,7 @@ import { historyHandler } from '../../../handlers/stats/history.handler'
 import type { State } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
 import { MessageType } from '../../../types/message.js'
+import { createTestPlayer, createTestDuo, createTestConfig } from '../../helpers/fixtures.js'
 
 function createTestState(): State {
   return {
@@ -10,17 +11,7 @@ function createTestState(): State {
     duos: new Map(),
     games: new Map(),
     devs: new Map(),
-    config: {
-      discordToken: 'test',
-      guildId: 'test',
-      adminRoleId: 'test',
-      riotApiKey: 'test',
-      region: 'EUW1',
-      challengeStartDate: new Date(),
-      challengeEndDate: new Date(),
-      gameCheckInterval: 60000,
-      maxGamesPerCheck: 10,
-    },
+    config: createTestConfig(),
   }
 }
 
@@ -28,6 +19,7 @@ function createMessage(sourceId: string, payload: { targetId?: string; page?: nu
   return {
     type: MessageType.HISTORY,
     sourceId,
+    timestamp: new Date(),
     payload,
   }
 }
@@ -44,7 +36,7 @@ describe('Handler History', () => {
   describe('Cas de succès', () => {
     it('devrait afficher l\'historique complet d\'un duo avec plusieurs games', () => {
       // Setup: duo avec 5 games
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Noob',
         tagLine: 'EUW',
@@ -55,10 +47,9 @@ describe('Handler History', () => {
         totalPoints: 150,
         wins: 3,
         losses: 2,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Carry',
         tagLine: 'EUW',
@@ -69,19 +60,17 @@ describe('Handler History', () => {
         totalPoints: 160,
         wins: 3,
         losses: 2,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
+        name: 'Test Duo',
         noobId: 'p1',
         carryId: 'p2',
-        name: 'Test Duo',
         totalPoints: 310,
         wins: 3,
         losses: 2,
-        registeredAt: new Date(),
-      })
+      }))
 
       // 5 games jouées
       for (let i = 1; i <= 5; i++) {
@@ -130,19 +119,15 @@ describe('Handler History', () => {
 
     it('devrait afficher l\'historique d\'un joueur solo (sans duo)', () => {
       // Setup: joueur sans duo
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'SoloPlayer',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: undefined,
+        duoId: 0,
         initialRank: { tier: 'GOLD', division: 'IV', lp: 0 },
         currentRank: { tier: 'GOLD', division: 'IV', lp: 0 },
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
       const msg = createMessage('p1')
       historyHandler(msg, state, responses)
@@ -157,10 +142,9 @@ describe('Handler History', () => {
 
     it('devrait afficher l\'historique trié par date (plus récent en premier)', () => {
       // Setup
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Noob',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
@@ -168,13 +152,11 @@ describe('Handler History', () => {
         totalPoints: 100,
         wins: 3,
         losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Carry',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
@@ -182,19 +164,17 @@ describe('Handler History', () => {
         totalPoints: 120,
         wins: 3,
         losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
         totalPoints: 220,
         wins: 3,
         losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
       // 3 games avec timestamps différents
       const game1Date = new Date('2025-01-01T10:00:00Z')
@@ -288,44 +268,36 @@ describe('Handler History', () => {
 
     it('devrait afficher les KDA et points de chaque game', () => {
       // Setup: duo avec 1 game
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Noob',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 70 },
         totalPoints: 50,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Carry',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 50 },
         totalPoints: 55,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
         totalPoints: 105,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
       const gameDate = new Date()
       state.games.set('match1', {
@@ -370,10 +342,9 @@ describe('Handler History', () => {
 
     it('devrait paginer l\'historique (10 games par page)', () => {
       // Setup: duo avec 25 games
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Noob',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
@@ -381,13 +352,11 @@ describe('Handler History', () => {
         totalPoints: 500,
         wins: 20,
         losses: 5,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Carry',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
@@ -395,19 +364,17 @@ describe('Handler History', () => {
         totalPoints: 550,
         wins: 20,
         losses: 5,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Test Duo',
         totalPoints: 1050,
         wins: 20,
         losses: 5,
-        registeredAt: new Date(),
-      })
+      }))
 
       // 25 games
       for (let i = 1; i <= 25; i++) {
@@ -452,83 +419,67 @@ describe('Handler History', () => {
 
     it('devrait afficher l\'historique d\'un autre duo via mention', () => {
       // Setup: 2 duos
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Noob1',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 1,
         initialRank: { tier: 'GOLD', division: 'III', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'III', lp: 70 },
         totalPoints: 50,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Carry1',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'II', lp: 30 },
         currentRank: { tier: 'PLATINUM', division: 'II', lp: 50 },
         totalPoints: 55,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p3', {
+      state.players.set('p3', createTestPlayer({
         discordId: 'p3',
         gameName: 'Noob2',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 2,
         initialRank: { tier: 'SILVER', division: 'I', lp: 80 },
         currentRank: { tier: 'SILVER', division: 'I', lp: 90 },
         totalPoints: 30,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p4', {
+      state.players.set('p4', createTestPlayer({
         discordId: 'p4',
         gameName: 'Carry2',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 2,
         initialRank: { tier: 'GOLD', division: 'IV', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'IV', lp: 60 },
         totalPoints: 35,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Duo 1',
         totalPoints: 105,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(2, {
-        duoId: 2,
+      state.duos.set(2, createTestDuo({
+        id: 2,
         noobId: 'p3',
         carryId: 'p4',
         name: 'Duo 2',
         totalPoints: 65,
         wins: 1,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
       const gameDate = new Date()
       state.games.set('match1', {
@@ -584,19 +535,12 @@ describe('Handler History', () => {
 
     it('devrait retourner une erreur si le joueur mentionné n\'existe pas', () => {
       // Setup: p1 existe mais pas p2
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Player1',
-        tagLine: 'EUW',
         role: 'noob',
-        duoId: undefined,
-        initialRank: { tier: 'GOLD', division: 'IV', lp: 0 },
-        currentRank: { tier: 'GOLD', division: 'IV', lp: 0 },
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+        duoId: 0,
+      }))
 
       // p1 demande l'historique de p2 (inexistant)
       const msg = createMessage('p1', { targetId: 'p2' })
@@ -613,44 +557,28 @@ describe('Handler History', () => {
   describe('Cas spéciaux', () => {
     it('devrait afficher 0 games pour un duo qui vient d\'être créé', () => {
       // Setup: duo sans games
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Newbie',
-        tagLine: 'EUW',
         role: 'noob',
         duoId: 1,
-        initialRank: { tier: 'GOLD', division: 'IV', lp: 0 },
-        currentRank: { tier: 'GOLD', division: 'IV', lp: 0 },
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'Newbie2',
-        tagLine: 'EUW',
         role: 'carry',
         duoId: 1,
         initialRank: { tier: 'PLATINUM', division: 'IV', lp: 0 },
         currentRank: { tier: 'PLATINUM', division: 'IV', lp: 0 },
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
+        id: 1,
         noobId: 'p1',
         carryId: 'p2',
         name: 'Fresh Duo',
-        totalPoints: 0,
-        wins: 0,
-        losses: 0,
-        registeredAt: new Date(),
-      })
+      }))
 
       const msg = createMessage('p1')
       historyHandler(msg, state, responses)
