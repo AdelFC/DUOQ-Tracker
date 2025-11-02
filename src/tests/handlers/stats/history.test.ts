@@ -55,8 +55,7 @@ describe('Handler History', () => {
         totalPoints: 150,
         wins: 3,
         losses: 2,
-        winStreak: 2,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p2', {
@@ -70,11 +69,10 @@ describe('Handler History', () => {
         totalPoints: 160,
         wins: 3,
         losses: 2,
-        winStreak: 2,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -82,7 +80,7 @@ describe('Handler History', () => {
         totalPoints: 310,
         wins: 3,
         losses: 2,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       // 5 games jouées
@@ -143,8 +141,7 @@ describe('Handler History', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       const msg = createMessage('p1')
@@ -171,8 +168,7 @@ describe('Handler History', () => {
         totalPoints: 100,
         wins: 3,
         losses: 0,
-        winStreak: 3,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p2', {
@@ -186,11 +182,10 @@ describe('Handler History', () => {
         totalPoints: 120,
         wins: 3,
         losses: 0,
-        winStreak: 3,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -198,7 +193,7 @@ describe('Handler History', () => {
         totalPoints: 220,
         wins: 3,
         losses: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       // 3 games avec timestamps différents
@@ -304,8 +299,7 @@ describe('Handler History', () => {
         totalPoints: 50,
         wins: 1,
         losses: 0,
-        winStreak: 1,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p2', {
@@ -319,11 +313,10 @@ describe('Handler History', () => {
         totalPoints: 55,
         wins: 1,
         losses: 0,
-        winStreak: 1,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -331,7 +324,7 @@ describe('Handler History', () => {
         totalPoints: 105,
         wins: 1,
         losses: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       const gameDate = new Date()
@@ -388,8 +381,7 @@ describe('Handler History', () => {
         totalPoints: 500,
         wins: 20,
         losses: 5,
-        winStreak: 3,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p2', {
@@ -403,11 +395,10 @@ describe('Handler History', () => {
         totalPoints: 550,
         wins: 20,
         losses: 5,
-        winStreak: 3,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -415,7 +406,7 @@ describe('Handler History', () => {
         totalPoints: 1050,
         wins: 20,
         losses: 5,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       // 25 games
@@ -472,8 +463,7 @@ describe('Handler History', () => {
         totalPoints: 50,
         wins: 1,
         losses: 0,
-        winStreak: 1,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p2', {
@@ -487,8 +477,7 @@ describe('Handler History', () => {
         totalPoints: 55,
         wins: 1,
         losses: 0,
-        winStreak: 1,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p3', {
@@ -496,14 +485,13 @@ describe('Handler History', () => {
         gameName: 'Noob2',
         tagLine: 'EUW',
         role: 'noob',
-        duoId: 'duo2',
+        duoId: 2,
         initialRank: { tier: 'SILVER', division: 'I', lp: 80 },
         currentRank: { tier: 'SILVER', division: 'I', lp: 90 },
         totalPoints: 30,
         wins: 1,
         losses: 0,
-        winStreak: 1,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p4', {
@@ -511,17 +499,16 @@ describe('Handler History', () => {
         gameName: 'Carry2',
         tagLine: 'EUW',
         role: 'carry',
-        duoId: 'duo2',
+        duoId: 2,
         initialRank: { tier: 'GOLD', division: 'IV', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'IV', lp: 60 },
         totalPoints: 35,
         wins: 1,
         losses: 0,
-        winStreak: 1,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -529,25 +516,25 @@ describe('Handler History', () => {
         totalPoints: 105,
         wins: 1,
         losses: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
-      state.duos.set('duo2', {
-        duoId: 'duo2',
+      state.duos.set(2, {
+        duoId: 2,
         noobId: 'p3',
         carryId: 'p4',
         name: 'Duo 2',
         totalPoints: 65,
         wins: 1,
         losses: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       const gameDate = new Date()
       state.games.set('match1', {
         id: 'match1',
         matchId: 'match1',
-        duoId: 'duo2',
+        duoId: 2,
         startTime: gameDate,
         endTime: new Date(gameDate.getTime() + 1800000),
         createdAt: gameDate,
@@ -608,8 +595,7 @@ describe('Handler History', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       // p1 demande l'historique de p2 (inexistant)
@@ -638,8 +624,7 @@ describe('Handler History', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('p2', {
@@ -653,11 +638,10 @@ describe('Handler History', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -665,7 +649,7 @@ describe('Handler History', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       const msg = createMessage('p1')

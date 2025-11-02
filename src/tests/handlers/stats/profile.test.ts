@@ -74,7 +74,7 @@ describe('Handler Profile', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',

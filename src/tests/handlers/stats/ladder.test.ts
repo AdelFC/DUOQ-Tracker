@@ -75,7 +75,7 @@ describe('Handler Ladder', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -117,7 +117,7 @@ describe('Handler Ladder', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo2', {
+      state.duos.set(2, {
         duoId: 2,
         noobId: 'p3',
         carryId: 'p4',
@@ -159,7 +159,7 @@ describe('Handler Ladder', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo3', {
+      state.duos.set(3, {
         duoId: 3,
         noobId: 'p5',
         carryId: 'p6',
@@ -244,7 +244,7 @@ describe('Handler Ladder', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -300,7 +300,7 @@ describe('Handler Ladder', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -429,7 +429,7 @@ describe('Handler Ladder', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',
@@ -485,7 +485,7 @@ describe('Handler Ladder', () => {
         createdAt: Date.now(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'p1',
         carryId: 'p2',

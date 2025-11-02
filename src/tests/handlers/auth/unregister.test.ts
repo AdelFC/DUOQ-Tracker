@@ -98,7 +98,7 @@ describe('Handler Unregister', () => {
         registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'player1',
         carryId: 'player2',
@@ -120,7 +120,7 @@ describe('Handler Unregister', () => {
       expect(state.players.get('player2')!.duoId).toBe(0)
 
       // Duo supprimé
-      expect(state.duos.has('duo1')).toBe(false)
+      expect(state.duos.has(1)).toBe(false)
 
       // 2 réponses : une pour player1, une pour player2
       expect(responses).toHaveLength(2)
@@ -164,7 +164,7 @@ describe('Handler Unregister', () => {
         registeredAt: new Date(),
       })
 
-      state.duos.set('duo1', {
+      state.duos.set(1, {
         duoId: 1,
         noobId: 'player1',
         carryId: 'player2',
