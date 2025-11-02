@@ -33,8 +33,9 @@ function createTestState(): State {
 
 function createMessage(sourceId: string, payload: { apiKey?: string }): Message {
   return {
-    type: MessageType.KEY,
+    type: MessageType.KEY_SET,
     sourceId,
+    timestamp: new Date(),
     payload,
   }
 }

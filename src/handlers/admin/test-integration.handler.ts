@@ -195,7 +195,6 @@ export async function handleTestIntegration(
     wins: 9,
     losses: 6,
     winRate: 60,
-    currentStreak: 2,
     bestStreak: 4,
     duoPartner: 'TestCarry#EUW',
   })
@@ -227,7 +226,6 @@ export async function handleTestIntegration(
     wins: 10,
     losses: 5,
     winRate: 66.7,
-    currentStreak: 3,
     bestStreak: 5,
     noobRank: 'Gold II',
     carryRank: 'Platinum IV',
@@ -264,7 +262,6 @@ export async function handleTestIntegration(
         totalPoints: 350,
         wins: 18,
         losses: 3,
-        currentStreak: 7,
       },
       {
         rank: 2,
@@ -274,7 +271,6 @@ export async function handleTestIntegration(
         totalPoints: 245,
         wins: 10,
         losses: 5,
-        currentStreak: 3,
       },
       {
         rank: 3,
@@ -284,7 +280,6 @@ export async function handleTestIntegration(
         totalPoints: 198,
         wins: 12,
         losses: 9,
-        currentStreak: -2,
       },
     ],
     page: 1,

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { devHandler } from '../../../handlers/dev/dev.handler'
 import type { State, Config } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
+import { MessageType } from '../../../types/message.js'
 
 function createTestConfig(): Config {
   return {
@@ -30,8 +31,9 @@ function createTestState(): State {
 
 function createMessage(sourceId: string, username: string): Message {
   return {
-    type: 'dev',
+    type: MessageType.DEV_STATUS,
     sourceId,
+    timestamp: new Date(),
     payload: {
       username,
     },

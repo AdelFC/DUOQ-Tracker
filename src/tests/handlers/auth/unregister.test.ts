@@ -28,6 +28,7 @@ function createMessage(sourceId: string, payload: {} = {}): Message {
   return {
     type: MessageType.UNREGISTER,
     sourceId,
+    timestamp: new Date(),
     payload,
   }
 }
@@ -55,8 +56,7 @@ describe('Handler Unregister', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       const msg = createMessage('player1')
@@ -81,8 +81,7 @@ describe('Handler Unregister', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('player2', {
@@ -96,8 +95,7 @@ describe('Handler Unregister', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.duos.set('duo1', {
@@ -108,7 +106,7 @@ describe('Handler Unregister', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       const msg = createMessage('player1')
@@ -149,8 +147,7 @@ describe('Handler Unregister', () => {
         totalPoints: 100,
         wins: 5,
         losses: 2,
-        winStreak: 2,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.players.set('player2', {
@@ -164,8 +161,7 @@ describe('Handler Unregister', () => {
         totalPoints: 120,
         wins: 5,
         losses: 2,
-        winStreak: 2,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       state.duos.set('duo1', {
@@ -176,7 +172,7 @@ describe('Handler Unregister', () => {
         totalPoints: 220,
         wins: 5,
         losses: 2,
-        createdAt: Date.now(),
+        registeredAt: new Date(),
       })
 
       const msg = createMessage('player1')

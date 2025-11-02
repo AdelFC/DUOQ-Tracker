@@ -26,7 +26,7 @@ function createTestState(): State {
 
 function createMessage(sourceId: string, payload: { targetId?: string } = {}): Message {
   return {
-    type: MessageType.PROFILE,
+    type: MessageType.STATS,
     sourceId,
     payload,
   }
