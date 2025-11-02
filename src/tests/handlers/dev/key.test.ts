@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { keyHandler } from '../../../handlers/dev/key.handler'
 import type { State, Config } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
+import { MessageType } from '../../../types/message.js'
 
 function createTestConfig(): Config {
   return {
@@ -25,13 +26,14 @@ function createTestState(): State {
     players: new Map(),
     duos: new Map(),
     games: new Map(),
+    devs: new Map(),
     config: createTestConfig(),
   }
 }
 
 function createMessage(sourceId: string, payload: { apiKey?: string }): Message {
   return {
-    type: 'key',
+    type: MessageType.KEY,
     sourceId,
     payload,
   }
@@ -54,9 +56,9 @@ describe('Handler Key', () => {
       keyHandler(msg, state, responses)
 
       // Vérifier que la clé a été mise à jour
-      expect(state.config.riotApiKey).toBe(newKey)
-      expect(state.config.riotApiKeyUpdatedAt).toBeDefined()
-      expect(state.config.riotApiKeyReminders).toEqual([])
+      expect((state.config as any).riotApiKey).toBe(newKey)
+      expect((state.config as any).riotApiKeyUpdatedAt).toBeDefined()
+      expect((state.config as any).riotApiKeyReminders).toEqual([])
 
       // Vérifier la réponse
       expect(responses).toHaveLength(1)
@@ -67,8 +69,8 @@ describe('Handler Key', () => {
 
     it('devrait réinitialiser les rappels lors du changement de clé', () => {
       // Setup: clé existante avec rappels déjà envoyés
-      state.config.riotApiKeyUpdatedAt = new Date(Date.now() - 23 * 60 * 60 * 1000) // Il y a 23h
-      state.config.riotApiKeyReminders = [
+      (state.config as any).riotApiKeyUpdatedAt = new Date(Date.now() - 23 * 60 * 60 * 1000) // Il y a 23h
+      (state.config as any).riotApiKeyReminders = [
         new Date(Date.now() - 2 * 60 * 60 * 1000), // Rappel à 22h
         new Date(Date.now() - 1 * 60 * 60 * 1000), // Rappel à 23h
       ]
@@ -79,12 +81,12 @@ describe('Handler Key', () => {
       keyHandler(msg, state, responses)
 
       // Vérifier que les rappels ont été réinitialisés
-      expect(state.config.riotApiKeyReminders).toEqual([])
-      expect(state.config.riotApiKeyUpdatedAt).toBeDefined()
+      expect((state.config as any).riotApiKeyReminders).toEqual([])
+      expect((state.config as any).riotApiKeyUpdatedAt).toBeDefined()
 
       // Le timestamp doit être récent (moins d'1 seconde)
       const now = Date.now()
-      const updatedAt = state.config.riotApiKeyUpdatedAt!.getTime()
+      const updatedAt = (state.config as any).riotApiKeyUpdatedAt!.getTime()
       expect(now - updatedAt).toBeLessThan(1000)
     })
 
@@ -134,7 +136,7 @@ describe('Handler Key', () => {
       expect(responses[0].content).toContain('/key <api_key>')
 
       // La clé ne doit pas avoir changé
-      expect(state.config.riotApiKey).toBe('RGAPI-old-key')
+      expect((state.config as any).riotApiKey).toBe('RGAPI-old-key')
     })
 
     it('devrait échouer si la clé ne commence pas par RGAPI-', () => {
@@ -166,7 +168,7 @@ describe('Handler Key', () => {
       expect(responses[0].content).toContain('invalide')
 
       // La clé ne doit pas avoir changé
-      expect(state.config.riotApiKey).toBe('RGAPI-old-key')
+      expect((state.config as any).riotApiKey).toBe('RGAPI-old-key')
     })
 
     it('devrait ignorer les champs supplémentaires dans le payload', () => {
@@ -178,7 +180,7 @@ describe('Handler Key', () => {
       expect(responses[0].content).toContain('mise à jour avec succès')
 
       // La clé doit avoir changé (les champs supplémentaires sont ignorés)
-      expect(state.config.riotApiKey).toBe('RGAPI-key1')
+      expect((state.config as any).riotApiKey).toBe('RGAPI-key1')
     })
   })
 
@@ -190,19 +192,19 @@ describe('Handler Key', () => {
       keyHandler(msg, state, responses)
 
       // Devrait trim la clé
-      expect(state.config.riotApiKey).toBe('RGAPI-key-with-spaces')
+      expect((state.config as any).riotApiKey).toBe('RGAPI-key-with-spaces')
       expect(responses[0].content).toContain('mise à jour')
     })
 
     it('devrait afficher un warning si la même clé est re-soumise', () => {
-      state.config.riotApiKey = 'RGAPI-same-key'
-      state.config.riotApiKeyUpdatedAt = new Date(Date.now() - 1000)
+      (state.config as any).riotApiKey = 'RGAPI-same-key'
+      (state.config as any).riotApiKeyUpdatedAt = new Date(Date.now() - 1000)
 
       const msg = createMessage('admin1', { apiKey: 'RGAPI-same-key' })
       keyHandler(msg, state, responses)
 
       // Clé mise à jour quand même
-      expect(state.config.riotApiKey).toBe('RGAPI-same-key')
+      expect((state.config as any).riotApiKey).toBe('RGAPI-same-key')
 
       // Mais avec un warning
       expect(responses[0].content).toContain('identique')

@@ -1,5 +1,6 @@
 import type { State } from '../types/state.js'
 import type { Response } from '../types/message.js'
+import { MessageType } from '../types/message.js'
 
 /**
  * Service de rappels automatiques pour la clé API Riot
@@ -142,7 +143,8 @@ La clé API a **24 heures** et est maintenant **expirée** !
   // Envoyer le message à tous les devs avec mentions
   for (const dev of devs.values()) {
     responses.push({
-      recipientId: dev.userId,
+      type: MessageType.INFO,
+      targetId: dev.userId,
       content: `${mentions}\n\n${message}`,
     })
   }

@@ -66,14 +66,14 @@ describe('Service API Key Reminders', () => {
       expect(responses[0].content).toContain('expirera')
 
       // Vérifier que le rappel a été enregistré
-      expect(state.config.riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
     })
 
     it('ne devrait pas renvoyer le rappel de 22h si déjà envoyé', () => {
       state = createTestState(22)
 
       // Rappel déjà envoyé
-      state.config.riotApiKeyReminders = [new Date()]
+      (state.config as any).riotApiKeyReminders = [new Date()]
 
       state.devs.set('dev1', {
         userId: 'dev1',
@@ -105,14 +105,14 @@ describe('Service API Key Reminders', () => {
       expect(responses[0].content).toContain('expirera')
 
       // Vérifier que le rappel a été enregistré
-      expect(state.config.riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
     })
 
     it('ne devrait pas envoyer le rappel de 23h si celui de 22h n\'a pas été envoyé', () => {
       state = createTestState(23)
 
       // Aucun rappel envoyé
-      state.config.riotApiKeyReminders = []
+      (state.config as any).riotApiKeyReminders = []
 
       state.devs.set('dev1', {
         userId: 'dev1',
@@ -145,7 +145,7 @@ describe('Service API Key Reminders', () => {
       expect(responses[0].content).toContain('⚠️')
 
       // Vérifier que le rappel a été enregistré
-      expect(state.config.riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
     })
   })
 
@@ -167,14 +167,14 @@ describe('Service API Key Reminders', () => {
       expect(responses[0].content).toContain('🚨')
 
       // Vérifier que le rappel a été enregistré
-      expect(state.config.riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
     })
   })
 
   describe('Cas spéciaux', () => {
     it('ne devrait rien faire si pas de clé API configurée', () => {
       state = createTestState()
-      state.config.riotApiKeyUpdatedAt = undefined
+      (state.config as any).riotApiKeyUpdatedAt = undefined
 
       state.devs.set('dev1', {
         userId: 'dev1',
@@ -245,7 +245,7 @@ describe('Service API Key Reminders', () => {
 
       // 5 notifications
       expect(responses).toHaveLength(5)
-      expect(state.config.riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
     })
 
     it('devrait envoyer tous les rappels manqués si la clé a dépassé 24h', () => {
