@@ -25,7 +25,7 @@ describe('Handler Game Poll', () => {
   })
 
   it('should handle no duos gracefully', async () => {
-    const msg = message(MessageType.POLL_GAMES).build()
+    const msg = message(MessageType.POLL).build()
 
     await pollGamesHandler(msg, testState, responses)
 
@@ -40,7 +40,7 @@ describe('Handler Game Poll', () => {
     const testDuo = duo('user1', 'user2').withId(1).build()
     testState.duos.set(testDuo.id, testDuo)
 
-    const msg = message(MessageType.POLL_GAMES).build()
+    const msg = message(MessageType.POLL).build()
 
     await pollGamesHandler(msg, testState, responses)
 
@@ -64,7 +64,7 @@ describe('Handler Game Poll', () => {
     const testDuo = duo('user1', 'user2').withId(1).build()
     testState.duos.set(testDuo.id, testDuo)
 
-    const msg = message(MessageType.POLL_GAMES).build()
+    const msg = message(MessageType.POLL).build()
 
     await pollGamesHandler(msg, testState, responses)
 
@@ -92,7 +92,7 @@ describe('Handler Game Poll', () => {
     const testDuo = duo('user1', 'user2').withId(1).build()
     testState.duos.set(testDuo.id, testDuo)
 
-    const msg = message(MessageType.POLL_GAMES).build()
+    const msg = message(MessageType.POLL).build()
 
     await pollGamesHandler(msg, testState, responses)
 
@@ -143,7 +143,7 @@ describe('Handler Game Poll', () => {
     // Mock to return the same match ID
     mockRiotService.getRecentMatchIds.mockResolvedValue([matchId])
 
-    const msg = message(MessageType.POLL_GAMES).build()
+    const msg = message(MessageType.POLL).build()
 
     await pollGamesHandler(msg, testState, responses)
 
