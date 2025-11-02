@@ -260,7 +260,7 @@ export async function registerHandler(msg: Message, state: State, responses: Res
     role: 'noob', // Par défaut, sera déterminé lors du /link
     duoId: 0, // À assigner lors du /link
     peakElo,
-    initialRank: peakElo, // Initialisé au peak elo
+    initialRank: peakRankInfo, // Initialisé au peak elo
     currentRank: peakRankInfo,
     mainRoleString: mainRole,
     mainChampion,

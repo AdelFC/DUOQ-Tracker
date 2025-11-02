@@ -187,7 +187,7 @@ describe('registerHandler', () => {
         role: 'noob',
         duoId: 0,
         peakElo: 'G4',
-        initialRank: 'G4',
+        initialRank: { tier: 'GOLD', division: 'IV', lp: 50 },
         currentRank: { tier: 'GOLD', division: 'IV', lp: 50 },
         mainRoleString: 'MID',
         mainChampion: 'Yasuo',

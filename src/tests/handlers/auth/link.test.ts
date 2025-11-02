@@ -21,7 +21,8 @@ function createTestPlayer(
   discordId: string,
   gameName: string,
   peakElo: string,
-  currentRank: RankInfo
+  currentRank: RankInfo,
+  initialRank?: RankInfo
 ): Player {
   return {
     discordId,
@@ -31,7 +32,7 @@ function createTestPlayer(
     role: 'noob',
     duoId: 0,
     peakElo,
-    initialRank: peakElo,
+    initialRank: initialRank || currentRank,
     currentRank,
     mainRoleString: 'MID',
     mainChampion: 'Yasuo',
