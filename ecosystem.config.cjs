@@ -17,8 +17,11 @@ module.exports = {
       // Application name
       name: 'duoq-tracker',
 
-      // Entry point (wrapper script that uses tsx from node_modules)
-      script: './start-bot.sh',
+      // Working directory (absolute path)
+      cwd: '/home/afc/Desktop/LePacte/DUOQ-Tracker',
+
+      // Entry point - production uses compiled code, dev uses tsx
+      script: process.env.NODE_ENV === 'production' ? './start-bot-prod.sh' : './start-bot.sh',
 
       // Number of instances (1 for Discord bot - no clustering needed)
       instances: 1,
