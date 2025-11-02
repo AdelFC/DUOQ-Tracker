@@ -121,7 +121,7 @@ export class DailyLadderService {
         return
       }
 
-      await channel.send({ embeds: [embed] })
+      await (channel as any).send({ embeds: [embed] })
       console.log(`✅ Daily ladder posted (${rankedDuos.length} duos)`)
 
     } catch (error) {
