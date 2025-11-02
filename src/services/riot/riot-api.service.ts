@@ -79,7 +79,7 @@ export class RiotApiService {
         throw new Error(`Erreur API Riot: ${response.status} ${response.statusText}`)
       }
 
-      const data = await response.json()
+      const data = await response.json() as RiotAccount
 
       return {
         puuid: data.puuid,
@@ -128,7 +128,7 @@ export class RiotApiService {
         throw new Error(`Erreur API Riot: ${response.status}`)
       }
 
-      return await response.json()
+      return await response.json() as string[]
     } catch (error) {
       console.error(`[RiotAPI] Error fetching match IDs for ${puuid}:`, error)
       return []
@@ -155,7 +155,7 @@ export class RiotApiService {
         throw new Error(`Erreur API Riot: ${response.status}`)
       }
 
-      const data = await response.json()
+      const data = await response.json() as any
 
       // Extract relevant info
       const participants: MatchParticipant[] = data.info.participants.map((p: any) => ({
