@@ -25,6 +25,7 @@ describe('calculateGameScore', () => {
       const noobGameStats: PlayerGameStats = {
         puuid: 'noob_puuid',
         summonerId: 'noob_summoner',
+        teamId: 100,
         championId: 157, // Yasuo
         championName: 'Yasuo',
         lane: 'MIDDLE',
@@ -40,6 +41,7 @@ describe('calculateGameScore', () => {
       const carryGameStats: PlayerGameStats = {
         puuid: 'carry_puuid',
         summonerId: 'carry_summoner',
+        teamId: 100,
         championId: 222, // Jinx
         championName: 'Jinx',
         lane: 'BOTTOM',
@@ -164,6 +166,7 @@ describe('calculateGameScore', () => {
       const noobStats: PlayerGameStats = {
         puuid: 'n',
         summonerId: 'n',
+        teamId: 100,
         championId: 1,
         championName: 'Annie',
         lane: 'MIDDLE',
@@ -179,6 +182,7 @@ describe('calculateGameScore', () => {
       const carryStats: PlayerGameStats = {
         puuid: 'c',
         summonerId: 'c',
+        teamId: 100,
         championId: 222,
         championName: 'Jinx',
         lane: 'BOTTOM',
@@ -216,6 +220,7 @@ describe('calculateGameScore', () => {
       const noobStats: PlayerGameStats = {
         puuid: 'n',
         summonerId: 'n',
+        teamId: 100,
         championId: 1,
         championName: 'Annie',
         lane: 'MIDDLE',
@@ -231,6 +236,7 @@ describe('calculateGameScore', () => {
       const carryStats: PlayerGameStats = {
         puuid: 'c',
         summonerId: 'c',
+        teamId: 100,
         championId: 222,
         championName: 'Jinx',
         lane: 'BOTTOM',
@@ -268,6 +274,7 @@ describe('calculateGameScore', () => {
       const noobStats: PlayerGameStats = {
         puuid: 'n',
         summonerId: 'n',
+        teamId: 100,
         championId: 1,
         championName: 'Annie',
         lane: 'MIDDLE',
@@ -283,6 +290,7 @@ describe('calculateGameScore', () => {
       const carryStats: PlayerGameStats = {
         puuid: 'c',
         summonerId: 'c',
+        teamId: 100,
         championId: 222,
         championName: 'Jinx',
         lane: 'BOTTOM',
@@ -328,6 +336,7 @@ describe('calculateGameScore', () => {
       const noobStats: PlayerGameStats = {
         puuid: 'n',
         summonerId: 'n',
+        teamId: 100,
         championId: 1,
         championName: 'Annie',
         lane: 'MIDDLE',
@@ -343,6 +352,7 @@ describe('calculateGameScore', () => {
       const carryStats: PlayerGameStats = {
         puuid: 'c',
         summonerId: 'c',
+        teamId: 100,
         championId: 222,
         championName: 'Jinx',
         lane: 'BOTTOM',

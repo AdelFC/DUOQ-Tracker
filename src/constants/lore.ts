@@ -28,7 +28,6 @@ export const EMOJIS = {
   trophy: '🏆',
   medal: '🏅',
   crown: '👑',
-  diamond: '💎',
   gem: '💠',
 
   // Stats & Progress

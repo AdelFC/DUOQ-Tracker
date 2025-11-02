@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { profileHandler } from '../../../handlers/stats/profile.handler'
-import { State, Response, Message } from '../../../types'
+import type { State } from '../../../types/state.js'
+import type { Response, Message } from '../../../types/message.js'
 
 function createTestState(): State {
   return {

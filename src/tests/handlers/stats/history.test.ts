@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { historyHandler } from '../../../handlers/stats/history.handler'
-import { State, Response, Message } from '../../../types'
+import type { State } from '../../../types/state.js'
+import type { Response, Message } from '../../../types/message.js'
 
 function createTestState(): State {
   return {
@@ -85,19 +86,28 @@ describe('Handler History', () => {
 
       // 5 games jouées
       for (let i = 1; i <= 5; i++) {
+        const gameDate = new Date(Date.now() + i * 1000)
         state.games.set(`match${i}`, {
+          id: `match${i}`,
           matchId: `match${i}`,
           duoId: 'duo1',
+          startTime: gameDate,
+          endTime: new Date(gameDate.getTime() + 1800000),
+          createdAt: gameDate,
           win: i <= 3, // 3 wins, 2 losses
+          scored: true,
+          noobKDA: '8/3/12',
+          carryKDA: '10/2/15',
           noobKills: 8,
           noobDeaths: 3,
           noobAssists: 12,
           carryKills: 10,
           carryDeaths: 2,
           carryAssists: 15,
+          noobChampion: 'Jinx',
+          carryChampion: 'Thresh',
           pointsAwarded: i <= 3 ? 50 : -30,
           duration: 1800,
-          createdAt: new Date(Date.now() + i * 1000),
         })
       }
 
@@ -191,49 +201,76 @@ describe('Handler History', () => {
       })
 
       // 3 games avec timestamps différents
+      const game1Date = new Date('2025-01-01T10:00:00Z')
       state.games.set('match1', {
+        id: 'match1',
         matchId: 'match1',
         duoId: 'duo1',
+        startTime: game1Date,
+        endTime: new Date(game1Date.getTime() + 1800000),
+        createdAt: game1Date, // Ancienne
         win: true,
+        scored: true,
+        noobKDA: '10/2/15',
+        carryKDA: '8/3/20',
         noobKills: 10,
         noobDeaths: 2,
         noobAssists: 15,
         carryKills: 8,
         carryDeaths: 3,
         carryAssists: 20,
+        noobChampion: 'Jinx',
+        carryChampion: 'Thresh',
         pointsAwarded: 50,
         duration: 1800,
-        createdAt: new Date('2025-01-01T10:00:00Z'), // Ancienne
       })
 
+      const game2Date = new Date('2025-01-03T10:00:00Z')
       state.games.set('match2', {
+        id: 'match2',
         matchId: 'match2',
         duoId: 'duo1',
+        startTime: game2Date,
+        endTime: new Date(game2Date.getTime() + 1500000),
+        createdAt: game2Date, // Plus récente
         win: true,
+        scored: true,
+        noobKDA: '12/1/18',
+        carryKDA: '10/2/22',
         noobKills: 12,
         noobDeaths: 1,
         noobAssists: 18,
         carryKills: 10,
         carryDeaths: 2,
         carryAssists: 22,
+        noobChampion: 'Caitlyn',
+        carryChampion: 'Leona',
         pointsAwarded: 55,
         duration: 1500,
-        createdAt: new Date('2025-01-03T10:00:00Z'), // Plus récente
       })
 
+      const game3Date = new Date('2025-01-02T10:00:00Z')
       state.games.set('match3', {
+        id: 'match3',
         matchId: 'match3',
         duoId: 'duo1',
+        startTime: game3Date,
+        endTime: new Date(game3Date.getTime() + 2100000),
+        createdAt: game3Date, // Milieu
         win: true,
+        scored: true,
+        noobKDA: '8/4/12',
+        carryKDA: '7/5/18',
         noobKills: 8,
         noobDeaths: 4,
         noobAssists: 12,
         carryKills: 7,
         carryDeaths: 5,
         carryAssists: 18,
+        noobChampion: 'Ashe',
+        carryChampion: 'Nautilus',
         pointsAwarded: 45,
         duration: 2100,
-        createdAt: new Date('2025-01-02T10:00:00Z'), // Milieu
       })
 
       const msg = createMessage('p1')
@@ -296,19 +333,28 @@ describe('Handler History', () => {
         createdAt: Date.now(),
       })
 
+      const gameDate = new Date()
       state.games.set('match1', {
+        id: 'match1',
         matchId: 'match1',
         duoId: 'duo1',
+        startTime: gameDate,
+        endTime: new Date(gameDate.getTime() + 1800000),
+        createdAt: gameDate,
         win: true,
+        scored: true,
+        noobKDA: '10/3/15',
+        carryKDA: '8/2/20',
         noobKills: 10,
         noobDeaths: 3,
         noobAssists: 15,
         carryKills: 8,
         carryDeaths: 2,
         carryAssists: 20,
+        noobChampion: 'Jinx',
+        carryChampion: 'Thresh',
         pointsAwarded: 105,
         duration: 1800,
-        createdAt: new Date(),
       })
 
       const msg = createMessage('p1')
@@ -373,19 +419,28 @@ describe('Handler History', () => {
 
       // 25 games
       for (let i = 1; i <= 25; i++) {
+        const gameDate = new Date(Date.now() + i * 1000)
         state.games.set(`match${i}`, {
+          id: `match${i}`,
           matchId: `match${i}`,
           duoId: 'duo1',
+          startTime: gameDate,
+          endTime: new Date(gameDate.getTime() + 1800000),
+          createdAt: gameDate,
           win: i <= 20,
+          scored: true,
+          noobKDA: '8/3/12',
+          carryKDA: '10/2/15',
           noobKills: 8,
           noobDeaths: 3,
           noobAssists: 12,
           carryKills: 10,
           carryDeaths: 2,
           carryAssists: 15,
+          noobChampion: 'Jinx',
+          carryChampion: 'Thresh',
           pointsAwarded: i <= 20 ? 50 : -30,
           duration: 1800,
-          createdAt: new Date(Date.now() + i * 1000),
         })
       }
 
@@ -487,19 +542,28 @@ describe('Handler History', () => {
         createdAt: Date.now(),
       })
 
+      const gameDate = new Date()
       state.games.set('match1', {
+        id: 'match1',
         matchId: 'match1',
         duoId: 'duo2',
+        startTime: gameDate,
+        endTime: new Date(gameDate.getTime() + 1800000),
+        createdAt: gameDate,
         win: true,
+        scored: true,
+        noobKDA: '5/5/10',
+        carryKDA: '7/4/12',
         noobKills: 5,
         noobDeaths: 5,
         noobAssists: 10,
         carryKills: 7,
         carryDeaths: 4,
         carryAssists: 12,
+        noobChampion: 'Jinx',
+        carryChampion: 'Thresh',
         pointsAwarded: 65,
         duration: 1800,
-        createdAt: new Date(),
       })
 
       // p1 demande l'historique de p3 (qui est dans duo2)

@@ -43,9 +43,9 @@ export function handleDevAdd(message: Message, state: State, responses: Response
 
   // Ajouter le dev
   devs.set(userId, {
-    discordId: userId,
-    addedAt: new Date(),
-    addedBy: message.sourceId,
+    userId: userId,
+    username: '', // Will be populated from Discord user
+    registeredAt: new Date(),
   })
 
   responses.push({

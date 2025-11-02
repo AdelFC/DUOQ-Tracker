@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { keyHandler } from '../../../handlers/dev/key.handler'
-import { State, Response, Message, Config } from '../../../types'
+import type { State, Config } from '../../../types/state.js'
+import type { Response, Message } from '../../../types/message.js'
 
 function createTestConfig(): Config {
   return {

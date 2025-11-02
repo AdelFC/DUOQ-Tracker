@@ -111,8 +111,187 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
     }
 
     case 'GAME_RESULT_FOUND': {
-      // TODO: Implement automatic scoring when result is found
+      // Automatic scoring when game result is found
       console.log(`[GameTracker] Game result found for duo ${event.duoId}: ${event.matchData.metadata.matchId}`)
+
+      const duo = state.duos.get(Number(event.duoId))
+      if (!duo) {
+        console.warn(`[GameTracker] Duo ${event.duoId} not found for GAME_RESULT_FOUND event`)
+        return
+      }
+
+      const noob = state.players.get(duo.noobId)
+      const carry = state.players.get(duo.carryId)
+      if (!noob || !carry) {
+        console.warn(`[GameTracker] Players not found for duo ${event.duoId}`)
+        return
+      }
+
+      // Find player data in match
+      const matchInfo = event.matchData.info
+      const noobData = matchInfo.participants.find((p) => p.puuid === noob.puuid)
+      const carryData = matchInfo.participants.find((p) => p.puuid === carry.puuid)
+
+      if (!noobData || !carryData) {
+        console.warn(`[GameTracker] Player data not found in match for duo ${event.duoId}`)
+        return
+      }
+
+      // Verify same team
+      if (noobData.teamId !== carryData.teamId) {
+        console.log(`[GameTracker] Players not on same team in match ${event.matchData.metadata.matchId}`)
+        return
+      }
+
+      // Import scoring engine
+      const { calculateGameScore } = await import('../services/scoring/engine.js')
+
+      // Create GameData (simplified - no rank change tracking for now)
+      const gameData = {
+        matchId: event.matchData.metadata.matchId,
+        gameId: matchInfo.gameId,
+        startTime: new Date(matchInfo.gameStartTimestamp),
+        endTime: new Date(matchInfo.gameEndTimestamp),
+        duration: matchInfo.gameDuration,
+        duoId: duo.id,
+        win: noobData.win,
+        status: 'COMPLETED' as const,
+        detectedAt: new Date(),
+        scoredAt: null,
+        noobStats: {
+          puuid: noob.puuid || '',
+          summonerId: noobData.summonerId,
+          teamId: noobData.teamId,
+          championId: noobData.championId,
+          championName: noobData.championName,
+          lane: (noobData.teamPosition || 'UNKNOWN') as any,
+          kills: noobData.kills,
+          deaths: noobData.deaths,
+          assists: noobData.assists,
+          previousRank: noob.currentRank,
+          newRank: noob.currentRank, // TODO: Fetch actual rank change from Riot API
+          isOffRole: false, // TODO: Detect off-role
+          isOffChampion: false, // TODO: Detect off-champion
+        },
+        carryStats: {
+          puuid: carry.puuid || '',
+          summonerId: carryData.summonerId,
+          teamId: carryData.teamId,
+          championId: carryData.championId,
+          championName: carryData.championName,
+          lane: (carryData.teamPosition || 'UNKNOWN') as any,
+          kills: carryData.kills,
+          deaths: carryData.deaths,
+          assists: carryData.assists,
+          previousRank: carry.currentRank,
+          newRank: carry.currentRank, // TODO: Fetch actual rank change from Riot API
+          isOffRole: false,
+          isOffChampion: false,
+        },
+      }
+
+      // Calculate score
+      const scoreResult = calculateGameScore({
+        gameData,
+        noobStreak: noob.streaks.current,
+        carryStreak: carry.streaks.current,
+      })
+
+      const noobPoints = scoreResult.noob.final
+      const carryPoints = scoreResult.carry.final
+      const duoPoints = scoreResult.total
+
+      // Update player stats
+      noob.totalPoints += noobPoints
+      carry.totalPoints += carryPoints
+
+      if (gameData.win) {
+        noob.wins += 1
+        noob.streaks.current += 1
+        if (noob.streaks.current > noob.streaks.longestWin) {
+          noob.streaks.longestWin = noob.streaks.current
+        }
+        carry.wins += 1
+        carry.streaks.current += 1
+        if (carry.streaks.current > carry.streaks.longestWin) {
+          carry.streaks.longestWin = carry.streaks.current
+        }
+        duo.wins += 1
+        duo.currentStreak += 1
+        if (duo.currentStreak > duo.longestWinStreak) {
+          duo.longestWinStreak = duo.currentStreak
+        }
+      } else {
+        noob.losses += 1
+        noob.streaks.current = 0
+        carry.losses += 1
+        carry.streaks.current = 0
+        duo.losses += 1
+        duo.currentStreak = 0
+      }
+
+      // Update duo
+      duo.totalPoints += duoPoints
+      duo.gamesPlayed += 1
+      duo.lastGameAt = new Date()
+
+      // Mark game as scored in state.games and update pointsAwarded
+      const trackedGame = state.games.get(event.matchData.metadata.matchId)
+      if (trackedGame) {
+        trackedGame.scored = true
+        trackedGame.pointsAwarded = duoPoints
+      }
+
+      // Send notification to tracker channel
+      const trackerChannelId =
+        typeof state.config === 'object' && 'getSync' in state.config
+          ? state.config.getSync('trackerChannelId')
+          : (state.config as any).trackerChannelId
+
+      if (trackerChannelId && botClient) {
+        try {
+          const { formatGameScored } = await import('../formatters/embeds.js')
+          const { EmbedBuilder } = await import('discord.js')
+
+          const embed = formatGameScored({
+            win: gameData.win,
+            noobName: `${noob.gameName}#${noob.tagLine}`,
+            carryName: `${carry.gameName}#${carry.tagLine}`,
+            noobKDA: `${noobData.kills}/${noobData.deaths}/${noobData.assists}`,
+            carryKDA: `${carryData.kills}/${carryData.deaths}/${carryData.assists}`,
+            noobPoints,
+            carryPoints,
+            totalPoints: duoPoints,
+            duration: matchInfo.gameDuration,
+          })
+
+          const embedBuilder = new EmbedBuilder()
+            .setTitle(embed.title || null)
+            .setDescription(embed.description || null)
+            .setColor(embed.color || 0x5865f2)
+
+          if (embed.fields) {
+            embedBuilder.addFields(embed.fields)
+          }
+
+          if (embed.footer) {
+            embedBuilder.setFooter({ text: embed.footer.text })
+          }
+
+          if (embed.timestamp) {
+            embedBuilder.setTimestamp(embed.timestamp)
+          }
+
+          const channel = await botClient.channels.fetch(trackerChannelId)
+          if (channel && channel.isTextBased() && 'send' in channel) {
+            await channel.send({ embeds: [embedBuilder] })
+            console.log(`[GameTracker] Automatic scoring completed for duo ${duo.name}: ${duoPoints} pts`)
+          }
+        } catch (error) {
+          console.error('[GameTracker] Error sending scoring notification:', error)
+        }
+      }
+
       break
     }
 

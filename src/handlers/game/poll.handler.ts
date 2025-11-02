@@ -107,18 +107,28 @@ export async function pollGamesHandler(msg: Message, state: State, responses: Re
         gamesFound++
 
         // Marquer comme tracké (ajouter au state.games)
+        const gameStartTime = new Date(matchDetails.gameCreation)
         state.games.set(matchId, {
           id: matchId,
+          matchId: matchId, // Alias pour history.handler
           duoId: duo.id,
-          startTime: new Date(matchDetails.gameCreation),
+          startTime: gameStartTime,
           endTime: new Date(matchDetails.gameCreation + matchDetails.gameDuration * 1000),
+          createdAt: gameStartTime, // Alias pour history.handler
           win: noobData.win,
           noobKDA: `${noobData.kills}/${noobData.deaths}/${noobData.assists}`,
           carryKDA: `${carryData.kills}/${carryData.deaths}/${carryData.assists}`,
+          noobKills: noobData.kills,
+          noobDeaths: noobData.deaths,
+          noobAssists: noobData.assists,
+          carryKills: carryData.kills,
+          carryDeaths: carryData.deaths,
+          carryAssists: carryData.assists,
           noobChampion: noobData.championName,
           carryChampion: carryData.championName,
           duration: matchDetails.gameDuration,
           scored: false, // Sera scoré par endGameHandler
+          pointsAwarded: 0, // Sera rempli après scoring
         })
 
         // Notifier dans le tracker channel

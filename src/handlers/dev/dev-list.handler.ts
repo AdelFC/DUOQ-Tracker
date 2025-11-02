@@ -26,7 +26,7 @@ export function handleDevList(message: Message, state: State, responses: Respons
 
   // Créer la liste des devs
   const devList = Array.from(devs.values())
-    .map((dev, index) => `${index + 1}. <@${dev.discordId}>`)
+    .map((dev, index) => `${index + 1}. <@${dev.userId}>`)
     .join('\n')
 
   responses.push({

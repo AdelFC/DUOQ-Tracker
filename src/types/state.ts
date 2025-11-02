@@ -5,7 +5,7 @@
 
 import type { Player } from './player.js'
 import type { Duo } from './duo.js'
-import type { Game } from './game.js'
+import type { TrackedGame } from './game.js'
 import type { ConfigService } from '../services/config/index.js'
 
 export interface Clock {
@@ -50,7 +50,7 @@ export interface State {
   // Data
   players: Map<string, Player> // key: discordId
   duos: Map<number, Duo> // key: duo.id
-  games: Map<string, Game> // key: matchId
+  games: Map<string, TrackedGame> // key: matchId - Games détectées et trackées
   devs: Map<string, Dev> // key: userId - Devs authentifiés pour recevoir les rappels
 
   // Config (legacy - will be removed later)

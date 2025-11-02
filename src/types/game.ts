@@ -6,6 +6,47 @@ import type { Lane, RankInfo } from './player.js'
 
 export type GameStatus = 'IN_PROGRESS' | 'COMPLETED' | 'SCORED'
 
+/**
+ * TrackedGame - Structure stockée dans state.games Map
+ * Utilisée par poll.handler pour tracker les games détectées
+ * Enrichie après scoring avec les champs détaillés
+ */
+export interface TrackedGame {
+  // Identifiers
+  id: string // matchId
+  matchId: string // Alias pour history.handler compatibility
+  duoId: number
+
+  // Timing
+  startTime: Date
+  endTime: Date
+  createdAt: Date // Alias pour history.handler compatibility
+  duration: number // en secondes
+
+  // Result
+  win: boolean
+  scored: boolean // true si déjà scoré
+
+  // KDA - String format pour display rapide
+  noobKDA: string // Format "kills/deaths/assists"
+  carryKDA: string
+
+  // KDA - Numbers pour history.handler
+  noobKills: number
+  noobDeaths: number
+  noobAssists: number
+  carryKills: number
+  carryDeaths: number
+  carryAssists: number
+
+  // Champions
+  noobChampion: string
+  carryChampion: string
+
+  // Scoring (rempli après GAME_RESULT_FOUND)
+  pointsAwarded: number // Points totaux du duo
+}
+
 export interface GameData {
   // Riot API info
   matchId: string

@@ -1,4 +1,5 @@
-import { State, Response } from '../types'
+import type { State } from '../types/state.js'
+import type { Response } from '../types/message.js'
 
 /**
  * Service de rappels automatiques pour la clé API Riot

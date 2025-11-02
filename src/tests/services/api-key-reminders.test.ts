@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { checkApiKeyReminders } from '../../services/api-key-reminders'
-import { State, Response, Config } from '../../types'
+import type { State, Config } from '../../types/state.js'
+import type { Response } from '../../types/message.js'
 
 function createTestConfig(hoursAgo?: number): Config {
   return {

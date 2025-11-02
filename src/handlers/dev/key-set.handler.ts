@@ -49,7 +49,7 @@ export function handleKeySet(message: Message, state: State, responses: Response
 
   // Notifier tous les devs que la clé a été mise à jour
   const devMentions = Array.from(state.devs.values())
-    .map((dev) => `<@${dev.discordId}>`)
+    .map((dev) => `<@${dev.userId}>`)
     .join(' ')
 
   const devNotification = devMentions
