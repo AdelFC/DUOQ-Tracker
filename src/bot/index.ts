@@ -146,7 +146,26 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
       // Import scoring engine
       const { calculateGameScore } = await import('../services/scoring/engine.js')
 
-      // Create GameData (simplified - no rank change tracking for now)
+      // Fetch current ranks from Riot API
+      let noobNewRank = noob.currentRank
+      let carryNewRank = carry.currentRank
+
+      if (state.riotService) {
+        try {
+          const [noobRank, carryRank] = await Promise.all([
+            state.riotService.getRankBySummonerId(noobData.summonerId),
+            state.riotService.getRankBySummonerId(carryData.summonerId),
+          ])
+
+          // Use fetched ranks if available, fallback to current rank
+          if (noobRank) noobNewRank = noobRank
+          if (carryRank) carryNewRank = carryRank
+        } catch (error) {
+          console.warn('[GameTracker] Failed to fetch ranks, using current ranks as fallback:', error)
+        }
+      }
+
+      // Create GameData with real rank changes
       const gameData = {
         matchId: event.matchData.metadata.matchId,
         gameId: matchInfo.gameId,
@@ -169,7 +188,7 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
           deaths: noobData.deaths,
           assists: noobData.assists,
           previousRank: noob.currentRank,
-          newRank: noob.currentRank, // TODO: Fetch actual rank change from Riot API
+          newRank: noobNewRank,
           isOffRole: false, // TODO: Detect off-role
           isOffChampion: noob.mainChampion ? noob.mainChampion !== noobData.championName : false
         },
@@ -184,7 +203,7 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
           deaths: carryData.deaths,
           assists: carryData.assists,
           previousRank: carry.currentRank,
-          newRank: carry.currentRank, // TODO: Fetch actual rank change from Riot API
+          newRank: carryNewRank,
           isOffRole: false,
           isOffChampion: carry.mainChampion ? carry.mainChampion !== carryData.championName : false,
         },
@@ -204,6 +223,10 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
       // Update player stats
       noob.totalPoints += noobPoints
       carry.totalPoints += carryPoints
+
+      // Update current ranks with fetched ranks
+      noob.currentRank = noobNewRank
+      carry.currentRank = carryNewRank
 
       if (gameData.win) {
         noob.wins += 1

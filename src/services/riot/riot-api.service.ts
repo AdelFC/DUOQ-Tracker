@@ -183,6 +183,62 @@ export class RiotApiService {
   }
 
   /**
+   * Get rank info for a summoner by their summonerId
+   * @param summonerId - The summoner ID (encrypted summoner ID from match data)
+   * @returns RankInfo object or null if unranked/error
+   */
+  async getRankBySummonerId(summonerId: string): Promise<import('../../types/player.js').RankInfo | null> {
+    const apiKey = this.getApiKey()
+    // Get region from config (e.g., 'EUW1' → 'euw1')
+    const region = ((this.config as any).region || 'EUW1').toLowerCase()
+    const url = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'X-Riot-Token': apiKey,
+        },
+      })
+
+      if (response.status === 404) {
+        // Summoner not found or unranked
+        console.log(`[RiotAPI] Summoner ${summonerId} not found or unranked`)
+        return null
+      }
+
+      if (response.status === 429) {
+        // Rate limit - return null and log warning
+        console.warn('[RiotAPI] Rate limit hit while fetching rank - using fallback')
+        return null
+      }
+
+      if (!response.ok) {
+        throw new Error(`Riot API error: ${response.status}`)
+      }
+
+      const data = await response.json() as any[]
+
+      // Find RANKED_SOLO_5x5 queue
+      const rankedSolo = data.find((entry: any) => entry.queueType === 'RANKED_SOLO_5x5')
+
+      if (!rankedSolo) {
+        console.log(`[RiotAPI] Summoner ${summonerId} not ranked in Solo/Duo`)
+        return null
+      }
+
+      // Convert tier and rank to RankInfo format
+      return {
+        tier: rankedSolo.tier, // IRON, BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER, CHALLENGER
+        division: rankedSolo.rank, // I, II, III, IV (not present for MASTER+)
+        lp: rankedSolo.leaguePoints,
+      }
+    } catch (error) {
+      console.error(`[RiotAPI] Error fetching rank for summoner ${summonerId}:`, error)
+      return null
+    }
+  }
+
+  /**
    * Helper to get API key from config
    */
   private getApiKey(): string {
