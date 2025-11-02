@@ -196,6 +196,7 @@ export async function handleTestIntegration(
     losses: 6,
     winRate: 60,
     bestStreak: 4,
+    currentStreak: 2,
     duoPartner: 'TestCarry#EUW',
   })
 
@@ -227,6 +228,7 @@ export async function handleTestIntegration(
     losses: 5,
     winRate: 66.7,
     bestStreak: 5,
+    currentStreak: 3,
     noobRank: 'Gold II',
     carryRank: 'Platinum IV',
     noobPoints: 125,

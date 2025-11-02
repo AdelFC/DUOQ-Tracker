@@ -142,7 +142,6 @@ export async function pollGamesHandler(msg: Message, state: State, responses: Re
             duoName: duo.name || `${noob.gameName} & ${carry.gameName}`,
             noobName: `${noob.gameName}#${noob.tagLine}`,
             carryName: `${carry.gameName}#${carry.tagLine}`,
-            detectedAt: new Date(),
           })
 
           responses.push({
