@@ -51,7 +51,7 @@ export interface Player {
 
   // Rank info
   peakElo: string // Elo de référence pour balancing duo (ex: "G2")
-  initialRank: string // Rank au moment de /link (ex: "B3")
+  initialRank: RankInfo // Rank au moment de /link
   currentRank: RankInfo // Rank actuel trackée
 
   // Main info (fourni par joueur à /register)
