@@ -128,16 +128,25 @@ describe('Handler Game Poll', () => {
     const matchId = 'EUW1_123456'
     testState.games.set(matchId, {
       id: matchId,
+      matchId,
       duoId: testDuo.id,
       startTime: new Date(),
       endTime: new Date(),
+      createdAt: new Date(),
       win: true,
       noobKDA: '10/3/15',
       carryKDA: '8/5/20',
+      noobKills: 10,
+      noobDeaths: 3,
+      noobAssists: 15,
+      carryKills: 8,
+      carryDeaths: 5,
+      carryAssists: 20,
       noobChampion: 'Jinx',
       carryChampion: 'Thresh',
       duration: 1800,
       scored: false,
+      pointsAwarded: null,
     })
 
     // Mock to return the same match ID

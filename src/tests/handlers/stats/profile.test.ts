@@ -3,6 +3,7 @@ import { profileHandler } from '../../../handlers/stats/profile.handler'
 import type { State } from '../../../types/state.js'
 import type { Response, Message } from '../../../types/message.js'
 import { MessageType } from '../../../types/message.js'
+import { createTestPlayer, createTestDuo } from '../../helpers/fixtures.js'
 
 function createTestState(): State {
   return {
@@ -29,6 +30,7 @@ function createMessage(sourceId: string, payload: { targetId?: string } = {}): M
     type: MessageType.STATS,
     sourceId,
     payload,
+    timestamp: new Date(),
   }
 }
 
@@ -44,7 +46,7 @@ describe('Handler Profile', () => {
   describe('Cas de succès', () => {
     it('devrait afficher le profil complet d\'un joueur avec duo', () => {
       // Setup: Joueur avec duo et statistiques
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'TestPlayer',
         tagLine: 'EUW',
@@ -55,11 +57,10 @@ describe('Handler Profile', () => {
         totalPoints: 120,
         wins: 8,
         losses: 3,
-        winStreak: 3,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 3, longestWin: 3, longestLoss: 0 },
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'PartnerPlayer',
         tagLine: 'EUW',
@@ -70,20 +71,17 @@ describe('Handler Profile', () => {
         totalPoints: 130,
         wins: 8,
         losses: 3,
-        winStreak: 3,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 3, longestWin: 3, longestLoss: 0 },
+      }))
 
-      state.duos.set(1, {
-        duoId: 1,
+      state.duos.set(1, createTestDuo({
         noobId: 'p1',
         carryId: 'p2',
         name: 'Dream Team',
         totalPoints: 250,
         wins: 8,
         losses: 3,
-        createdAt: Date.now(),
-      })
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)
@@ -110,7 +108,7 @@ describe('Handler Profile', () => {
 
     it('devrait afficher le profil d\'un joueur sans duo', () => {
       // Setup: Joueur solo (pas encore de duo)
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'SoloPlayer',
         tagLine: 'EUW',
@@ -121,9 +119,8 @@ describe('Handler Profile', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)
@@ -139,7 +136,7 @@ describe('Handler Profile', () => {
 
     it('devrait afficher le profil d\'un autre joueur via mention', () => {
       // Setup: 2 joueurs
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Requester',
         tagLine: 'EUW',
@@ -150,11 +147,10 @@ describe('Handler Profile', () => {
         totalPoints: 50,
         wins: 4,
         losses: 2,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
-      state.players.set('p2', {
+      state.players.set('p2', createTestPlayer({
         discordId: 'p2',
         gameName: 'TargetPlayer',
         tagLine: 'EUW',
@@ -165,9 +161,8 @@ describe('Handler Profile', () => {
         totalPoints: 80,
         wins: 6,
         losses: 1,
-        winStreak: 2,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 2, longestWin: 2, longestLoss: 0 },
+      }))
 
       // p1 demande le profil de p2
       const msg = createMessage('p1', { targetId: 'p2' })
@@ -187,7 +182,7 @@ describe('Handler Profile', () => {
 
     it('devrait calculer le winrate correctement', () => {
       // Setup: joueur avec 7W/3L = 70% winrate
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Player',
         tagLine: 'EUW',
@@ -198,9 +193,8 @@ describe('Handler Profile', () => {
         totalPoints: 100,
         wins: 7,
         losses: 3,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)
@@ -216,7 +210,7 @@ describe('Handler Profile', () => {
 
     it('devrait afficher la progression de rank', () => {
       // Setup: joueur avec progression visible
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Climber',
         tagLine: 'EUW',
@@ -227,9 +221,8 @@ describe('Handler Profile', () => {
         totalPoints: 150,
         wins: 12,
         losses: 5,
-        winStreak: 4,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 4, longestWin: 4, longestLoss: 0 },
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)
@@ -246,7 +239,7 @@ describe('Handler Profile', () => {
 
     it('devrait afficher la winstreak actuelle', () => {
       // Setup: joueur avec winstreak de 5
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'OnFire',
         tagLine: 'EUW',
@@ -257,9 +250,8 @@ describe('Handler Profile', () => {
         totalPoints: 200,
         wins: 10,
         losses: 3,
-        winStreak: 5,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 5, longestWin: 5, longestLoss: 0 },
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)
@@ -292,7 +284,7 @@ describe('Handler Profile', () => {
 
     it('devrait retourner une erreur si le joueur mentionné n\'existe pas', () => {
       // Setup: p1 existe mais pas p2
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Player1',
         tagLine: 'EUW',
@@ -303,9 +295,8 @@ describe('Handler Profile', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
       // p1 demande le profil de p2 (inexistant)
       const msg = createMessage('p1', { targetId: 'p2' })
@@ -322,7 +313,7 @@ describe('Handler Profile', () => {
   describe('Cas spéciaux', () => {
     it('devrait gérer un joueur avec 0 games', () => {
       // Setup: nouveau joueur (0W/0L)
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Newbie',
         tagLine: 'EUW',
@@ -333,9 +324,8 @@ describe('Handler Profile', () => {
         totalPoints: 0,
         wins: 0,
         losses: 0,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)
@@ -351,7 +341,7 @@ describe('Handler Profile', () => {
 
     it('devrait gérer des points négatifs', () => {
       // Setup: joueur avec points négatifs (hard stuck)
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Hardstuck',
         tagLine: 'EUW',
@@ -362,9 +352,8 @@ describe('Handler Profile', () => {
         totalPoints: -80,
         wins: 3,
         losses: 12,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)
@@ -379,7 +368,7 @@ describe('Handler Profile', () => {
 
     it('devrait gérer une winstreak de 0', () => {
       // Setup: joueur qui vient de perdre (winstreak = 0)
-      state.players.set('p1', {
+      state.players.set('p1', createTestPlayer({
         discordId: 'p1',
         gameName: 'Player',
         tagLine: 'EUW',
@@ -390,9 +379,8 @@ describe('Handler Profile', () => {
         totalPoints: 50,
         wins: 5,
         losses: 4,
-        winStreak: 0,
-        createdAt: Date.now(),
-      })
+        streaks: { current: 0, longestWin: 0, longestLoss: 0 },
+      }))
 
       const msg = createMessage('p1')
       profileHandler(msg, state, responses)

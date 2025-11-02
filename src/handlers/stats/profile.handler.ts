@@ -90,8 +90,8 @@ function buildDescription(
   lines.push('')
 
   // Section: Winstreak (si > 0)
-  if (player.winStreak > 0) {
-    lines.push(`🔥 **Winstreak:** ${player.winStreak}`)
+  if (player.streaks.current > 0) {
+    lines.push(`🔥 **Winstreak:** ${player.streaks.current}`)
   }
 
   return lines.join('\n')

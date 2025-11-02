@@ -118,7 +118,7 @@ describe('Handler Key', () => {
 
         keyHandler(msg, testState, testResponses)
 
-        expect(testState.config.riotApiKey).toBe(key)
+        expect((testState.config as Config).riotApiKey).toBe(key)
         expect(testResponses).toHaveLength(1)
         expect(testResponses[0].content).toContain('mise à jour avec succès')
       })
@@ -155,7 +155,7 @@ describe('Handler Key', () => {
         expect(testResponses[0].content).toContain('RGAPI-')
 
         // La clé ne doit pas avoir changé
-        expect(testState.config.riotApiKey).toBe('RGAPI-old-key')
+        expect((testState.config as Config).riotApiKey).toBe('RGAPI-old-key')
       })
     })
 
