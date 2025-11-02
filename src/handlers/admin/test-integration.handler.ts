@@ -108,6 +108,10 @@ export async function handleTestIntegration(
     endDate,
     timezone: 'Europe/Paris',
     isActive: false,
+    playerCount: 0,
+    duoCount: 0,
+    gameCount: 0,
+    hasApiKey: false,
   })
 
   responses.push({
@@ -159,8 +163,6 @@ export async function handleTestIntegration(
     duoName: 'TestDuo',
     noobName: 'TestNoob#EUW',
     carryName: 'TestCarry#EUW',
-    gameMode: 'RANKED_SOLO_5x5',
-    detectedAt: now,
   })
 
   responses.push({
@@ -285,6 +287,8 @@ export async function handleTestIntegration(
         currentStreak: -2,
       },
     ],
+    page: 1,
+    totalPages: 1,
     totalDuos: 12,
   })
 
