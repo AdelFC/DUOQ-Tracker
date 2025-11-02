@@ -58,19 +58,19 @@ describe('Service API Key Reminders', () => {
 
       // 2 notifications (une par dev)
       expect(responses).toHaveLength(2)
-      expect(responses[0].recipientId).toBe('dev1')
-      expect(responses[1].recipientId).toBe('dev2')
+      expect(responses[0].targetId).toBe('dev1')
+      expect(responses[1].targetId).toBe('dev2')
 
       // Vérifier le contenu
       expect(responses[0].content).toContain('22 heures')
       expect(responses[0].content).toContain('expirera')
 
       // Vérifier que le rappel a été enregistré
-      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1);
     })
 
     it('ne devrait pas renvoyer le rappel de 22h si déjà envoyé', () => {
-      state = createTestState(22)
+      state = createTestState(22);
 
       // Rappel déjà envoyé
       (state.config as any).riotApiKeyReminders = [new Date()]
@@ -105,11 +105,11 @@ describe('Service API Key Reminders', () => {
       expect(responses[0].content).toContain('expirera')
 
       // Vérifier que le rappel a été enregistré
-      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1);
     })
 
     it('ne devrait pas envoyer le rappel de 23h si celui de 22h n\'a pas été envoyé', () => {
-      state = createTestState(23)
+      state = createTestState(23);
 
       // Aucun rappel envoyé
       (state.config as any).riotApiKeyReminders = []
@@ -167,14 +167,14 @@ describe('Service API Key Reminders', () => {
       expect(responses[0].content).toContain('🚨')
 
       // Vérifier que le rappel a été enregistré
-      expect((state.config as any).riotApiKeyReminders).toHaveLength(1)
+      expect((state.config as any).riotApiKeyReminders).toHaveLength(1);
     })
   })
 
   describe('Cas spéciaux', () => {
     it('ne devrait rien faire si pas de clé API configurée', () => {
       state = createTestState()
-      (state.config as any).riotApiKeyUpdatedAt = undefined
+      ;(state.config as any).riotApiKeyUpdatedAt = undefined
 
       state.devs.set('dev1', {
         userId: 'dev1',

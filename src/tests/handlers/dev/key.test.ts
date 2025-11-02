@@ -69,8 +69,8 @@ describe('Handler Key', () => {
 
     it('devrait réinitialiser les rappels lors du changement de clé', () => {
       // Setup: clé existante avec rappels déjà envoyés
-      (state.config as any).riotApiKeyUpdatedAt = new Date(Date.now() - 23 * 60 * 60 * 1000) // Il y a 23h
-      (state.config as any).riotApiKeyReminders = [
+      ;(state.config as any).riotApiKeyUpdatedAt = new Date(Date.now() - 23 * 60 * 60 * 1000) // Il y a 23h
+      ;(state.config as any).riotApiKeyReminders = [
         new Date(Date.now() - 2 * 60 * 60 * 1000), // Rappel à 22h
         new Date(Date.now() - 1 * 60 * 60 * 1000), // Rappel à 23h
       ]
@@ -197,8 +197,8 @@ describe('Handler Key', () => {
     })
 
     it('devrait afficher un warning si la même clé est re-soumise', () => {
-      (state.config as any).riotApiKey = 'RGAPI-same-key'
-      (state.config as any).riotApiKeyUpdatedAt = new Date(Date.now() - 1000)
+      ;(state.config as any).riotApiKey = 'RGAPI-same-key'
+      ;(state.config as any).riotApiKeyUpdatedAt = new Date(Date.now() - 1000)
 
       const msg = createMessage('admin1', { apiKey: 'RGAPI-same-key' })
       keyHandler(msg, state, responses)
