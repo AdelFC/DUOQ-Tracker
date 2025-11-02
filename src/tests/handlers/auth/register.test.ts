@@ -48,7 +48,7 @@ describe('registerHandler', () => {
       expect(player.mainRoleString).toBe('MID')
       expect(player.mainChampion).toBe('Yasuo')
       expect(player.peakElo).toBe('G2')
-      expect(player.initialRank).toBe('G2')
+      expect(player.initialRank).toEqual({ tier: 'GOLD', division: 'II', lp: 0 })
       expect(player.discordId).toBe('discord123')
       expect(player.role).toBe('noob') // Par défaut
       expect(player.duoId).toBe(0) // Pas encore en duo
@@ -107,7 +107,7 @@ describe('registerHandler', () => {
 
         const player = testState.players.get(discordId)!
         expect(player.peakElo).toBe(rank)
-        expect(player.initialRank).toBe(rank)
+        expect(player.initialRank).toEqual(player.currentRank) // Both should be same RankInfo
       })
     })
 
@@ -478,7 +478,7 @@ describe('registerHandler', () => {
 
       const player = testState.players.get('discord123')!
       expect(player.peakElo).toBe('G4')
-      expect(player.initialRank).toBe('G4')
+      expect(player.initialRank).toEqual({ tier: 'GOLD', division: 'IV', lp: 0 })
     })
 
     it('should trim whitespace from mainChampion', () => {
