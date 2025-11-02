@@ -58,13 +58,13 @@ export class DailyLadderScheduler {
     const now = new Date()
 
     // Vérifier si l'événement est actif
-    const isActive = await this.state.config.isEventActive()
+    const isActive = await (this.state.config as any).isEventActive()
     if (!isActive) {
       return
     }
 
     // Récupérer le tracker channel
-    const trackerChannelId = await this.state.config.get('trackerChannelId')
+    const trackerChannelId = await (this.state.config as any).get('trackerChannelId')
     if (!trackerChannelId) {
       return
     }
@@ -81,7 +81,7 @@ export class DailyLadderScheduler {
     }
 
     // Vérifier l'heure (poster à 20h Paris time)
-    const timezone = (await this.state.config.get('eventTimezone')) || 'Europe/Paris'
+    const timezone = (await (this.state.config as any).get('eventTimezone')) || 'Europe/Paris'
     const currentHour = now.toLocaleString('fr-FR', {
       timeZone: timezone,
       hour: 'numeric',
@@ -146,7 +146,7 @@ export class DailyLadderScheduler {
    * Force le post du ladder quotidien (pour tests)
    */
   async forcePost(): Promise<void> {
-    const trackerChannelId = await this.state.config.get('trackerChannelId')
+    const trackerChannelId = await (this.state.config as any).get('trackerChannelId')
     if (!trackerChannelId) {
       throw new Error('Tracker channel not configured')
     }

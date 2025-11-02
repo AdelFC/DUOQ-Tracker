@@ -7,6 +7,7 @@ import { DailyLadderService } from '../../services/daily-ladder.js'
 import { state, player, duo } from '../fixtures/builders.js'
 import type { ConfigService } from '../../services/config/index.js'
 import type { Client, TextChannel } from 'discord.js'
+import type { State } from '../../types/state.js'
 
 // Mock discord.js Client
 const mockClient = {
@@ -23,7 +24,7 @@ const mockChannel = {
 
 describe('DailyLadderService', () => {
   let service: DailyLadderService
-  let testState: ReturnType<typeof state>['build']
+  let testState: State
 
   beforeEach(() => {
     testState = state().build()

@@ -54,7 +54,7 @@ export class DailyLadderService {
   async postDailyLadder(): Promise<void> {
     try {
       // Get tracker channel ID from config
-      const trackerChannelId = await this.state.config.get('trackerChannelId')
+      const trackerChannelId = await (this.state.config as any).get('trackerChannelId')
 
       if (!trackerChannelId) {
         console.warn('⚠️ Daily ladder: Tracker channel not configured')
@@ -62,7 +62,7 @@ export class DailyLadderService {
       }
 
       // Check if event is active
-      const isEventActive = await this.state.config.isEventActive()
+      const isEventActive = await (this.state.config as any).isEventActive()
       if (!isEventActive) {
         console.log('ℹ️ Daily ladder: Event not active, skipping')
         return
