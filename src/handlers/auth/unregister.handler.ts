@@ -55,16 +55,7 @@ export function unregisterHandler(msg: Message, state: State, responses: Respons
         })
       }
 
-      // Retirer le duo du GameTracker
-      import('../../bot/index.js').then(({ getGameTracker }) => {
-        const tracker = getGameTracker()
-        if (tracker) {
-          tracker.removeDuo(String(duoId))
-          console.log(`[Unregister] Removed duo ${duoId} from GameTracker`)
-        }
-      }).catch((err) => {
-        console.error('[Unregister] Failed to remove duo from GameTracker:', err)
-      })
+      // NOTE: GameTracker removed - no longer needed with new Riot API
 
       // Supprimer le duo
       state.duos.delete(duoId)

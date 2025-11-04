@@ -626,23 +626,13 @@ export function formatSetupReset(payload: {
 // ============================================================================
 
 /**
- * Format : Notification de game détectée (en cours)
+ * NOTE: formatGameDetected() removed
+ *
+ * Riot API no longer supports real-time game detection (games in progress).
+ * We can only detect completed games via manual polling.
+ *
+ * Use formatGameFound() instead for completed game notifications.
  */
-export function formatGameDetected(payload: {
-  noobName: string
-  carryName: string
-  duoName: string
-}): DiscordEmbed {
-  const { noobName, carryName, duoName } = payload
-
-  return {
-    title: `${EMOJIS.game} Game en cours !`,
-    description: `Le duo **${duoName}** est en game !\n\n${noobName} ${EMOJIS.duo} ${carryName}`,
-    color: COLORS.info,
-    footer: { text: 'Le résultat sera tracké automatiquement' },
-    timestamp: new Date(),
-  }
-}
 
 /**
  * Format : Notification de game terminée trouvée (polling manuel)

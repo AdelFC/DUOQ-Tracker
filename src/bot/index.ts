@@ -21,22 +21,26 @@ import {
 } from './commands'
 import { DailyLadderService } from '../services/daily-ladder.js'
 import { ApiKeyReminderService } from '../services/api-key-reminder.service.js'
-import { GameTracker } from '../services/game-tracker/index.js'
-import type { GameTrackerEvent } from '../services/game-tracker/types.js'
-import type { Message } from '../types/message.js'
 import { router } from './router.js'
 
 // Global service instances
 let dailyLadderService: DailyLadderService | null = null
 let apiKeyReminderService: ApiKeyReminderService | null = null
-let gameTracker: GameTracker | null = null
 let botClient: BotClient | null = null
 
 /**
- * Event handler for GameTracker events
- * Converts game tracking events into Discord notifications
+ * NOTE: GameTracker automatic detection removed
+ *
+ * Riot API no longer provides real-time game status, so we cannot detect
+ * when games start or end automatically. All game detection is now done
+ * via manual polling (/poll command) which finds completed games.
+ *
+ * The code below (GAME_STARTED, GAME_ENDED, GAME_RESULT_FOUND events)
+ * is kept for reference but is NO LONGER USED.
  */
-async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Message[]): Promise<void> {
+
+/*
+async function handleGameTrackerEvent_OBSOLETE(event: GameTrackerEvent, _messages: Message[]): Promise<void> {
   const state = router.getState()
 
   switch (event.type) {
@@ -342,6 +346,7 @@ async function handleGameTrackerEvent(event: GameTrackerEvent, _messages: Messag
     }
   }
 }
+*/
 
 /**
  * Create and configure Discord bot client
@@ -409,20 +414,9 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
   apiKeyReminderService = new ApiKeyReminderService(client, state)
   apiKeyReminderService.start()
 
-  // Start Game Tracker Service (automatic game detection)
-  if (state.riotService) {
-    gameTracker = new GameTracker(state.riotService, handleGameTrackerEvent, {
-      pollingInterval: 10000, // 10 seconds
-      minCheckInterval: 30000, // 30 seconds between checks for same duo
-      maxConcurrentChecks: 5,
-      maxFetchAttempts: 18, // 18 * 10s = 3 minutes
-      region: 'euw1',
-    })
-    gameTracker.start()
-    console.log('[Bot] GameTracker started')
-  } else {
-    console.warn('[Bot] RiotService not available, GameTracker not started')
-  }
+  // NOTE: GameTracker automatic detection removed
+  // Riot API no longer supports real-time game detection
+  // Use /poll command for manual game detection instead
 
   return client
 }
@@ -443,23 +437,11 @@ export async function stopBot(client: BotClient): Promise<void> {
     apiKeyReminderService = null
   }
 
-  // Stop Game Tracker Service
-  if (gameTracker) {
-    gameTracker.stop()
-    gameTracker = null
-    console.log('[Bot] GameTracker stopped')
-  }
+  // NOTE: GameTracker removed - no longer needed
 
   // Clear bot client
   botClient = null
 
   await client.destroy()
   console.log('[Bot] Disconnected')
-}
-
-/**
- * Get GameTracker instance (for use in handlers)
- */
-export function getGameTracker(): GameTracker | null {
-  return gameTracker
 }

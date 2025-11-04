@@ -181,27 +181,9 @@ export function linkHandler(msg: Message, state: State, responses: Response[]): 
   carry.duoId = duoId
   carry.role = 'carry'
 
-  // Ajouter le duo au GameTracker si les joueurs ont un PUUID
-  if (noob.puuid && carry.puuid) {
-    // Import GameTracker dynamically to avoid circular dependencies
-    import('../../bot/index.js').then(({ getGameTracker }) => {
-      const tracker = getGameTracker()
-      if (tracker) {
-        tracker.addDuo(
-          String(duoId),
-          noob.puuid!,
-          carry.puuid!,
-          noobId,
-          carryId
-        )
-        console.log(`[Link] Added duo ${finalTeamName} to GameTracker`)
-      }
-    }).catch((err) => {
-      console.error('[Link] Failed to add duo to GameTracker:', err)
-    })
-  } else {
-    console.warn(`[Link] Duo ${duoId} created but players don't have PUUID yet, skipping GameTracker`)
-  }
+  // NOTE: GameTracker automatic tracking removed
+  // Riot API no longer supports real-time game detection
+  // Games are now detected via manual /poll command
 
   // Réponse de succès
   const noobName = noob.gameName
@@ -216,7 +198,7 @@ export function linkHandler(msg: Message, state: State, responses: Response[]): 
 **Noob** : ${noobName} (Peak: ${noob.peakElo})
 **Carry** : ${carryName} (Peak: ${carry.peakElo})
 
-Vos games seront automatiquement trackées. 🎮`,
+Utilisez \`/poll\` pour détecter vos games terminées. 🎮`,
     ephemeral: false,
   })
 }
