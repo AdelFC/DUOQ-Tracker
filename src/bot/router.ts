@@ -15,7 +15,6 @@ import { registerHandler } from '../handlers/auth/register.handler'
 import { linkHandler } from '../handlers/auth/link.handler'
 import { unregisterHandler } from '../handlers/auth/unregister.handler'
 import { pollGamesHandler } from '../handlers/game/poll.handler'
-import { endGameHandler } from '../handlers/game/end.handler'
 import { ladderHandler } from '../handlers/stats/ladder.handler'
 import { profileHandler } from '../handlers/stats/profile.handler'
 import { historyHandler } from '../handlers/stats/history.handler'
@@ -36,7 +35,6 @@ type CommandName =
   | 'link'
   | 'unregister'
   | 'poll'
-  | 'end'
   | 'ladder'
   | 'profile'
   | 'history'
@@ -179,10 +177,6 @@ class DiscordRouter {
         await pollGamesHandler(msg, this.state, responses)
         break
 
-      case MessageType.GAME_ENDED:
-        endGameHandler(msg, this.state, responses)
-        break
-
       case MessageType.LADDER:
         ladderHandler(msg, this.state, responses)
         break
@@ -300,15 +294,6 @@ class DiscordRouter {
 
       case 'poll': {
         messageType = MessageType.POLL
-        break
-      }
-
-      case 'end': {
-        messageType = MessageType.GAME_ENDED
-        const gameId = interaction.options.getString('game_id', true)
-        payload = {
-          gameId,
-        }
         break
       }
 

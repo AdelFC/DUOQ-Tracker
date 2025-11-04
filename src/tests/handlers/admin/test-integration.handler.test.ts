@@ -47,7 +47,7 @@ describe('handleTestIntegration', () => {
     expect(titles).toContain('Setup Event')
     expect(titles).toContain('Setup Status')
     expect(titles).toContain('Register Player')
-    expect(titles).toContain('Game Detected')
+    expect(titles).toContain('Game terminée détectée')
     expect(titles).toContain('Player Profile')
     expect(titles).toContain('Duo Stats')
     expect(titles).toContain('Ladder')

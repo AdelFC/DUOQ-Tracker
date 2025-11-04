@@ -38,6 +38,46 @@ export function handleKeyShow(message: Message, state: State, responses: Respons
     return
   }
 
+  // Get API key age
+  const updatedAtStr =
+    typeof state.config === 'object' && 'getSync' in state.config
+      ? state.config.getSync('riotApiKeyUpdatedAt')
+      : (state.config as any).riotApiKeyUpdatedAt
+
+  let keyAge = 'Inconnu'
+  let keyStatus = '⚠️ Âge inconnu'
+  let embedColor = 0xffa500 // Orange
+
+  if (updatedAtStr) {
+    const updatedAt = typeof updatedAtStr === 'string' ? new Date(updatedAtStr) : updatedAtStr
+    const now = Date.now()
+    const ageMs = now - updatedAt.getTime()
+    const ageHours = ageMs / (60 * 60 * 1000)
+    const ageMinutes = ageMs / (60 * 1000)
+
+    // Format age
+    if (ageHours >= 1) {
+      keyAge = `${ageHours.toFixed(1)} heures`
+    } else {
+      keyAge = `${Math.floor(ageMinutes)} minutes`
+    }
+
+    // Determine status and color
+    if (ageHours >= 24) {
+      keyStatus = '🚨 EXPIRÉ'
+      embedColor = 0xff0000 // Red
+    } else if (ageHours >= 23) {
+      keyStatus = '⚠️ Critique'
+      embedColor = 0xff6600 // Orange-red
+    } else if (ageHours >= 22) {
+      keyStatus = '⏰ Attention'
+      embedColor = 0xffa500 // Orange
+    } else {
+      keyStatus = '✅ Actif'
+      embedColor = 0x00ff00 // Green
+    }
+  }
+
   // Masquer la clé en n'affichant que les premiers et derniers caractères
   const maskedKey =
     riotApiKey.length > 10
@@ -49,7 +89,7 @@ export function handleKeyShow(message: Message, state: State, responses: Respons
     targetId: message.sourceId,
     content: JSON.stringify({
       title: 'Clé API Riot',
-      description: 'Clé API Riot configurée',
+      description: 'Informations sur la clé API Riot configurée',
       fields: [
         {
           name: 'Clé masquée',
@@ -57,19 +97,19 @@ export function handleKeyShow(message: Message, state: State, responses: Respons
           inline: false,
         },
         {
-          name: 'Longueur',
-          value: `${riotApiKey.length} caractères`,
+          name: 'Status',
+          value: keyStatus,
           inline: true,
         },
         {
-          name: 'Status',
-          value: 'Configuré',
+          name: 'Âge',
+          value: keyAge,
           inline: true,
         },
       ],
-      color: 0x00ff00,
+      color: embedColor,
       footer: {
-        text: 'Cette clé est utilisée pour toutes les requêtes Riot API',
+        text: 'Les clés API Riot expirent après 24 heures',
       },
     }),
     ephemeral: true,

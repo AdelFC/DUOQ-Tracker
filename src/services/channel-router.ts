@@ -4,7 +4,7 @@
  *
  * Règles de routage:
  * - User commands (REGISTER, LINK_ACCOUNT, STATS, etc.) → General Channel
- * - Game notifications (GAME_DETECTED, GAME_ENDED, GAME_SCORED) → Tracker Channel
+ * - Game notifications (GAME_DETECTED, GAME_SCORED) → Tracker Channel
  * - Ladder → Tracker Channel
  * - Setup commands → Source (ephemeral) ou General
  */
@@ -54,7 +54,6 @@ export class ChannelRouter {
     // Notifications de game → Tracker Channel
     if (
       type === MessageType.GAME_DETECTED ||
-      type === MessageType.GAME_ENDED ||
       type === MessageType.GAME_SCORED
     ) {
       return 'tracker'

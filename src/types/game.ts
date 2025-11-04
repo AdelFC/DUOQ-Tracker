@@ -4,7 +4,7 @@
 
 import type { Lane, RankInfo } from './player.js'
 
-export type GameStatus = 'IN_PROGRESS' | 'COMPLETED' | 'SCORED'
+export type GameStatus = 'COMPLETED' | 'SCORED'
 
 /**
  * TrackedGame - Structure stockée dans state.games Map
@@ -96,40 +96,4 @@ export interface PlayerGameStats {
   // Risk detection
   isOffRole: boolean // Pas sur son main role
   isOffChampion: boolean // Pas sur son main champion
-}
-
-export interface Game {
-  id: number
-  matchId: string
-  duoId: number
-
-  // Game info
-  startTime: Date
-  endTime: Date
-  duration: number
-  win: boolean
-
-  // Stats
-  noobKills: number
-  noobDeaths: number
-  noobAssists: number
-  noobChampionId: number
-  noobLane: Lane
-  noobPreviousRank: string // Serialized RankInfo
-  noobNewRank: string // Serialized RankInfo
-
-  carryKills: number
-  carryDeaths: number
-  carryAssists: number
-  carryChampionId: number
-  carryLane: Lane
-  carryPreviousRank: string
-  carryNewRank: string
-
-  // Points
-  pointsAwarded: number
-  breakdown: string // JSON serialized ScoreBreakdown
-
-  // Timestamps
-  createdAt: Date
 }

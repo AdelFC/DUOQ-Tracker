@@ -15,7 +15,10 @@ export interface RiotAccount {
 
 export interface MatchParticipant {
   puuid: string
+  summonerId: string
+  championId: number
   championName: string
+  teamPosition: string
   kills: number
   deaths: number
   assists: number
@@ -25,7 +28,10 @@ export interface MatchParticipant {
 
 export interface MatchInfo {
   matchId: string
+  gameId: number
   gameCreation: number
+  gameStartTimestamp: number
+  gameEndTimestamp: number
   gameDuration: number
   gameMode: string
   queueId: number
@@ -111,11 +117,15 @@ export class RiotApiService {
    * Get recent match IDs for a player
    * @param puuid - Player PUUID
    * @param count - Number of matches to retrieve (default: 5, max: 100)
+   * @param queue - Optional queue ID to filter (e.g., 420 for ranked solo/duo)
    * @returns Array of match IDs
    */
-  async getRecentMatchIds(puuid: string, count: number = 5): Promise<string[]> {
+  async getRecentMatchIds(puuid: string, count: number = 5, queue?: number): Promise<string[]> {
     const apiKey = this.getApiKey()
-    const url = `${this.MATCH_BASE_URL}/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=${count}`
+    let url = `${this.MATCH_BASE_URL}/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=${count}`
+    if (queue) {
+      url += `&queue=${queue}`
+    }
 
     try {
       const response = await fetch(url, {
@@ -160,7 +170,10 @@ export class RiotApiService {
       // Extract relevant info
       const participants: MatchParticipant[] = data.info.participants.map((p: any) => ({
         puuid: p.puuid,
+        summonerId: p.summonerId,
+        championId: p.championId,
         championName: p.championName,
+        teamPosition: p.teamPosition || 'UNKNOWN',
         kills: p.kills,
         deaths: p.deaths,
         assists: p.assists,
@@ -170,7 +183,10 @@ export class RiotApiService {
 
       return {
         matchId: data.metadata.matchId,
+        gameId: data.info.gameId,
         gameCreation: data.info.gameCreation,
+        gameStartTimestamp: data.info.gameStartTimestamp,
+        gameEndTimestamp: data.info.gameEndTimestamp,
         gameDuration: data.info.gameDuration,
         gameMode: data.info.gameMode,
         queueId: data.info.queueId,

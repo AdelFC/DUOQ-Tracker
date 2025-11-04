@@ -43,8 +43,13 @@ export function handleKeySet(message: Message, state: State, responses: Response
   // Définir la clé API dans la config
   if (typeof state.config === 'object' && 'setSync' in state.config) {
     state.config.setSync('riotApiKey', trimmedKey)
+    // IMPORTANT: Reset the API key timestamp and reminders
+    state.config.setSync('riotApiKeyUpdatedAt', new Date().toISOString())
+    state.config.setSync('riotApiKeyReminders', '[]')
   } else {
     ;(state.config as any).riotApiKey = trimmedKey
+    ;(state.config as any).riotApiKeyUpdatedAt = new Date()
+    ;(state.config as any).riotApiKeyReminders = []
   }
 
   // Notifier tous les devs que la clé a été mise à jour

@@ -103,7 +103,7 @@ describe('ChannelRouter', () => {
     })
 
     it('should route game notifications to tracker channel', async () => {
-      const gameTypes = [MessageType.GAME_DETECTED, MessageType.GAME_ENDED, MessageType.GAME_SCORED]
+      const gameTypes = [MessageType.GAME_DETECTED, MessageType.GAME_SCORED]
 
       for (const type of gameTypes) {
         const response: Response = {

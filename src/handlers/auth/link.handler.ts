@@ -181,9 +181,8 @@ export function linkHandler(msg: Message, state: State, responses: Response[]): 
   carry.duoId = duoId
   carry.role = 'carry'
 
-  // NOTE: GameTracker automatic tracking removed
-  // Riot API no longer supports real-time game detection
-  // Games are now detected via manual /poll command
+  // NOTE: Games are auto-detected every minute via AutoPollService
+  // Manual /poll is also available if needed
 
   // Réponse de succès
   const noobName = noob.gameName
@@ -198,7 +197,7 @@ export function linkHandler(msg: Message, state: State, responses: Response[]): 
 **Noob** : ${noobName} (Peak: ${noob.peakElo})
 **Carry** : ${carryName} (Peak: ${carry.peakElo})
 
-Utilisez \`/poll\` pour détecter vos games terminées. 🎮`,
+Vos games terminées seront automatiquement détectées. 🎮`,
     ephemeral: false,
   })
 }

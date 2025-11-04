@@ -12,7 +12,6 @@ export enum MessageType {
   // Tracking
   POLL = 'POLL',
   GAME_DETECTED = 'GAME_DETECTED',
-  GAME_ENDED = 'GAME_ENDED',
   GAME_SCORED = 'GAME_SCORED',
 
   // Stats

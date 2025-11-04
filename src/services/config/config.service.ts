@@ -70,6 +70,8 @@ export class ConfigService {
       generalChannelId: await this.get('generalChannelId'),
       trackerChannelId: await this.get('trackerChannelId'),
       riotApiKey: await this.get('riotApiKey'),
+      riotApiKeyUpdatedAt: await this.get('riotApiKeyUpdatedAt'),
+      riotApiKeyReminders: await this.get('riotApiKeyReminders'),
       lastApiKeyReminder: await this.get('lastApiKeyReminder'),
       isActive: await this.isEventActive(),
     }
