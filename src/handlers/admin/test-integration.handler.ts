@@ -12,6 +12,7 @@ import {
   formatSetupEvent,
   formatSetupStatus,
   formatGameDetected,
+  formatGameFound,
   formatDailyLadder,
   formatRegisterSuccess,
   formatPlayerProfile,
@@ -147,13 +148,13 @@ export async function handleTestIntegration(
     ephemeral: false,
   })
 
-  // Test 5: Game Detected
+  // Test 5: Game Detected (tracking automatique)
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
     content: JSON.stringify({
-      title: '🧪 Test 5: Game Detected',
-      description: 'Détection d\'une game en cours',
+      title: '🧪 Test 5: Game Detected (Auto Tracking)',
+      description: 'Détection automatique : game vient de commencer',
       color: 3447003,
     }),
     ephemeral: false,
@@ -172,12 +173,38 @@ export async function handleTestIntegration(
     ephemeral: false,
   })
 
-  // Test 6: Player Profile
+  // Test 6: Game Found (polling manuel)
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
     content: JSON.stringify({
-      title: '🧪 Test 6: Player Profile',
+      title: '🧪 Test 6: Game Found (Manual Poll)',
+      description: 'Polling manuel : game terminée détectée',
+      color: 3447003,
+    }),
+    ephemeral: false,
+  })
+
+  const gameFoundEmbed = formatGameFound({
+    duoName: 'TestDuo',
+    noobName: 'TestNoob#EUW',
+    carryName: 'TestCarry#EUW',
+    win: true,
+  })
+
+  responses.push({
+    type: MessageType.INFO,
+    targetId: message.sourceId,
+    content: JSON.stringify(gameFoundEmbed),
+    ephemeral: false,
+  })
+
+  // Test 7: Player Profile
+  responses.push({
+    type: MessageType.INFO,
+    targetId: message.sourceId,
+    content: JSON.stringify({
+      title: '🧪 Test 7: Player Profile',
       description: 'Profil d\'un joueur',
       color: 3447003,
     }),
@@ -207,12 +234,12 @@ export async function handleTestIntegration(
     ephemeral: false,
   })
 
-  // Test 7: Duo Stats
+  // Test 8: Duo Stats
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
     content: JSON.stringify({
-      title: '🧪 Test 7: Duo Stats',
+      title: '🧪 Test 8: Duo Stats',
       description: 'Statistiques d\'un duo',
       color: 3447003,
     }),
@@ -242,12 +269,12 @@ export async function handleTestIntegration(
     ephemeral: false,
   })
 
-  // Test 8: Ladder
+  // Test 9: Ladder
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
     content: JSON.stringify({
-      title: '🧪 Test 8: Ladder',
+      title: '🧪 Test 9: Ladder',
       description: 'Classement général',
       color: 3447003,
     }),
@@ -296,12 +323,12 @@ export async function handleTestIntegration(
     ephemeral: false,
   })
 
-  // Test 9: History
+  // Test 10: History
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
     content: JSON.stringify({
-      title: '🧪 Test 9: History',
+      title: '🧪 Test 10: History',
       description: 'Historique des games',
       color: 3447003,
     }),
@@ -344,12 +371,12 @@ export async function handleTestIntegration(
     ephemeral: false,
   })
 
-  // Test 10: Daily Ladder
+  // Test 11: Daily Ladder
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
     content: JSON.stringify({
-      title: '🧪 Test 10: Daily Ladder',
+      title: '🧪 Test 11: Daily Ladder',
       description: 'Classement quotidien automatique',
       color: 3447003,
     }),
@@ -404,17 +431,18 @@ export async function handleTestIntegration(
       title: '✅ Tests d\'intégration terminés',
       description:
         '**Tous les embeds ont été testés avec succès !**\n\n' +
-        'Les 10 tests suivants ont été exécutés :\n' +
+        'Les 11 tests suivants ont été exécutés :\n' +
         '1. Setup Channels\n' +
         '2. Setup Event\n' +
         '3. Setup Status\n' +
         '4. Register Player\n' +
-        '5. Game Detected\n' +
-        '6. Player Stats\n' +
-        '7. Duo Stats\n' +
-        '8. Ladder\n' +
-        '9. History\n' +
-        '10. Daily Ladder\n\n' +
+        '5. Game Detected (Auto Tracking)\n' +
+        '6. Game Found (Manual Poll)\n' +
+        '7. Player Profile\n' +
+        '8. Duo Stats\n' +
+        '9. Ladder\n' +
+        '10. History\n' +
+        '11. Daily Ladder\n\n' +
         'Le bot est prêt pour la production ! 🚀',
       color: 5763719,
       footer: {
