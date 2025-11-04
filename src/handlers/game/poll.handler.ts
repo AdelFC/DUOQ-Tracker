@@ -1,7 +1,7 @@
 import type { Message, Response } from '../../types/message.js'
 import { MessageType } from '../../types/message.js'
 import type { State } from '../../types/state.js'
-import { formatGameDetected, formatError } from '../../formatters/embeds.js'
+import { formatGameFound, formatError } from '../../formatters/embeds.js'
 
 /**
  * Handler pour le polling des matchs terminés
@@ -138,10 +138,11 @@ export async function pollGamesHandler(msg: Message, state: State, responses: Re
             : (state.config as any).trackerChannelId
 
         if (trackerChannelId) {
-          const embed = formatGameDetected({
+          const embed = formatGameFound({
             duoName: duo.name || `${noob.gameName} & ${carry.gameName}`,
             noobName: `${noob.gameName}#${noob.tagLine}`,
             carryName: `${carry.gameName}#${carry.tagLine}`,
+            win: noobData.win,
           })
 
           responses.push({

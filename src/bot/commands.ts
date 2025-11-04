@@ -95,18 +95,6 @@ export const pollCommand = {
 }
 
 /**
- * /end - Terminer une game manuellement (dev/admin)
- */
-export const endCommand = {
-  data: new SlashCommandBuilder()
-    .setName('end')
-    .setDescription('[DEV] Terminer une game manuellement')
-    .addStringOption((option) =>
-      option.setName('game_id').setDescription('ID de la game').setRequired(true)
-    ),
-}
-
-/**
  * /ladder - Afficher le classement
  */
 export const ladderCommand = {

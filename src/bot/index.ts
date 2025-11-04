@@ -11,7 +11,6 @@ import {
   unregisterCommand,
   linkCommand,
   pollCommand,
-  endCommand,
   ladderCommand,
   profileCommand,
   historyCommand,
@@ -21,6 +20,7 @@ import {
   testCommand,
 } from './commands'
 import { DailyLadderService } from '../services/daily-ladder.js'
+import { ApiKeyReminderService } from '../services/api-key-reminder.service.js'
 import { GameTracker } from '../services/game-tracker/index.js'
 import type { GameTrackerEvent } from '../services/game-tracker/types.js'
 import type { Message } from '../types/message.js'
@@ -28,6 +28,7 @@ import { router } from './router.js'
 
 // Global service instances
 let dailyLadderService: DailyLadderService | null = null
+let apiKeyReminderService: ApiKeyReminderService | null = null
 let gameTracker: GameTracker | null = null
 let botClient: BotClient | null = null
 
@@ -362,7 +363,6 @@ export function createBot(config: BotConfig): BotClient {
     linkCommand,
     // Game
     pollCommand,
-    endCommand,
     // Stats
     ladderCommand,
     profileCommand,
@@ -405,6 +405,10 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
   dailyLadderService = new DailyLadderService(client, state)
   dailyLadderService.start()
 
+  // Start API Key Reminder Service (checks every hour)
+  apiKeyReminderService = new ApiKeyReminderService(client, state)
+  apiKeyReminderService.start()
+
   // Start Game Tracker Service (automatic game detection)
   if (state.riotService) {
     gameTracker = new GameTracker(state.riotService, handleGameTrackerEvent, {
@@ -431,6 +435,12 @@ export async function stopBot(client: BotClient): Promise<void> {
   if (dailyLadderService) {
     dailyLadderService.stop()
     dailyLadderService = null
+  }
+
+  // Stop API Key Reminder Service
+  if (apiKeyReminderService) {
+    apiKeyReminderService.stop()
+    apiKeyReminderService = null
   }
 
   // Stop Game Tracker Service

@@ -10,7 +10,6 @@ import {
   unregisterCommand,
   linkCommand,
   pollCommand,
-  endCommand,
   ladderCommand,
   profileCommand,
   historyCommand,
@@ -41,7 +40,6 @@ const commands = [
   linkCommand.data.toJSON(),
   // Game
   pollCommand.data.toJSON(),
-  endCommand.data.toJSON(),
   // Stats
   ladderCommand.data.toJSON(),
   profileCommand.data.toJSON(),

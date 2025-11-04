@@ -645,6 +645,27 @@ export function formatGameDetected(payload: {
 }
 
 /**
+ * Format : Notification de game terminée trouvée (polling manuel)
+ */
+export function formatGameFound(payload: {
+  noobName: string
+  carryName: string
+  duoName: string
+  win: boolean
+}): DiscordEmbed {
+  const { noobName, carryName, duoName, win } = payload
+  const result = win ? `${EMOJIS.win} Victoire` : `${EMOJIS.loss} Défaite`
+
+  return {
+    title: `${EMOJIS.game} Game terminée détectée !`,
+    description: `Le duo **${duoName}** a terminé une game !\n\n${noobName} ${EMOJIS.duo} ${carryName}\n\n${result}`,
+    color: win ? COLORS.success : COLORS.error,
+    footer: { text: 'Scoring en attente' },
+    timestamp: new Date(),
+  }
+}
+
+/**
  * Format : Notification de daily ladder (classement quotidien)
  */
 export function formatDailyLadder(payload: {
