@@ -75,6 +75,7 @@ export class ConfigService {
       riotApiKeyReminders: await this.get('riotApiKeyReminders'),
       lastApiKeyReminder: await this.get('lastApiKeyReminder'),
       isActive: await this.isEventActive(),
+      challengeEndReminders: await this.get('challengeEndReminders'),
     }
   }
 

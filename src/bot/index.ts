@@ -22,12 +22,14 @@ import {
 import { DailyLadderService } from '../services/daily-ladder.js'
 import { ApiKeyReminderService } from '../services/api-key-reminder.service.js'
 import { AutoPollService } from '../services/auto-poll.service.js'
+import { ChallengeEndService } from '../services/challenge-end.service.js'
 import { router } from './router.js'
 
 // Global service instances
 let dailyLadderService: DailyLadderService | null = null
 let apiKeyReminderService: ApiKeyReminderService | null = null
 let autoPollService: AutoPollService | null = null
+let challengeEndService: ChallengeEndService | null = null
 let botClient: BotClient | null = null
 
 /**
@@ -96,19 +98,24 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
   apiKeyReminderService = new ApiKeyReminderService(client, state)
   apiKeyReminderService.start()
 
-  // Start Auto Poll Service (automatic game detection every 10 seconds)
+  // Start Auto Poll Service (automatic game detection every 5 seconds)
   if (state.riotService) {
     autoPollService = new AutoPollService(
       client,
       state,
       state.riotService,
-      5000 // Poll every 10 seconds
+      5000 // Poll every 5 seconds
     )
     autoPollService.start()
     console.log('[Bot] AutoPoll service started')
   } else {
     console.warn('[Bot] RiotService not available, AutoPoll not started')
   }
+
+  // Start Challenge End Service (checks every hour)
+  challengeEndService = new ChallengeEndService(client, state)
+  challengeEndService.start()
+  console.log('[Bot] ChallengeEnd service started')
 
   return client
 }
@@ -133,6 +140,12 @@ export async function stopBot(client: BotClient): Promise<void> {
   if (autoPollService) {
     autoPollService.stop()
     autoPollService = null
+  }
+
+  // Stop Challenge End Service
+  if (challengeEndService) {
+    challengeEndService.stop()
+    challengeEndService = null
   }
 
   // Clear bot client

@@ -22,6 +22,9 @@ export interface ChallengeConfig {
 
   // Challenge status
   isActive: boolean
+
+  // Challenge end reminders
+  challengeEndReminders: string | null // JSON array of sent reminder keys
 }
 
 export type ConfigKey =
@@ -35,6 +38,8 @@ export type ConfigKey =
   | 'riotApiKeyUpdatedAt'
   | 'riotApiKeyReminders'
   | 'lastApiKeyReminder'
+  | 'isActive'
+  | 'challengeEndReminders'
 
 export interface ConfigEntry {
   key: ConfigKey
