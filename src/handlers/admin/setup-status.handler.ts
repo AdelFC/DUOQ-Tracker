@@ -16,6 +16,7 @@ export async function handleSetupStatus(
   // Récupérer la configuration
   const generalChannelId = 'getSync' in state.config ? state.config.getSync('generalChannelId') : null
   const trackerChannelId = 'getSync' in state.config ? state.config.getSync('trackerChannelId') : null
+  const devChannelId = 'getSync' in state.config ? state.config.getSync('devChannelId') : null
   const eventStartDate = 'getSync' in state.config ? state.config.getSync('eventStartDate') : null
   const eventEndDate = 'getSync' in state.config ? state.config.getSync('eventEndDate') : null
   const eventTimezone = 'getSync' in state.config ? state.config.getSync('eventTimezone') : 'Europe/Paris'
@@ -40,10 +41,11 @@ export async function handleSetupStatus(
   const gameCount = state.games.size
 
   const embed = formatSetupStatus({
-    hasChannels: !!(generalChannelId && trackerChannelId),
+    hasChannels: !!(generalChannelId && trackerChannelId && devChannelId),
     hasEvent: !!(eventStartDate && eventEndDate),
     generalChannelId,
     trackerChannelId,
+    devChannelId,
     startDate,
     endDate,
     timezone: eventTimezone as string,

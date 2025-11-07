@@ -536,6 +536,7 @@ export function formatSetupStatus(payload: {
   hasEvent: boolean
   generalChannelId?: string
   trackerChannelId?: string
+  devChannelId?: string
   startDate?: Date
   endDate?: Date
   timezone?: string
@@ -550,6 +551,7 @@ export function formatSetupStatus(payload: {
     hasEvent,
     generalChannelId,
     trackerChannelId,
+    devChannelId,
     startDate,
     endDate,
     timezone,
@@ -566,10 +568,10 @@ export function formatSetupStatus(payload: {
   const fields = []
 
   // Channels
-  if (hasChannels && generalChannelId && trackerChannelId) {
+  if (hasChannels && generalChannelId && trackerChannelId && devChannelId) {
     fields.push({
       name: '💬 Channels',
-      value: `General: <#${generalChannelId}>\nTracker: <#${trackerChannelId}>`,
+      value: `General: <#${generalChannelId}>\nTracker: <#${trackerChannelId}>\nDev: <#${devChannelId}>`,
       inline: false,
     })
   } else {
