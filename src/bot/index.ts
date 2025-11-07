@@ -103,13 +103,13 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
   apiKeyReminderService = new ApiKeyReminderService(client, state)
   apiKeyReminderService.start()
 
-  // Start Auto Poll Service (automatic game detection every 15 seconds)
+  // Start Auto Poll Service (automatic game detection every 30 seconds)
   if (state.riotService) {
     autoPollService = new AutoPollService(
       client,
       state,
       state.riotService,
-      15000 // Poll every 15 seconds (rate limiting: 8 duos * 2 calls / 15s = ~64 calls/min < 100/2min limit)
+      30000 // Poll every 30 seconds (rate limiting: 12 duos * 2 calls / 30s = ~48 calls/min < 50 calls/min limit)
     )
     autoPollService.start()
     console.log('[Bot] AutoPoll service started')
