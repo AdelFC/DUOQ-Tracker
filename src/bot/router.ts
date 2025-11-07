@@ -115,14 +115,14 @@ class DiscordRouter {
 
       // Send first response to command sender
       const response = responses[0]!
-      const embed = this.responseToEmbed(response)
+      const embed = this.responseToEmbed(response, interaction)
 
       await interaction.editReply({ embeds: [embed] })
 
       // Send additional responses as follow-ups in the same channel
       for (let i = 1; i < responses.length; i++) {
         const resp = responses[i]!
-        const embed = this.responseToEmbed(resp)
+        const embed = this.responseToEmbed(resp, interaction)
 
         try {
           await interaction.followUp({
@@ -464,7 +464,7 @@ class DiscordRouter {
   /**
    * Convert internal Response to Discord Embed
    */
-  private responseToEmbed(response: Response): EmbedBuilder {
+  private responseToEmbed(response: Response, interaction: ChatInputCommandInteraction): EmbedBuilder {
     // Parse response content (expected to be JSON embed)
     try {
       const embedData = JSON.parse(response.content)
@@ -480,6 +480,28 @@ class DiscordRouter {
 
       if (embedData.fields) {
         embed.addFields(embedData.fields)
+      }
+
+      // Handle thumbnail with Discord avatar support
+      if (embedData.thumbnail) {
+        let thumbnailUrl = embedData.thumbnail.url
+
+        // Convert discord://avatar/{userId} to actual Discord CDN URL
+        if (thumbnailUrl.startsWith('discord://avatar/')) {
+          const userId = thumbnailUrl.replace('discord://avatar/', '')
+          // Get user from Discord client to build avatar URL
+          const user = interaction.client.users.cache.get(userId)
+          if (user) {
+            thumbnailUrl = user.displayAvatarURL({ size: 256 })
+          }
+        }
+
+        embed.setThumbnail(thumbnailUrl)
+      }
+
+      // Handle timestamp
+      if (embedData.timestamp) {
+        embed.setTimestamp(new Date(embedData.timestamp))
       }
 
       return embed
