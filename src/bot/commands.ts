@@ -4,7 +4,7 @@
  * Defines all slash commands for the DUOQ Tracker bot
  */
 
-import { SlashCommandBuilder } from 'discord.js'
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js'
 
 /**
  * /register - S'inscrire au challenge
@@ -91,7 +91,8 @@ export const linkCommand = {
 export const pollCommand = {
   data: new SlashCommandBuilder()
     .setName('poll')
-    .setDescription('[DEV] Vérifier manuellement les games actives'),
+    .setDescription('[DEV] Vérifier manuellement les games actives')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 }
 
 /**
@@ -137,6 +138,7 @@ export const devCommand = {
   data: new SlashCommandBuilder()
     .setName('dev')
     .setDescription('[DEV] Commandes de développement')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('add')
@@ -177,6 +179,7 @@ export const keyCommand = {
   data: new SlashCommandBuilder()
     .setName('key')
     .setDescription('[DEV] Gérer les clés API Riot')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('set')
@@ -197,6 +200,7 @@ export const setupCommand = {
   data: new SlashCommandBuilder()
     .setName('setup')
     .setDescription('[ADMIN] Configurer le challenge DUOQ')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('channels')
@@ -264,5 +268,6 @@ export const setupCommand = {
 export const testCommand = {
   data: new SlashCommandBuilder()
     .setName('test')
-    .setDescription('[ADMIN] Tester toutes les commandes du bot avec des données mock'),
+    .setDescription('[ADMIN] Tester toutes les commandes du bot avec des données mock')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 }
