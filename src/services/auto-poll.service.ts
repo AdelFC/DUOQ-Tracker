@@ -122,6 +122,22 @@ export class AutoPollService {
               continue
             }
 
+            // Filter by event start date
+            const eventStartDate =
+              typeof this.state.config === 'object' && 'getSync' in this.state.config
+                ? this.state.config.getSync('eventStartDate')
+                : (this.state.config as any).eventStartDate
+
+            if (eventStartDate) {
+              const startDate = new Date(eventStartDate)
+              const gameStartTime = new Date(matchDetails.gameCreation)
+
+              if (gameStartTime < startDate) {
+                // Game started before challenge - skip it
+                continue
+              }
+            }
+
             // Verify same team
             const noobData = matchDetails.participants.find((p) => p.puuid === noob.puuid)
             const carryData = matchDetails.participants.find((p) => p.puuid === carry.puuid)
@@ -284,6 +300,8 @@ export class AutoPollService {
         duration: matchDetails.gameDuration,
         duoId: duo.id,
         win: noobData.win,
+        remake: matchDetails.gameEndedInEarlySurrender,
+        surrender: matchDetails.gameEndedInSurrender,
         status: 'COMPLETED' as const,
         detectedAt: new Date(),
         scoredAt: null,

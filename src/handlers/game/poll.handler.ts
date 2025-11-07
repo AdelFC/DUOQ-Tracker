@@ -89,6 +89,23 @@ export async function pollGamesHandler(msg: Message, state: State, responses: Re
           continue
         }
 
+        // Filter by event start date
+        const eventStartDate =
+          typeof state.config === 'object' && 'getSync' in state.config
+            ? state.config.getSync('eventStartDate')
+            : (state.config as any).eventStartDate
+
+        if (eventStartDate) {
+          const startDate = new Date(eventStartDate)
+          const gameStartTime = new Date(matchDetails.gameCreation)
+
+          if (gameStartTime < startDate) {
+            // Game started before challenge - skip it
+            console.log(`[Poll] Match ${matchId} started before event start date, skipping`)
+            continue
+          }
+        }
+
         // Vérifier que les deux joueurs étaient dans la même équipe
         const noobData = matchDetails.participants.find((p) => p.puuid === noob.puuid)
         const carryData = matchDetails.participants.find((p) => p.puuid === carry.puuid)

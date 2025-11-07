@@ -35,6 +35,8 @@ export interface MatchInfo {
   gameDuration: number
   gameMode: string
   queueId: number
+  gameEndedInEarlySurrender: boolean // true = remake
+  gameEndedInSurrender: boolean // true = normal surrender
   participants: MatchParticipant[]
 }
 
@@ -190,6 +192,8 @@ export class RiotApiService {
         gameDuration: data.info.gameDuration,
         gameMode: data.info.gameMode,
         queueId: data.info.queueId,
+        gameEndedInEarlySurrender: data.info.gameEndedInEarlySurrender || false, // true = remake
+        gameEndedInSurrender: data.info.gameEndedInSurrender || false, // true = normal surrender
         participants,
       }
     } catch (error) {

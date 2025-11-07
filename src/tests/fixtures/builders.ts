@@ -343,6 +343,18 @@ export class GameDataBuilder {
     return this
   }
 
+  asRemake(): this {
+    this.game.remake = true
+    this.game.win = false // Remakes are always false in win field
+    return this
+  }
+
+  asSurrender(): this {
+    this.game.surrender = true
+    this.game.win = false // Surrenders are always defeats
+    return this
+  }
+
   withNoobStats(stats: PlayerGameStats): this {
     this.game.noobStats = stats
     return this
@@ -380,6 +392,8 @@ export class GameDataBuilder {
       noobStats: this.game.noobStats,
       carryStats: this.game.carryStats,
       win: this.game.win ?? true,
+      remake: this.game.remake ?? false,
+      surrender: this.game.surrender ?? false,
       status: this.game.status || 'COMPLETED',
       detectedAt: this.game.detectedAt || now,
       scoredAt: this.game.scoredAt || null,

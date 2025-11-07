@@ -44,8 +44,8 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   const noobGameResult = calculateGameResult({
     win,
     duration,
-    surrender: false, // TODO: détecter surrender depuis Riot API
-    remake: false, // TODO: détecter remake
+    surrender: gameData.surrender,
+    remake: gameData.remake,
   })
 
   // 3. Streak
@@ -98,8 +98,8 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   const carryGameResult = calculateGameResult({
     win,
     duration,
-    surrender: false,
-    remake: false,
+    surrender: gameData.surrender,
+    remake: gameData.remake,
   })
 
   // 3. Streak

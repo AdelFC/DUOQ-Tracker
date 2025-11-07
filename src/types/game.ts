@@ -64,6 +64,8 @@ export interface GameData {
 
   // Game result
   win: boolean
+  remake: boolean // gameEndedInEarlySurrender
+  surrender: boolean // gameEndedInSurrender
 
   // Status
   status: GameStatus
