@@ -2,6 +2,9 @@
 
 Ce document décrit en détail le système de calcul des points pour le DuoQ Challenge.
 
+**Dernière mise à jour** : 2025-11-07
+**Version** : 2.1
+
 ## Vue d'ensemble
 
 Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque partie jouée. Le score final est calculé en **14 étapes séquentielles** qui prennent en compte :
@@ -451,6 +454,36 @@ Score Final = round(Score Duo cappé)
 
 ---
 
+## Notes Techniques
+
+### Détection Automatique des Games (AutoPollService)
+
+Le bot détecte automatiquement les games terminées via polling régulier :
+- **Intervalle** : 30 secondes (ajusté pour éviter rate limiting Riot API)
+- **Limite Riot API** : 50 calls/min
+- **Capacité** : Supporte jusqu'à 12 duos simultanés (48 calls/min)
+- **Latence** : Games détectées en max 30s après fin de partie
+
+### Discord Logging
+
+Le bot envoie automatiquement les erreurs et warnings vers le channel dev Discord :
+- ⚠️ Rate limiting Riot API
+- 🔴 Erreurs AutoPoll service
+- 🔴 Erreurs scoring
+- Voir `src/utils/discord-logger.ts`
+
+### Bugs Corrigés (v2.1)
+
+**Grandmaster Rank Display** :
+- Fix emoji/couleur incorrects pour les joueurs Grandmaster
+- Le check `GM` est maintenant effectué avant le switch dans `getRankEmoji()` et `getRankColor()`
+
+**Progress Bar Division by Zero** :
+- Protection contre `total = 0` dans `createProgressBar()`
+- Protection contre valeurs négatives et `current > total`
+
+---
+
 ## Améliorations futures
 
 ### 1. Bonus spéciaux individuels
@@ -458,6 +491,12 @@ Score Final = round(Score Duo cappé)
 **Status** : MVP et Pentakill bonus sont mentionnés dans les specs mais non implémentés pour v1.
 
 **Raison** : Ces données nécessitent une analyse plus approfondie des statistiques de game (MVP = meilleur KDA ? Plus de dégâts ? Plus d'objectifs ?).
+
+### 2. Persistence Layer
+
+**Status** : Actuellement in-memory (volatile)
+
+**Recommandation future** : Migrer vers SQLite pour persistence entre redémarrages
 
 ---
 
