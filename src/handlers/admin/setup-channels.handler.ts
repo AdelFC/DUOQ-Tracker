@@ -11,7 +11,7 @@ import { formatSetupChannels, formatError } from '../../formatters/embeds.js'
 interface SetupChannelsPayload {
   generalChannelId: string
   trackerChannelId: string
-  devChannelId: string | null
+  devChannelId: string
 }
 
 export async function handleSetupChannels(
@@ -22,12 +22,16 @@ export async function handleSetupChannels(
   const { generalChannelId, trackerChannelId, devChannelId } = message.payload as SetupChannelsPayload
 
   // Validation: les channels doivent être différents
-  if (generalChannelId === trackerChannelId) {
+  if (
+    generalChannelId === trackerChannelId ||
+    generalChannelId === devChannelId ||
+    trackerChannelId === devChannelId
+  ) {
     responses.push({
       type: MessageType.ERROR,
       targetId: message.sourceId,
       content: JSON.stringify(
-        formatError({ error: 'Les channels général et tracker doivent être différents.' })
+        formatError({ error: 'Les trois channels doivent être différents.' })
       ),
       ephemeral: true,
     })
@@ -35,12 +39,12 @@ export async function handleSetupChannels(
   }
 
   // Validation: les IDs doivent être non vides
-  if (!generalChannelId || !trackerChannelId) {
+  if (!generalChannelId || !trackerChannelId || !devChannelId) {
     responses.push({
       type: MessageType.ERROR,
       targetId: message.sourceId,
       content: JSON.stringify(
-        formatError({ error: 'Les deux channels (général et tracker) sont requis.' })
+        formatError({ error: 'Les trois channels (général, tracker, dev) sont requis.' })
       ),
       ephemeral: true,
     })
@@ -51,16 +55,14 @@ export async function handleSetupChannels(
   if ('setSync' in state.config) {
     state.config.setSync('generalChannelId', generalChannelId)
     state.config.setSync('trackerChannelId', trackerChannelId)
-    if (devChannelId) {
-      state.config.setSync('devChannelId', devChannelId)
-    }
+    state.config.setSync('devChannelId', devChannelId)
   }
 
   // Response de succès avec embed
   const embed = formatSetupChannels({
     generalChannelId,
     trackerChannelId,
-    devChannelId: devChannelId || undefined,
+    devChannelId,
   })
 
   responses.push({
@@ -85,12 +87,10 @@ export async function handleSetupChannels(
     ephemeral: false,
   })
 
-  if (devChannelId) {
-    responses.push({
-      type: MessageType.INFO,
-      targetId: devChannelId,
-      content: '✅ Channel configuré pour les **logs de scoring détaillés**',
-      ephemeral: false,
-    })
-  }
+  responses.push({
+    type: MessageType.INFO,
+    targetId: devChannelId,
+    content: '✅ Channel configuré pour les **logs de scoring détaillés**',
+    ephemeral: false,
+  })
 }

@@ -220,8 +220,8 @@ export const setupCommand = {
         .addChannelOption((option) =>
           option
             .setName('dev')
-            .setDescription('Channel pour les logs de scoring détaillés (optionnel)')
-            .setRequired(false)
+            .setDescription('Channel pour les logs de scoring détaillés')
+            .setRequired(true)
         )
     )
     .addSubcommand((subcommand) =>
