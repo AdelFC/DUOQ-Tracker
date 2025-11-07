@@ -331,9 +331,11 @@ class DiscordRouter {
             messageType = MessageType.SETUP_CHANNELS
             const generalChannel = interaction.options.getChannel('general', true)
             const trackerChannel = interaction.options.getChannel('tracker', true)
+            const devChannel = interaction.options.getChannel('dev', false)
             payload = {
               generalChannelId: generalChannel.id,
               trackerChannelId: trackerChannel.id,
+              devChannelId: devChannel?.id || null,
             }
             break
           }

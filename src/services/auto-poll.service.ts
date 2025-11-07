@@ -173,10 +173,10 @@ export class AutoPollService {
 
             totalGamesFound++
 
-            // Send notification to tracker channel
-            await this.notifyGameFound(duo, noob, carry, noobData.win)
+            // Skip "game found" notification - only send final scored result
+            // await this.notifyGameFound(duo, noob, carry, noobData.win)
 
-            // Auto-score the game
+            // Auto-score the game (sends notification with full results)
             await this.scoreGame(matchId, duo, noob, carry, matchDetails, noobData, carryData)
 
             console.log(`[AutoPoll] Found and scored game ${matchId} for duo ${duo.name}`)

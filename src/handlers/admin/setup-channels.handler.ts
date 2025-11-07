@@ -1,6 +1,6 @@
 /**
  * Handler pour /setup channels
- * Configure les channels Discord (general + tracker)
+ * Configure les channels Discord (general + tracker + dev optionnel)
  */
 
 import type { Message, Response } from '../../types/message.js'
@@ -11,6 +11,7 @@ import { formatSetupChannels, formatError } from '../../formatters/embeds.js'
 interface SetupChannelsPayload {
   generalChannelId: string
   trackerChannelId: string
+  devChannelId: string | null
 }
 
 export async function handleSetupChannels(
@@ -18,7 +19,7 @@ export async function handleSetupChannels(
   state: State,
   responses: Response[]
 ): Promise<void> {
-  const { generalChannelId, trackerChannelId } = message.payload as SetupChannelsPayload
+  const { generalChannelId, trackerChannelId, devChannelId } = message.payload as SetupChannelsPayload
 
   // Validation: les channels doivent être différents
   if (generalChannelId === trackerChannelId) {
@@ -50,12 +51,16 @@ export async function handleSetupChannels(
   if ('setSync' in state.config) {
     state.config.setSync('generalChannelId', generalChannelId)
     state.config.setSync('trackerChannelId', trackerChannelId)
+    if (devChannelId) {
+      state.config.setSync('devChannelId', devChannelId)
+    }
   }
 
   // Response de succès avec embed
   const embed = formatSetupChannels({
     generalChannelId,
     trackerChannelId,
+    devChannelId: devChannelId || undefined,
   })
 
   responses.push({
@@ -79,4 +84,13 @@ export async function handleSetupChannels(
     content: '✅ Channel configuré pour les **notifications automatiques** (games, ladder)',
     ephemeral: false,
   })
+
+  if (devChannelId) {
+    responses.push({
+      type: MessageType.INFO,
+      targetId: devChannelId,
+      content: '✅ Channel configuré pour les **logs de scoring détaillés**',
+      ephemeral: false,
+    })
+  }
 }

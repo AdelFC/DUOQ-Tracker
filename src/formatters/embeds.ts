@@ -411,27 +411,42 @@ export function formatRankChange(payload: {
 export function formatSetupChannels(payload: {
   generalChannelId: string
   trackerChannelId: string
+  devChannelId?: string
 }): DiscordEmbed {
-  const { generalChannelId, trackerChannelId } = payload
+  const { generalChannelId, trackerChannelId, devChannelId } = payload
   const adminTaunt = getRandomTaunt('admin')
+
+  const fields = [
+    {
+      name: '💬 Channel General',
+      value: `<#${generalChannelId}>\nInteractions et commandes`,
+      inline: true,
+    },
+    {
+      name: '📊 Channel Tracker',
+      value: `<#${trackerChannelId}>\nNotifications automatiques`,
+      inline: true,
+    },
+  ]
+
+  if (devChannelId) {
+    fields.push({
+      name: '🔧 Channel Dev',
+      value: `<#${devChannelId}>\nLogs de scoring détaillés`,
+      inline: true,
+    })
+  }
+
+  const footerText = devChannelId
+    ? 'Messages de test envoyés dans les trois channels'
+    : 'Messages de test envoyés dans les deux channels'
 
   return {
     title: `${EMOJIS.check} Channels configurés`,
     description: `${adminTaunt}\n\nLes channels Discord ont été configurés avec succès.`,
-    fields: [
-      {
-        name: '💬 Channel General',
-        value: `<#${generalChannelId}>\nInteractions et commandes`,
-        inline: true,
-      },
-      {
-        name: '📊 Channel Tracker',
-        value: `<#${trackerChannelId}>\nNotifications automatiques`,
-        inline: true,
-      },
-    ],
+    fields,
     color: COLORS.success,
-    footer: { text: 'Messages de test envoyés dans les deux channels' },
+    footer: { text: footerText },
     timestamp: new Date(),
   }
 }

@@ -1,75 +1,95 @@
 /**
  * Liste de noms de teams prédéfinis
  *
+ * Noms basés sur le lore de League of Legends (en anglais)
  * Utilisés pour attribution automatique lors de /link si team_name non fourni
  */
 
 export const TEAM_NAMES = [
-  // Références LoL
-  'Les Barons Dansants',
-  'Les Drakes Enragés',
-  'Les Heralds Percutants',
-  'Les Nexus Brisés',
-  'Les Inhibiteurs Tombés',
-  'Les Turrets Détruites',
-  'Les Wards Invisibles',
-  'Les Smite Volés',
-  'Les Flash Ratés',
-  'Les Pentakills Inattendus',
+  // Epic Monsters & Objectives
+  'The Grubs',
+  'Team Nashor',
+  'Team Nexus',
+  'The Drakes',
+  'The Heralds',
+  'The Barons',
+  'The Voidborn',
+  'The Watchers',
 
-  // Stratégies
-  'Les Split Pushers',
-  'Les Teamfight Masters',
-  'Les Macro Kings',
-  'Les Roamers Fous',
-  'Les Gankeurs Sauvages',
-  'Les Scalers Patients',
-  'Les Early Game Dominators',
-  'Les Late Game Carries',
+  // Regions & Factions
+  'Demacia United',
+  'Noxus Invaders',
+  'Ionia Spirits',
+  'Freljord Warriors',
+  'Shadow Isles',
+  'Shurima Ascended',
+  'Piltover Hextech',
+  'Zaun Chemtanks',
+  'Bilgewater Pirates',
+  'Targon Climbers',
+  'The Void Walkers',
+  'Bandle Scouts',
+  'Ixtal Elementalists',
 
-  // Références Gaming
-  'Les Tryharders Éternels',
-  'Les Tilts Contrôlés',
-  'Les Flamers Repentis',
-  'Les Reportés Injustement',
-  'Les AFK Pardonnés',
-  'Les Lag Warriors',
-  'Les DC Heroes',
+  // Champion Groups & Classes
+  'The Sentinels',
+  'The Assassins',
+  'The Mages',
+  'The Marksmen',
+  'The Tanks',
+  'The Fighters',
+  'The Supports',
+  'The Enchanters',
+  'The Skirmishers',
+  'The Divers',
 
-  // Fun & Créatifs
-  'Les Minions Rebelles',
-  'Les Scuttles Vengeurs',
-  'Les Krugs Oubliés',
-  'Les Raptors Furieux',
-  'Les Gromp Solitaires',
-  'Les Wolves Hurleurs',
-  'Les Rift Explorers',
-  'Les Summoners Perdus',
-  'Les Items Stackés',
-  'Les CS Manqués',
+  // Lore-based Teams
+  'The Kinkou Order',
+  'The Black Rose',
+  'The Solari',
+  'The Lunari',
+  'The Ruined',
+  'The Redeemed',
+  'The Wardens',
+  'The Protectors',
+  'The Destroyers',
+  'The Yordles',
 
-  // Duo themed
-  'Les Duos de Fer',
-  'Les Binômes Légendaires',
-  'Les Paires Infernales',
-  'Les Tandems Mortels',
-  'Les Complices du Rift',
-  'Les Partenaires du Crime',
-  'Les Acolytes Victorieux',
-  'Les Frères d\'Armes',
+  // Gameplay References
+  'The Split Pushers',
+  'The Teamfighters',
+  'The Macro Kings',
+  'The Roamers',
+  'The Gankers',
+  'The Scalers',
+  'The Snowballers',
+  'The Comeback Kids',
+  'The Pentakills',
+  'The Flashers',
 
-  // Epic
-  'Les Conquérants de l\'Invocateur',
-  'Les Gardiens du Nexus',
-  'Les Protecteurs du Rift',
-  'Les Champions Éternels',
-  'Les Légendes Vivantes',
-  'Les Dieux du Macro',
-  'Les Maîtres du Micro',
-  'Les Rois de la Botlane',
-  'Les Seigneurs de la Toplane',
-  'Les Empereurs de la Midlane',
-  'Les Princes de la Jungle',
+  // Epic & Creative
+  'The Summoners',
+  'The Champions',
+  'The Legends',
+  'The Mythics',
+  'The Immortals',
+  'The Eternals',
+  'The Conquerors',
+  'The Victorious',
+  'The Glorious',
+  'The Masterminds',
+
+  // Duo-themed
+  'The Dynamic Duo',
+  'The Perfect Pair',
+  'The Twin Blades',
+  'The Partners',
+  'The Brothers',
+  'The Alliance',
+  'The Coalition',
+  'The Synergy',
+  'The Harmony',
+  'The Unity',
 ]
 
 /**

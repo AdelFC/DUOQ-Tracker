@@ -213,6 +213,12 @@ export const setupCommand = {
             .setDescription('Channel pour les notifications automatiques')
             .setRequired(true)
         )
+        .addChannelOption((option) =>
+          option
+            .setName('dev')
+            .setDescription('Channel pour les logs de scoring détaillés (optionnel)')
+            .setRequired(false)
+        )
     )
     .addSubcommand((subcommand) =>
       subcommand

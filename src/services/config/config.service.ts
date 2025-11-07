@@ -69,6 +69,7 @@ export class ConfigService {
       eventTimezone: (await this.get('eventTimezone')) || 'Europe/Paris',
       generalChannelId: await this.get('generalChannelId'),
       trackerChannelId: await this.get('trackerChannelId'),
+      devChannelId: await this.get('devChannelId'),
       riotApiKey: await this.get('riotApiKey'),
       riotApiKeyUpdatedAt: await this.get('riotApiKeyUpdatedAt'),
       riotApiKeyReminders: await this.get('riotApiKeyReminders'),

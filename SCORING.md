@@ -189,14 +189,30 @@ Le changement de rank entre le début et la fin de la partie est fortement impac
 
 **Observation** : Les descentes sont **doublement pénalisées** pour encourager la prudence.
 
-#### Note sur les LP (League Points)
+#### Conversion LP (League Points)
 
-**IMPORTANT** : Actuellement, les LP ne sont **pas pris en compte** dans le scoring. Seuls les changements de division/tier comptent. Cela signifie que :
+Les LP sont maintenant pris en compte via un système de conversion :
 
-- Gagner +18 LP sans changer de division = **0 points**
-- Perdre -15 LP sans changer de division = **0 points**
+**Conversion** : **1 LP = 0.4 point**
 
-**Amélioration prévue** : Ajouter un système de conversion LP → points pour mieux refléter les petites progressions.
+| Variation LP | Points | Commentaire |
+|--------------|--------|-------------|
+| +20 LP | **+8 pts** | Belle victoire |
+| +15 LP | **+6 pts** | Victoire standard |
+| -15 LP | **-6 pts** | Défaite standard |
+| -20 LP | **-8 pts** | Grosse défaite |
+
+**Règles d'application** :
+- Les LP ne comptent que **si pas de changement de division/tier**
+- Si division change, seul le bonus de division/tier s'applique (pas de cumul avec LP)
+- Pour Master+ (pas de divisions), les LP comptent toujours
+
+**Exemples** :
+```
+Gold III (50 LP) → Gold III (70 LP) : +20 LP × 0.4 = +8 pts ✓
+Gold III (95 LP) → Gold II (0 LP)   : +50 pts (division), LP ignorés
+Master (150 LP) → Master (175 LP)   : +25 LP × 0.4 = +10 pts ✓
+```
 
 #### Implémentation
 Voir [src/services/scoring/rank-change.ts](src/services/scoring/rank-change.ts)
@@ -435,34 +451,13 @@ Score Final = round(Score Duo cappé)
 
 ---
 
-## Points d'amélioration identifiés
+## Améliorations futures
 
-### 1. LP non pris en compte
+### 1. Bonus spéciaux individuels
 
-**Problème** : Actuellement, seuls les changements de division/tier comptent. Les LP (League Points) ne sont pas convertis en points.
+**Status** : MVP et Pentakill bonus sont mentionnés dans les specs mais non implémentés pour v1.
 
-**Impact** : Un joueur qui gagne +18 LP sans changer de division reçoit 0 points pour son rank change.
-
-**Solution proposée** : Ajouter une conversion LP → points fractionnaires. Par exemple :
-```
-rankChangePoints = tierBonus + (LP_delta / 100) × 10
-```
-
-Cela ajouterait entre -10 et +10 points selon la variation de LP.
-
-### 2. Détection Remake/Surrender
-
-**Problème** : Les flags `remake` et `surrender` ne sont pas encore détectés automatiquement depuis l'API Riot.
-
-**Status** :
-- Remake : `TODO` dans [src/services/scoring/engine.ts:48](src/services/scoring/engine.ts#L48)
-- Surrender : `TODO` dans [src/services/scoring/engine.ts:47](src/services/scoring/engine.ts#L47)
-
-**Impact** : Les remakes sont actuellement traités comme des victoires/défaites au lieu de 0 points.
-
-### 3. Bonus spéciaux individuels non implémentés
-
-**Status** : MVP et Pentakill bonus sont mentionnés dans les specs mais non implémentés (v1).
+**Raison** : Ces données nécessitent une analyse plus approfondie des statistiques de game (MVP = meilleur KDA ? Plus de dégâts ? Plus d'objectifs ?).
 
 ---
 

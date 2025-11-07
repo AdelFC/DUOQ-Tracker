@@ -12,6 +12,7 @@ export interface ChallengeConfig {
   // Discord channels
   generalChannelId: string | null
   trackerChannelId: string | null
+  devChannelId: string | null
 
   // Riot API
   riotApiKey: string | null
@@ -29,6 +30,7 @@ export type ConfigKey =
   | 'eventTimezone'
   | 'generalChannelId'
   | 'trackerChannelId'
+  | 'devChannelId'
   | 'riotApiKey'
   | 'riotApiKeyUpdatedAt'
   | 'riotApiKeyReminders'

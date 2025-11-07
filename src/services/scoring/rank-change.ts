@@ -8,6 +8,11 @@
  * Descente (double malus):
  * - -1 division: -100 points
  * - -1 tier: -200 points
+ *
+ * LP Conversion (v2.2):
+ * - 1 LP = 0.4 point
+ * - ±20 LP = ±8 points
+ * - S'applique uniquement si pas de changement de division/tier
  */
 
 import type { RankInfo } from '../../types/player.js'
@@ -35,6 +40,9 @@ const DIVISION_ORDER: Record<string, number> = {
   I: 3,
 }
 
+// Conversion LP → Points
+const LP_TO_POINTS = 0.4 // 1 LP = 0.4 point (±20 LP = ±8 points)
+
 /**
  * Calcule le bonus/malus de changement de rank
  * @param previous - Rank avant la game
@@ -46,6 +54,7 @@ export function calculateRankChange(previous: RankInfo, current: RankInfo): Rank
   const currTierValue = TIER_ORDER[current.tier]
 
   let tierBonus = 0
+  let lpBonus = 0
 
   // Changement de tier
   if (currTierValue > prevTierValue) {
@@ -67,14 +76,24 @@ export function calculateRankChange(previous: RankInfo, current: RankInfo): Rank
       } else if (currDivValue < prevDivValue) {
         // Descente de division (double malus)
         tierBonus = -100
+      } else {
+        // Même division → calculer variation LP
+        const lpDelta = current.lp - previous.lp
+        lpBonus = lpDelta * LP_TO_POINTS
       }
+    } else {
+      // Master+ (pas de divisions) → toujours calculer variation LP
+      const lpDelta = current.lp - previous.lp
+      lpBonus = lpDelta * LP_TO_POINTS
     }
   }
 
+  const finalScore = tierBonus + lpBonus
+
   return {
-    lpChange: 0, // Pas de conversion LP dans ce module
+    lpChange: lpBonus,
     multiplier: 1, // Pas de multiplier dans ce module
     tierBonus,
-    final: tierBonus,
+    final: finalScore,
   }
 }
