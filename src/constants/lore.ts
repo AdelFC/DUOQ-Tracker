@@ -134,6 +134,27 @@ export const TAUNTS = {
     "👹 BULLYING ! L'ennemi demande sa mère !",
     "🎪 GG FF 15 pour eux ! Dominés du début à la fin !",
     "💣 BOOM ! Nexus explosé comme prévu !",
+    "🌟 Victoire magistrale ! La Rift tremble !",
+    "🎯 Précision chirurgicale sur cette game !",
+    "⚔️ L'ennemi a été mis au placard !",
+    "🔥 Trop chauds pour eux ! GG EZ !",
+    "💎 Perfection incarnée sur la Rift !",
+    "👊 Knockout technique ! C'est plié !",
+    "🎮 Diff abyssale, allez next !",
+    "⚡ Flash sous leur nexus et GG !",
+    "🏆 Victoire sans appel ! Bravo le duo !",
+    "💪 Démonstration de force pure !",
+    "🌪️ Ouragan sur la Rift ! Tout balayé !",
+    "🎭 Performance digne d'une scène pro !",
+    "🔱 Trident planté dans leur nexus !",
+    "🎪 Le cirque est fini, vous avez gagné !",
+    "💀 RIP l'équipe adverse, c'était rapide !",
+    "🚀 Envolée vers la victoire ! Objectif lune !",
+    "⭐ Brillance absolue ! Vous rayonnez !",
+    "🔥 Les adversaires fondent comme neige au soleil !",
+    "💥 BANG ! Game terminée en beauté !",
+    "🎯 Bullseye ! Objectifs tous détruits !",
+    "⚔️ Épées aiguisées, victoire assurée !",
   ],
 
   // Défaites
@@ -154,6 +175,26 @@ export const TAUNTS = {
     "🤡 C'était du trolling, on essaie sérieusement next ?",
     "😭 Difficile de carry avec 4 wards dans l'équipe !",
     "🎪 Le nexus était buggé, c'est pour ça qu'il a explosé !",
+    "🌙 Après la nuit vient toujours l'aube !",
+    "⚡ Cette défaite n'est qu'un détour vers la gloire !",
+    "🎯 Reload, refocus, revenge !",
+    "💪 Les vrais duos se révèlent dans l'adversité !",
+    "🔥 Ce n'est pas tomber qui compte, c'est se relever !",
+    "⚔️ Une bataille perdue, la guerre continue !",
+    "🏆 Les champions perdent parfois, les quitters jamais !",
+    "💎 Forgés dans la défaite, trempés pour la victoire !",
+    "🌟 Gardez la foi, votre heure viendra !",
+    "🎮 Pas de tilt, juste du skill à travailler !",
+    "😤 GG à eux, mais on revient plus forts !",
+    "💀 Pas grave, on leur rendra visite en promo !",
+    "🤷 Impossible de win avec Baron qui steal baron !",
+    "🎪 C'était preview mode, maintenant on joue !",
+    "⚡ Défaite acceptée, leçon enregistrée, go next !",
+    "🔱 Vous êtes tombés, mais jamais vaincus !",
+    "💪 Les grands duos rebondissent toujours !",
+    "🎯 Focus sur la prochaine, celle-là est dans le passé !",
+    "🌪️ La tempête passe, le soleil revient !",
+    "⭐ Même les étoiles ont des moments sombres !",
   ],
 
   // Win Streaks
@@ -166,6 +207,16 @@ export const TAUNTS = {
     "🚀 FUSÉE ! {{streak}} wins sans arrêt !",
     "⚔️ DOMINATION ! {{streak}} victoires de suite !",
     "🔱 INVINCIBLES ! {{streak}} en série !",
+    "💥 EXPLOSION DE TALENT ! {{streak}} games d'affilée !",
+    "🎯 PRÉCISION MORTELLE ! {{streak}} wins consécutifs !",
+    "🌪️ OURAGAN SUR LA RIFT ! {{streak}} victoires !",
+    "👊 KNOCKOUT COMBO ! {{streak}} en série !",
+    "🏆 DYNASTIE EN MARCHE ! {{streak}} wins !",
+    "⭐ CONSTELLATION DE VICTOIRES ! {{streak}} stars !",
+    "💪 INDOMPTABLES ! {{streak}} victoires consécutives !",
+    "🎮 MACHINE À GAGNER ! {{streak}} en série !",
+    "🔥 BRASIER INCONTRÔLABLE ! {{streak}} wins !",
+    "⚡ ÉCLAIR SUR LA RIFT ! {{streak}} victoires !",
   ],
 
   // Loss Streaks (motivationnels)
@@ -178,6 +229,16 @@ export const TAUNTS = {
     "👑 Les champions sont ceux qui ne lâchent rien !",
     "🌟 La lumière au bout du tunnel !",
     "⚔️ Plus vous tombez, plus fort vous vous relevez !",
+    "🏆 Les légendes naissent dans l'adversité !",
+    "💪 Jamais abandon ! Comeback imminent !",
+    "🌙 Après la tempête vient le calme !",
+    "⚡ Rechargez, le meilleur est à venir !",
+    "🎯 Focus reset ! La série va tourner !",
+    "💎 Pression maximale = Diamants futurs !",
+    "🔥 Brasier de détermination allumé !",
+    "⚔️ Un duo ne tombe jamais définitivement !",
+    "🌟 Vous êtes à un game du turnaround !",
+    "👊 Le KO technique arrive, tenez bon !",
   ],
 
   // Progression rank
@@ -187,6 +248,11 @@ export const TAUNTS = {
     "⭐ Level up ! {{newRank}} débloqué !",
     "👑 Ascension ! {{newRank}} atteint avec brio !",
     "💎 Promotion méritée ! {{newRank}} !",
+    "🔥 PROMO VALIDÉE ! {{newRank}} conquis !",
+    "⚡ Échelon supérieur ! {{newRank}} atteint !",
+    "🏆 Montée triomphale en {{newRank}} !",
+    "💪 Promotion muscle ! Bienvenue {{newRank}} !",
+    "🎯 Objectif rempli ! {{newRank}} est vôtre !",
   ],
 
   rankDown: [
@@ -194,6 +260,10 @@ export const TAUNTS = {
     "💪 On remonte ça rapidement !",
     "🎯 Direction : reconquête !",
     "⚔️ Une bataille perdue, pas la guerre !",
+    "🔥 Chute temporaire, comeback permanent !",
+    "⚡ Reculer pour mieux sauter !",
+    "💎 Les champions font des allers-retours !",
+    "🏆 Ce rang vous attend, allez le récupérer !",
   ],
 
   // Messages génériques motivationnels
@@ -238,6 +308,12 @@ export const TAUNTS = {
     "👑 Le trône vous attend, les prétendants peuvent pleurer !",
     "⚡ Tellement rapides que le ladder lag pour se mettre à jour !",
     "💎 Brillez tellement fort que les autres portent des lunettes !",
+    "🌟 Les adversaires prient pour ne pas tomber contre vous !",
+    "⚔️ Terreur du ladder, respect absolu !",
+    "💥 Votre nom fait trembler les autres duos !",
+    "🏆 La compétition ? Quelle compétition ? Vous dominez !",
+    "🔱 Posés au sommet comme des dieux de la Rift !",
+    "🎮 Les autres regardent vos replays pour apprendre !",
   ],
 
   ladderBottom: [
@@ -247,6 +323,10 @@ export const TAUNTS = {
     "🔥 Chaque défaite est une leçon, chaque leçon un pas vers la gloire !",
     "😤 Utilisez ce classement comme fuel pour votre rage !",
     "⚔️ Les meilleures remontées font les meilleures histoires !",
+    "🌟 Du fond du classement aux étoiles !",
+    "💎 Les diamants viennent des profondeurs !",
+    "🚀 Nulle part où aller sauf vers le haut !",
+    "⚡ Underdog story en cours d'écriture !",
   ],
 
   ladderMiddle: [
@@ -255,6 +335,10 @@ export const TAUNTS = {
     "🎯 Zone de confort INTERDITE ! Visez plus haut !",
     "🔥 C'est là que les vrais duos se révèlent !",
     "⚡ Un sprint final et le TOP est à vous !",
+    "🌟 Le podium n'est qu'à quelques wins !",
+    "🏆 Momentum building ! Top 3 incoming !",
+    "⚔️ Zone dangereuse pour vos adversaires !",
+    "💎 Briller au milieu, dominer au sommet !",
   ],
 
   // Taunts admin (pour les commandes setup)
@@ -352,7 +436,14 @@ export function interpolate(template: string, vars: Record<string, string | numb
 }
 
 /**
- * Obtenir un taunt aléatoire d'une catégorie
+ * Histoire des taunts récents (pour éviter les répétitions)
+ * Structure : { category: [recentTaunts...] }
+ */
+const tauntHistory = new Map<string, string[]>()
+const MAX_HISTORY_SIZE = 5 // Garder les 5 derniers taunts de chaque catégorie
+
+/**
+ * Obtenir un taunt aléatoire d'une catégorie (avec anti-répétition)
  */
 export function getRandomTaunt(
   category: keyof typeof TAUNTS,
@@ -364,8 +455,35 @@ export function getRandomTaunt(
     return String(tauntList)
   }
 
-  const randomTaunt = tauntList[Math.floor(Math.random() * tauntList.length)]
+  // Si on a qu'un seul taunt, pas de choix possible
+  if (tauntList.length === 1) {
+    return interpolate(tauntList[0], context)
+  }
+
+  // Récupérer l'historique de cette catégorie
+  const history = tauntHistory.get(category) || []
+
+  // Filtrer les taunts non utilisés récemment
+  const availableTaunts = tauntList.filter(t => !history.includes(t))
+
+  // Si tous les taunts ont été utilisés récemment, reset l'historique
+  const candidateTaunts = availableTaunts.length > 0 ? availableTaunts : tauntList
+
+  // Sélectionner un taunt aléatoire
+  const randomTaunt = candidateTaunts[Math.floor(Math.random() * candidateTaunts.length)]
+
+  // Mettre à jour l'historique
+  const newHistory = [...history, randomTaunt].slice(-MAX_HISTORY_SIZE)
+  tauntHistory.set(category, newHistory)
+
   return interpolate(randomTaunt, context)
+}
+
+/**
+ * Réinitialiser l'historique des taunts (utile pour les tests)
+ */
+export function resetTauntHistory(): void {
+  tauntHistory.clear()
 }
 
 /**
