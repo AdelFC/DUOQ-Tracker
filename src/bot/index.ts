@@ -24,6 +24,7 @@ import { ApiKeyReminderService } from '../services/api-key-reminder.service.js'
 import { AutoPollService } from '../services/auto-poll.service.js'
 import { ChallengeEndService } from '../services/challenge-end.service.js'
 import { router } from './router.js'
+import { initDiscordLogger } from '../utils/discord-logger.js'
 
 // Global service instances
 let dailyLadderService: DailyLadderService | null = null
@@ -90,6 +91,10 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
   // Get state from router
   const state = router.getState()
 
+  // Initialize Discord Logger (for error/warning notifications)
+  initDiscordLogger(client, state)
+  console.log('[Bot] Discord logger initialized')
+
   // Start Daily Ladder Service (posts at 19:00 Europe/Paris)
   dailyLadderService = new DailyLadderService(client, state)
   dailyLadderService.start()
@@ -98,13 +103,13 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
   apiKeyReminderService = new ApiKeyReminderService(client, state)
   apiKeyReminderService.start()
 
-  // Start Auto Poll Service (automatic game detection every 5 seconds)
+  // Start Auto Poll Service (automatic game detection every 15 seconds)
   if (state.riotService) {
     autoPollService = new AutoPollService(
       client,
       state,
       state.riotService,
-      5000 // Poll every 5 seconds
+      15000 // Poll every 15 seconds (rate limiting: 8 duos * 2 calls / 15s = ~64 calls/min < 100/2min limit)
     )
     autoPollService.start()
     console.log('[Bot] AutoPoll service started')

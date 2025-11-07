@@ -6,6 +6,7 @@
 
 import type { ConfigService } from '../config/index.js'
 import type { Config } from '../../types/state.js'
+import { logWarn, logError } from '../../utils/discord-logger.js'
 
 export interface RiotAccount {
   puuid: string
@@ -80,6 +81,10 @@ export class RiotApiService {
       }
 
       if (response.status === 429) {
+        await logWarn(
+          '🚨 RATE LIMIT RIOT API',
+          'Trop de requêtes API. Considère augmenter pollInterval dans bot/index.ts'
+        )
         throw new Error('Trop de requêtes API Riot. Réessayez dans quelques instants.')
       }
 
@@ -228,7 +233,10 @@ export class RiotApiService {
 
       if (response.status === 429) {
         // Rate limit - return null and log warning
-        console.warn('[RiotAPI] Rate limit hit while fetching rank - using fallback')
+        await logWarn(
+          '🚨 RATE LIMIT RIOT API (getRankBySummonerId)',
+          'Trop de requêtes API. Considère augmenter pollInterval dans bot/index.ts'
+        )
         return null
       }
 

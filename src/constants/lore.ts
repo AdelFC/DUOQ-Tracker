@@ -375,6 +375,11 @@ export function getMotivationalFooter(winRate: number): string {
  * Obtenir l'emoji correspondant à un rank
  */
 export function getRankEmoji(rankStr: string): string {
+  // Cas spécial Grandmaster (vérifier AVANT le switch)
+  if (rankStr.toUpperCase().startsWith('GM')) {
+    return EMOJIS.grandmaster
+  }
+
   const firstChar = rankStr[0].toUpperCase()
 
   switch (firstChar) {
@@ -389,19 +394,17 @@ export function getRankEmoji(rankStr: string): string {
     case 'C': return EMOJIS.challenger
     default: return EMOJIS.medal
   }
-
-  // Cas spécial Grandmaster
-  if (rankStr.toUpperCase().startsWith('GM')) {
-    return EMOJIS.grandmaster
-  }
-
-  return EMOJIS.medal
 }
 
 /**
  * Obtenir la couleur correspondant à un rank
  */
 export function getRankColor(rankStr: string): number {
+  // Cas spécial Grandmaster (vérifier AVANT le switch)
+  if (rankStr.toUpperCase().startsWith('GM')) {
+    return COLORS.grandmaster
+  }
+
   const firstChar = rankStr[0].toUpperCase()
 
   switch (firstChar) {
@@ -416,12 +419,6 @@ export function getRankColor(rankStr: string): number {
     case 'C': return COLORS.challenger
     default: return COLORS.neutral
   }
-
-  if (rankStr.toUpperCase().startsWith('GM')) {
-    return COLORS.grandmaster
-  }
-
-  return COLORS.neutral
 }
 
 /**
@@ -491,7 +488,15 @@ export function resetTauntHistory(): void {
  * Ex: createProgressBar(7, 10) → "███████░░░"
  */
 export function createProgressBar(current: number, total: number, length: number = 10): string {
-  const filled = Math.floor((current / total) * length)
+  // Protection division par zéro
+  if (total === 0) {
+    return '░'.repeat(length)
+  }
+
+  // Protection valeurs négatives et current > total
+  const safeCurrent = Math.max(0, Math.min(current, total))
+
+  const filled = Math.floor((safeCurrent / total) * length)
   const empty = length - filled
   return '█'.repeat(Math.max(0, filled)) + '░'.repeat(Math.max(0, empty))
 }

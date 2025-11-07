@@ -11,6 +11,7 @@
 import type { Client } from 'discord.js'
 import type { State } from '../types/state.js'
 import type { RiotApiService } from './riot/riot-api.service.js'
+import { logError, logWarn } from '../utils/discord-logger.js'
 
 export class AutoPollService {
   private intervalId: NodeJS.Timeout | null = null
@@ -183,6 +184,7 @@ export class AutoPollService {
           }
         } catch (error) {
           console.error(`[AutoPoll] Error polling duo ${duo.id}:`, error)
+          await logError(`Erreur polling duo ${duo.name} (ID: ${duo.id})`, error as Error)
         }
       }
 
@@ -192,6 +194,7 @@ export class AutoPollService {
       }
     } catch (error) {
       console.error('[AutoPoll] Error during poll:', error)
+      await logError('Erreur critique dans AutoPoll service', error as Error)
     } finally {
       this.isPolling = false
     }
@@ -411,6 +414,7 @@ export class AutoPollService {
       )
     } catch (error) {
       console.error('[AutoPoll] Error scoring game:', error)
+      await logError(`Erreur scoring game ${matchId}`, error as Error)
     }
   }
 
