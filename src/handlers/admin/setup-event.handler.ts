@@ -11,6 +11,7 @@ import { formatSetupEvent, formatError } from '../../formatters/embeds.js'
 interface SetupEventPayload {
   startDate: string
   endDate: string
+  timezone: string
 }
 
 export async function handleSetupEvent(
@@ -18,7 +19,7 @@ export async function handleSetupEvent(
   state: State,
   responses: Response[]
 ): Promise<void> {
-  const { startDate, endDate } = message.payload as SetupEventPayload
+  const { startDate, endDate, timezone } = message.payload as SetupEventPayload
 
   // Valider les dates
   const start = new Date(startDate)
@@ -73,14 +74,14 @@ export async function handleSetupEvent(
   if ('setSync' in state.config) {
     state.config.setSync('eventStartDate', startDate)
     state.config.setSync('eventEndDate', endDate)
-    state.config.setSync('eventTimezone', 'Europe/Paris')
+    state.config.setSync('eventTimezone', timezone)
   }
 
   // Response de succès
   const embed = formatSetupEvent({
     startDate: start,
     endDate: end,
-    timezone: 'Europe/Paris',
+    timezone,
     durationDays,
     durationHours,
     isActive,
