@@ -40,15 +40,22 @@ export function formatRegisterSuccess(payload: {
   const roleText = role === 'noob' ? 'Noob' : 'Carry'
   const rankEmoji = getRankEmoji(initialRank)
 
+  const description = [
+    `${EMOJIS.party} Bienvenue dans le **DuoQ Tracker**, **${gameName}**#**${tagLine}** !`,
+    '',
+    `${getRandomTaunt('welcome')}`,
+    '',
+    '─────────────────────',
+    '',
+    `${roleEmoji} **Rôle:** ${roleText}`,
+    `${rankEmoji} **Rank de départ:** ${initialRank}`,
+  ].join('\n')
+
   return {
-    title: `${EMOJIS.check} Inscription réussie !`,
-    description: `Bienvenue dans le **DuoQ Tracker**, **${gameName}**#**${tagLine}** !\n\n${getRandomTaunt('welcome')}`,
-    fields: [
-      { name: 'Rôle', value: `${roleEmoji} **${roleText}**`, inline: true },
-      { name: 'Rank Initial', value: `${rankEmoji} **${initialRank}**`, inline: true },
-    ],
+    title: `${EMOJIS.check} Inscription validée`,
+    description,
     color: COLORS.success,
-    footer: { text: 'Prochaine étape : Utilise /link pour lier ton compte Riot !' },
+    footer: { text: '💡 Prochaine étape : Utilise /link pour former un duo !' },
     timestamp: new Date(),
   }
 }
@@ -88,35 +95,50 @@ export function formatGameScored(payload: {
   const { noobName, carryName, win, noobPoints, carryPoints, noobKDA, carryKDA, duration, totalPoints } = payload
 
   const resultEmoji = win ? EMOJIS.victory : EMOJIS.defeat
-  const resultText = win ? 'Victoire' : 'Défaite'
+  const resultText = win ? '**VICTOIRE**' : '**DÉFAITE**'
   const color = win ? COLORS.victory : COLORS.defeat
   const taunt = win ? getRandomTaunt('victory') : getRandomTaunt('defeat')
 
   const durationMin = Math.floor(duration / 60)
   const durationSec = duration % 60
 
+  // Points avec formatage coloré
+  const noobPointsStr = noobPoints > 0 ? `+${noobPoints}` : `${noobPoints}`
+  const carryPointsStr = carryPoints > 0 ? `+${carryPoints}` : `${carryPoints}`
+
+  const description = [
+    `${resultEmoji} ${resultText}`,
+    '',
+    `**${noobName}** ${EMOJIS.duo} **${carryName}**`,
+    '',
+    taunt,
+    '',
+    '─────────────────────',
+  ].join('\n')
+
   return {
-    title: `${resultEmoji} ${resultText} !`,
-    description: `**${noobName}** ${EMOJIS.duo} **${carryName}**\n\n${taunt}`,
+    description,
     fields: [
       {
         name: `${EMOJIS.noob} ${noobName}`,
-        value: `**${noobPoints > 0 ? '+' : ''}${noobPoints}** pts\nKDA: ${noobKDA}`,
+        value: `💎 **${noobPointsStr}** pts\n⚔️ KDA: \`${noobKDA}\``,
         inline: true,
       },
       {
         name: `${EMOJIS.carry} ${carryName}`,
-        value: `**${carryPoints > 0 ? '+' : ''}${carryPoints}** pts\nKDA: ${carryKDA}`,
+        value: `💎 **${carryPointsStr}** pts\n⚔️ KDA: \`${carryKDA}\``,
         inline: true,
       },
       {
-        name: 'Durée',
-        value: `${EMOJIS.clock} ${durationMin}:${durationSec.toString().padStart(2, '0')}`,
+        name: `${EMOJIS.clock} Durée`,
+        value: `\`${durationMin}:${durationSec.toString().padStart(2, '0')}\``,
         inline: true,
       },
     ],
     color,
-    footer: totalPoints ? { text: `Total duo : ${totalPoints} pts` } : undefined,
+    footer: totalPoints !== undefined
+      ? { text: `💰 Total du duo : ${totalPoints > 0 ? '+' : ''}${totalPoints} pts | GG WP !` }
+      : { text: 'GG WP !' },
     timestamp: new Date(),
   }
 }
@@ -299,11 +321,25 @@ export function formatLadder(payload: {
     ? duos
         .map((duo) => {
           const { rank, duoName, noobName, carryName, totalPoints, wins, losses } = duo
-          const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**${rank}.**`
-          return `${medal} **${duoName}** • **${totalPoints}** pts (${wins}W/${losses}L)\n   └─ ${noobName} ${EMOJIS.duo} ${carryName}`
+          const totalGames = wins + losses
+          const winrate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0
+
+          // Médailles pour le podium
+          const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `**#${rank}**`
+
+          // Barre de progression visuelle du winrate
+          const progressBar = createProgressBar(wins, totalGames, 8)
+
+          return [
+            `${medal} **${duoName}**`,
+            `   💎 **${totalPoints}** pts`,
+            `   📊 ${wins}W - ${losses}L (\`${winrate}%\`)`,
+            `   ${progressBar}`,
+            `   👥 ${noobName} ${EMOJIS.duo} ${carryName}`,
+          ].join('\n')
         })
         .join('\n\n')
-    : 'Aucun duo classé'
+    : '⚠️ Aucun duo n\'a encore joué de games\n\nUtilisez `/link` pour former un duo !'
 
   // Ajouter un taunt basé sur la position du duo du requester
   let taunt = ''
