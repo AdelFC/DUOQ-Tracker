@@ -271,3 +271,25 @@ export const testCommand = {
     .setDescription('[ADMIN] Tester toutes les commandes du bot avec des données mock')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 }
+
+/**
+ * /add-points - Ajouter/retirer des points à un duo (admin)
+ */
+export const addPointsCommand = {
+  data: new SlashCommandBuilder()
+    .setName('add-points')
+    .setDescription('[ADMIN] Ajouter ou retirer des points à un duo')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .addStringOption((option) =>
+      option
+        .setName('team_name')
+        .setDescription('Nom de l\'équipe duo')
+        .setRequired(true)
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName('points')
+        .setDescription('Nombre de points à ajouter (négatif pour retirer)')
+        .setRequired(true)
+    ),
+}

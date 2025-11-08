@@ -29,6 +29,7 @@ import { handleDevStatus } from '../handlers/dev/dev-status.handler'
 import { handleDevReset } from '../handlers/dev/dev-reset.handler'
 import { handleKeySet } from '../handlers/dev/key-set.handler'
 import { handleKeyShow } from '../handlers/dev/key-show.handler'
+import { handleAddPoints } from '../handlers/admin/add-points.handler'
 
 type CommandName =
   | 'register'
@@ -42,6 +43,7 @@ type CommandName =
   | 'key'
   | 'setup'
   | 'test'
+  | 'add-points'
 
 /**
  * Discord Router
@@ -240,6 +242,10 @@ class DiscordRouter {
 
       case MessageType.KEY_SHOW:
         handleKeyShow(msg, this.state, responses)
+        break
+
+      case MessageType.ADD_POINTS:
+        await handleAddPoints(msg, this.state, responses)
         break
 
       default:
@@ -444,6 +450,18 @@ class DiscordRouter {
           default:
             messageType = MessageType.ERROR
             payload = { error: 'Unknown key subcommand' }
+        }
+        break
+      }
+
+      case 'add-points': {
+        messageType = MessageType.ADD_POINTS
+        const teamName = interaction.options.getString('team_name', true)
+        const points = interaction.options.getInteger('points', true)
+        payload = {
+          teamName,
+          points,
+          adminId: sourceId,
         }
         break
       }

@@ -18,6 +18,7 @@ import {
   keyCommand,
   setupCommand,
   testCommand,
+  addPointsCommand,
 } from './commands'
 import { DailyLadderService } from '../services/daily-ladder.js'
 import { ApiKeyReminderService } from '../services/api-key-reminder.service.js'
@@ -62,6 +63,7 @@ export function createBot(config: BotConfig): BotClient {
     // Admin
     setupCommand,
     testCommand,
+    addPointsCommand,
     // Dev
     devCommand,
     keyCommand,
