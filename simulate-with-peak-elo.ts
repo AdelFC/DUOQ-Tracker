@@ -240,6 +240,17 @@ function simulateGame(gameNum: number, duos: DuoState[]): string {
     const carryLP = updateLP(duo.carry, win)
     const noobLP = updateLP(duo.noob, win)
 
+    // Simuler multikills (rares)
+    const simulateMultikills = (kills: number) => {
+      if (kills >= 15 && Math.random() < 0.02) return { pentaKills: 1 } // 2% chance si 15+ kills
+      if (kills >= 12 && Math.random() < 0.05) return { quadraKills: 1 } // 5% chance si 12+ kills
+      if (kills >= 8 && Math.random() < 0.15) return { tripleKills: 1 } // 15% chance si 8+ kills
+      return {}
+    }
+
+    const noobMultikills = simulateMultikills(noobKDA.kills)
+    const carryMultikills = simulateMultikills(carryKDA.kills)
+
     // Créer GameData pour le scoring engine
     const gameData: GameData = {
       noobStats: {
@@ -248,8 +259,13 @@ function simulateGame(gameNum: number, duos: DuoState[]): string {
         assists: noobKDA.assists,
         previousRank: noobPrevRank,
         newRank: duo.noob.rank,
+        peakElo: duo.noob.peakElo,
         isOffRole: Math.random() < 0.15, // 15% off-role
         isOffChampion: Math.random() < 0.20, // 20% off-champion
+        // Multikills (bonus spéciaux)
+        ...noobMultikills,
+        firstBloodKill: Math.random() < 0.50, // 50% chance (1 joueur sur 10 par game)
+        largestKillingSpree: noobKDA.kills >= 7 ? noobKDA.kills : Math.floor(Math.random() * 5),
       },
       carryStats: {
         kills: carryKDA.kills,
@@ -257,8 +273,13 @@ function simulateGame(gameNum: number, duos: DuoState[]): string {
         assists: carryKDA.assists,
         previousRank: carryPrevRank,
         newRank: duo.carry.rank,
+        peakElo: duo.carry.peakElo,
         isOffRole: Math.random() < 0.10, // 10% off-role
         isOffChampion: Math.random() < 0.15, // 15% off-champion
+        // Multikills (bonus spéciaux)
+        ...carryMultikills,
+        firstBloodKill: Math.random() < 0.50, // 50% chance (1 joueur sur 10 par game)
+        largestKillingSpree: carryKDA.kills >= 7 ? carryKDA.kills : Math.floor(Math.random() * 5),
       },
       win,
       duration: win ? 1500 + Math.random() * 600 : 1800 + Math.random() * 400, // 25-35min
