@@ -55,8 +55,8 @@ module.exports = {
       // Merge logs
       merge_logs: true,
 
-      // Time in ms before sending final SIGKILL signal
-      kill_timeout: 5000,
+      // Time in ms before sending final SIGKILL signal (10s for persistence save)
+      kill_timeout: 10000,
 
       // Time in ms before considering app as ready
       listen_timeout: 3000,
