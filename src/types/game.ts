@@ -94,6 +94,7 @@ export interface PlayerGameStats {
   // Rank change
   previousRank: RankInfo
   newRank: RankInfo
+  peakElo: string // Peak elo du joueur (ex: "D4", "P2") - pour multiplicateur peak elo
 
   // Risk detection
   isOffRole: boolean // Pas sur son main role

@@ -2,17 +2,17 @@
 
 Ce document décrit en détail le système de calcul des points pour le DuoQ Challenge.
 
-**Dernière mise à jour** : 2025-11-07
-**Version** : 2.1
+**Dernière mise à jour** : 2025-11-08
+**Version** : 2.2
 
 ## Vue d'ensemble
 
-Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque partie jouée. Le score final est calculé en **14 étapes séquentielles** qui prennent en compte :
+Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque partie jouée. Le score final est calculé en **15 étapes séquentielles** qui prennent en compte :
 
 - **Performance individuelle** (KDA, rank change, streaks)
 - **Résultat de la partie** (victoire/défaite/remake/surrender)
 - **Performance collective** (bonus duo, prise de risque)
-- **Équilibrage** (multiplicateur de rank pour duos déséquilibrés)
+- **Équilibrage** (multiplicateur de rank pour duos déséquilibrés, anti-smurf)
 - **Plafonds** (caps pour éviter les exploits)
 
 ---
@@ -31,6 +31,7 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 6. Sous-total Noob                                  │
 │ 7. Cap individuel (-25 / +70)                       │
 │ 7.5. Multiplicateur de rank (0.5x - 1.0x)           │
+│ 7.6. Multiplicateur peak elo (0.75x - 1.15x)        │
 │ 8. Arrondi → Score Noob final                       │
 └─────────────────────────────────────────────────────┘
 
@@ -45,6 +46,7 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 6. Sous-total Carry                                 │
 │ 7. Cap individuel (-25 / +70)                       │
 │ 7.5. Multiplicateur de rank (0.5x - 1.0x)           │
+│ 7.6. Multiplicateur peak elo (0.75x - 1.15x)        │
 │ 8. Arrondi → Score Carry final                      │
 └─────────────────────────────────────────────────────┘
 
@@ -289,6 +291,113 @@ Le Noob ne gagne que **77.5%** de ses points, le Carry garde **100%**.
 
 #### Implémentation
 Voir [src/services/scoring/rank-multiplier.ts](src/services/scoring/rank-multiplier.ts)
+
+---
+
+### 1.7. Multiplicateur Peak Elo (Anti-Smurf)
+
+Le multiplicateur peak elo est un système **anti-smurf** qui pénalise les joueurs jouant significativement en dessous de leur vrai niveau (peak elo), tout en **récompensant la progression** pour ceux qui dépassent leur peak.
+
+#### Principe
+
+- Compare le **peak elo** du joueur (son meilleur rang historique) avec son **rank actuel**
+- Applique un **bonus** si le joueur dépasse son peak (progression)
+- Applique un **malus** si le joueur est trop en dessous de son peak (smurf)
+- Tolérance de **1 tier** en dessous (normal decay, meta shifts)
+
+#### Formule
+
+```
+tierDiff = floor((peakValue - currentValue) / 4)
+
+BONUS (au-dessus du peak elo):
+  Si tierDiff < 0 (joueur au-dessus de son peak):
+    tierAbove = abs(tierDiff)
+    Si tierAbove >= 3: multiplier = 1.15 (+15% bonus max)
+    Si tierAbove === 2: multiplier = 1.10 (+10% bonus)
+    Si tierAbove === 1: multiplier = 1.05 (+5% bonus)
+
+TOLÉRANCE (0-1 tier en dessous):
+  Si tierDiff <= 1:
+    multiplier = 1.0 (pas de malus)
+
+MALUS (smurfs, 2+ tiers en dessous):
+  Si tierDiff === 2: multiplier = 0.95  (-5%)
+  Si tierDiff === 3: multiplier = 0.875 (-12.5%)
+  Si tierDiff === 4: multiplier = 0.80  (-20%)
+  Si tierDiff >= 5: multiplier = 0.75  (-25% max)
+```
+
+#### Exemples
+
+**Cas 1 : Progression (BONUS)**
+```
+Peak Elo: Gold IV (rank = 12)
+Current Rank: Emerald IV (rank = 20)
+Écart: +8 divisions = +2 tiers
+
+→ tierDiff = floor((12 - 20) / 4) = -2
+→ tierAbove = 2
+→ multiplier = 1.10 (+10% bonus pour progression!)
+```
+
+**Cas 2 : Tolérance (pas de malus)**
+```
+Peak Elo: Platinum IV (rank = 16)
+Current Rank: Gold II (rank = 14)
+Écart: -2 divisions = -0.5 tier
+
+→ tierDiff = floor((16 - 14) / 4) = 0
+→ multiplier = 1.0 (tolérance, pas de malus)
+```
+
+**Cas 3 : Petit smurf (léger malus)**
+```
+Peak Elo: Platinum IV (rank = 16)
+Current Rank: Silver IV (rank = 8)
+Écart: -8 divisions = -2 tiers
+
+→ tierDiff = floor((16 - 8) / 4) = 2
+→ multiplier = 0.95 (-5% malus)
+```
+
+**Cas 4 : Gros smurf (malus sévère)**
+```
+Peak Elo: Diamond IV (rank = 24)
+Current Rank: Bronze IV (rank = 4)
+Écart: -20 divisions = -5 tiers
+
+→ tierDiff = floor((24 - 4) / 4) = 5
+→ multiplier = 0.75 (-25% malus max)
+```
+
+#### Tableau récapitulatif
+
+| Écart peak → current | tierDiff | Multiplicateur | Impact |
+|----------------------|----------|----------------|--------|
+| +3 tiers ou plus | <= -3 | **1.15x** | +15% bonus max |
+| +2 tiers | -2 | **1.10x** | +10% bonus |
+| +1 tier | -1 | **1.05x** | +5% bonus |
+| 0-1 tier en dessous | 0 ou 1 | **1.00x** | Tolérance |
+| -2 tiers | 2 | **0.95x** | -5% malus |
+| -3 tiers | 3 | **0.875x** | -12.5% malus |
+| -4 tiers | 4 | **0.80x** | -20% malus |
+| -5 tiers ou plus | >= 5 | **0.75x** | -25% malus max |
+
+#### Justification
+
+**Pourquoi ce système ?**
+- **Fairness** : Empêche les smurfs de dominer le ladder en jouant en bas elo
+- **Progression encouragée** : Récompense les joueurs qui s'améliorent et dépassent leur peak
+- **Tolérance** : Pas de pénalité pour 1 tier de descente (normal decay, meta changes)
+- **Malus progressif** : Plus l'écart est grand, plus la pénalité est sévère
+
+**Impact sur un challenge "Fresh Start"**
+- Si tous les duos partent de Bronze IV avec des peak elos variés, ce système pénalise les joueurs forts qui ne remontent pas assez vite
+- Le bonus de progression encourage les joueurs à climb activement
+
+#### Implémentation
+Voir [src/services/scoring/peak-elo-multiplier.ts](src/services/scoring/peak-elo-multiplier.ts)
 
 ---
 

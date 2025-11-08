@@ -11,6 +11,7 @@ import { calculateRiskBonus } from './risk.js'
 import { calculateNoDeathBonus } from './bonuses.js'
 import { applyPlayerCap, applyDuoCap } from './caps.js'
 import { calculatePlayerRankMultiplier } from './rank-multiplier.js'
+import { calculatePeakEloMultiplier } from './peak-elo-multiplier.js'
 
 import type { PlayerGameStats, GameData } from '../../types/game.js'
 import type { ScoreBreakdown, PlayerScore, DuoScore } from '../../types/scoring.js'
@@ -72,8 +73,12 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   const noobRankMultiplier = calculatePlayerRankMultiplier(noobStats.newRank, carryStats.newRank)
   const noobAfterMultiplier = noobCapped * noobRankMultiplier
 
+  // 7.6. Multiplicateur peak elo (anti-smurf + bonus progression)
+  const noobPeakMultiplier = calculatePeakEloMultiplier(noobStats.peakElo, noobStats.newRank)
+  const noobAfterPeakMultiplier = noobAfterMultiplier * noobPeakMultiplier
+
   // 8. Arrondi à l'entier
-  const noobFinal = Math.round(noobAfterMultiplier)
+  const noobFinal = Math.round(noobAfterPeakMultiplier)
 
   const noobScore: PlayerScore = {
     kda: noobKDA,
@@ -126,8 +131,12 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   const carryRankMultiplier = calculatePlayerRankMultiplier(carryStats.newRank, noobStats.newRank)
   const carryAfterMultiplier = carryCapped * carryRankMultiplier
 
+  // 7.6. Multiplicateur peak elo (anti-smurf + bonus progression)
+  const carryPeakMultiplier = calculatePeakEloMultiplier(carryStats.peakElo, carryStats.newRank)
+  const carryAfterPeakMultiplier = carryAfterMultiplier * carryPeakMultiplier
+
   // 8. Arrondi à l'entier
-  const carryFinal = Math.round(carryAfterMultiplier)
+  const carryFinal = Math.round(carryAfterPeakMultiplier)
 
   const carryScore: PlayerScore = {
     kda: carryKDA,
