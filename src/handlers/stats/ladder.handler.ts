@@ -32,8 +32,24 @@ export function ladderHandler(msg: Message, state: State, responses: Response[])
   // Récupérer tous les duos
   const allDuos = Array.from(state.duos.values())
 
-  // Trier par totalPoints DESC
-  allDuos.sort((a, b) => b.totalPoints - a.totalPoints)
+  // Trier par totalPoints DESC, puis par winrate DESC (tie-breaker)
+  allDuos.sort((a, b) => {
+    // Tri primaire: points
+    if (b.totalPoints !== a.totalPoints) {
+      return b.totalPoints - a.totalPoints
+    }
+
+    // Tri secondaire: winrate (en cas d'égalité de points)
+    const winrateA = a.gamesPlayed > 0 ? a.wins / a.gamesPlayed : 0
+    const winrateB = b.gamesPlayed > 0 ? b.wins / b.gamesPlayed : 0
+
+    if (winrateB !== winrateA) {
+      return winrateB - winrateA
+    }
+
+    // Tri tertiaire: nombre de victoires (si même winrate)
+    return b.wins - a.wins
+  })
 
   // Calculer la pagination
   const totalDuos = allDuos.length
@@ -67,8 +83,8 @@ export function ladderHandler(msg: Message, state: State, responses: Response[])
     return {
       rank,
       duoName: duo.name,
-      noobName: noob?.gameName || 'Unknown',
-      carryName: carry?.gameName || 'Unknown',
+      noobName: noob?.gameName || '[Parti]',
+      carryName: carry?.gameName || '[Parti]',
       totalPoints: duo.totalPoints,
       wins: duo.wins,
       losses: duo.losses,

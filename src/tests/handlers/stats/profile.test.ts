@@ -98,7 +98,7 @@ describe('Handler Profile', () => {
 
       // Vérifier les stats du joueur
       expect(embed.description).toContain('120')
-      expect(embed.description).toContain('8W/3L')
+      expect(embed.description).toContain('8W / 3L')
       expect(embed.description).toContain('GOLD II')
 
       // Vérifier les informations du duo
@@ -177,7 +177,7 @@ describe('Handler Profile', () => {
       // Doit afficher les stats de p2
       expect(embed.title).toContain('TargetPlayer')
       expect(embed.description).toContain('80')
-      expect(embed.description).toContain('6W/1L')
+      expect(embed.description).toContain('6W / 1L')
     })
 
     it('devrait calculer le winrate correctement', () => {
@@ -263,7 +263,7 @@ describe('Handler Profile', () => {
 
       // Doit afficher la winstreak
       expect(embed.description).toContain('5')
-      expect(embed.description).toContain('streak')
+      expect(embed.description).toContain('victoires')
     })
   })
 
@@ -335,8 +335,8 @@ describe('Handler Profile', () => {
       const content = responses[0].content
       const embed = JSON.parse(content)
 
-      expect(embed.description).toContain('0W/0L')
-      expect(embed.description).toContain('**0** pts')
+      expect(embed.description).toContain('0W / 0L')
+      expect(embed.description).toContain('0 pts')
     })
 
     it('devrait gérer des points négatifs', () => {

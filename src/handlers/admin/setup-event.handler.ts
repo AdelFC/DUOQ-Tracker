@@ -20,6 +20,7 @@ interface SetupEventPayload {
  * Retourne { day, month, year } ou null si invalide
  */
 function parseDate(dateStr: string): { day: number; month: number; year: number } | null {
+  if (!dateStr) return null
   const parts = dateStr.trim().split('/')
   if (parts.length !== 3) return null
 
@@ -40,6 +41,7 @@ function parseDate(dateStr: string): { day: number; month: number; year: number 
  * Retourne { hours, minutes } ou null si invalide
  */
 function parseTime(timeStr: string): { hours: number; minutes: number } | null {
+  if (!timeStr) return null
   const parts = timeStr.trim().split(':')
   if (parts.length !== 2) return null
 

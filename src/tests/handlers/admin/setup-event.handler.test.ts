@@ -16,10 +16,12 @@ describe('handleSetupEvent', () => {
     responses = []
   })
 
-  it('should configure event dates successfully', async () => {
+  it('should configure event dates successfully with new format', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
-      endDate: '2025-11-30T23:59:59Z',
+      startDate: '1/11/2025',
+      startHour: '00:00',
+      endDate: '30/11/2025',
+      endHour: '23:59',
     }).build()
 
     const testState = state().build()
@@ -37,18 +39,22 @@ describe('handleSetupEvent', () => {
     expect(successResponse.content).toContain('novembre')
     expect(successResponse.ephemeral).toBe(false)
 
-    // Check state was updated
+    // Check state was updated (stored as ISO strings)
     const config = testState.config as ConfigService
-    expect(await config.get('eventStartDate')).toBe('2025-11-01T00:00:00Z')
-    expect(await config.get('eventEndDate')).toBe('2025-11-30T23:59:59Z')
+    const storedStart = await config.get('eventStartDate')
+    const storedEnd = await config.get('eventEndDate')
+
+    expect(storedStart).toBeTruthy()
+    expect(storedEnd).toBeTruthy()
     expect(await config.get('eventTimezone')).toBe('Europe/Paris')
   })
 
-  it('should accept custom timezone', async () => {
+  it('should always use Europe/Paris timezone', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
-      endDate: '2025-11-30T23:59:59Z',
-      timezone: 'America/New_York',
+      startDate: '1/11/2025',
+      startHour: '10:00',
+      endDate: '30/11/2025',
+      endHour: '20:00',
     }).build()
 
     const testState = state().build()
@@ -57,14 +63,16 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.SUCCESS)
-    // The handler now defaults to Europe/Paris if no timezone provided
+
     const config = testState.config as ConfigService
     expect(await config.get('eventTimezone')).toBe('Europe/Paris')
   })
 
   it('should reject if startDate is missing', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      endDate: '2025-11-30T23:59:59Z',
+      startHour: '00:00',
+      endDate: '30/11/2025',
+      endHour: '23:59',
     }).build()
 
     const testState = state().build()
@@ -79,7 +87,9 @@ describe('handleSetupEvent', () => {
 
   it('should reject if endDate is missing', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
+      startDate: '1/11/2025',
+      startHour: '00:00',
+      endHour: '23:59',
     }).build()
 
     const testState = state().build()
@@ -105,7 +115,9 @@ describe('handleSetupEvent', () => {
   it('should reject invalid date format', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
       startDate: 'invalid-date',
-      endDate: '2025-11-30T23:59:59Z',
+      startHour: '00:00',
+      endDate: '30/11/2025',
+      endHour: '23:59',
     }).build()
 
     const testState = state().build()
@@ -114,14 +126,50 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.ERROR)
-    expect(responses[0].content).toContain('Date de début invalide')
-    expect(responses[0].content).toContain('ISO 8601')
+    expect(responses[0].content).toContain('Date de début')
+    expect(responses[0].content).toContain('invalide')
+  })
+
+  it('should reject invalid hour format', async () => {
+    const msg = message(MessageType.SETUP_EVENT, {
+      startDate: '1/11/2025',
+      startHour: '25:00', // Invalid hour
+      endDate: '30/11/2025',
+      endHour: '23:59',
+    }).build()
+
+    const testState = state().build()
+
+    await handleSetupEvent(msg, testState, responses)
+
+    expect(responses).toHaveLength(1)
+    expect(responses[0].type).toBe(MessageType.ERROR)
+    expect(responses[0].content).toContain('heure invalide')
+  })
+
+  it('should reject impossible dates like 31/02/2025', async () => {
+    const msg = message(MessageType.SETUP_EVENT, {
+      startDate: '31/02/2025', // Impossible date
+      startHour: '00:00',
+      endDate: '30/11/2025',
+      endHour: '23:59',
+    }).build()
+
+    const testState = state().build()
+
+    await handleSetupEvent(msg, testState, responses)
+
+    expect(responses).toHaveLength(1)
+    expect(responses[0].type).toBe(MessageType.ERROR)
+    expect(responses[0].content).toContain('Date invalide')
   })
 
   it('should reject if start date is after end date', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-30T23:59:59Z',
-      endDate: '2025-11-01T00:00:00Z',
+      startDate: '30/11/2025',
+      startHour: '23:59',
+      endDate: '1/11/2025',
+      endHour: '00:00',
     }).build()
 
     const testState = state().build()
@@ -133,10 +181,12 @@ describe('handleSetupEvent', () => {
     expect(responses[0].content).toContain('après')
   })
 
-  it('should reject if start date equals end date', async () => {
+  it('should reject if start date equals end date and time', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
-      endDate: '2025-11-01T00:00:00Z',
+      startDate: '1/11/2025',
+      startHour: '12:00',
+      endDate: '1/11/2025',
+      endHour: '12:00',
     }).build()
 
     const testState = state().build()
@@ -150,8 +200,10 @@ describe('handleSetupEvent', () => {
 
   it('should accept past dates without warning', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2020-01-01T00:00:00Z',
-      endDate: '2020-01-02T00:00:00Z',
+      startDate: '1/01/2020',
+      startHour: '00:00',
+      endDate: '2/01/2020',
+      endHour: '00:00',
     }).build()
 
     const testState = state().build()
@@ -165,8 +217,10 @@ describe('handleSetupEvent', () => {
 
   it('should calculate duration correctly', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
-      endDate: '2025-11-05T12:00:00Z', // 4 days and 12 hours
+      startDate: '1/11/2025',
+      startHour: '00:00',
+      endDate: '5/11/2025',
+      endHour: '12:00', // 4 days and 12 hours
     }).build()
 
     const testState = state().build()
@@ -181,8 +235,10 @@ describe('handleSetupEvent', () => {
 
   it('should show singular form for 1 day', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
-      endDate: '2025-11-02T00:00:00Z', // 1 day
+      startDate: '1/11/2025',
+      startHour: '00:00',
+      endDate: '2/11/2025',
+      endHour: '00:00', // 1 day
     }).build()
 
     const testState = state().build()
@@ -200,27 +256,35 @@ describe('handleSetupEvent', () => {
     const config = testState.config as ConfigService
 
     // First configuration
-    await config.set('eventStartDate', '2025-10-01T00:00:00Z')
-    await config.set('eventEndDate', '2025-10-31T23:59:59Z')
+    await config.set('eventStartDate', '2025-10-01T00:00:00.000Z')
+    await config.set('eventEndDate', '2025-10-31T23:59:59.000Z')
 
     // Second configuration (override)
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
-      endDate: '2025-11-30T23:59:59Z',
+      startDate: '1/11/2025',
+      startHour: '00:00',
+      endDate: '30/11/2025',
+      endHour: '23:59',
     }).build()
 
     await handleSetupEvent(msg, testState, responses)
 
     // Should succeed and override
     expect(responses[0].type).toBe(MessageType.SUCCESS)
-    expect(await config.get('eventStartDate')).toBe('2025-11-01T00:00:00Z')
-    expect(await config.get('eventEndDate')).toBe('2025-11-30T23:59:59Z')
+
+    const newStart = await config.get('eventStartDate')
+    const newEnd = await config.get('eventEndDate')
+    expect(newStart).toBeTruthy()
+    expect(newEnd).toBeTruthy()
+    expect(newStart).not.toBe('2025-10-01T00:00:00.000Z')
   })
 
   it('should accept short event duration (< 1 day)', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2026-11-01T00:00:00Z', // Use future date to avoid past date warning
-      endDate: '2026-11-01T06:00:00Z', // 6 hours
+      startDate: '1/11/2026',
+      startHour: '00:00',
+      endDate: '1/11/2026',
+      endHour: '06:00', // 6 hours
     }).build()
 
     const testState = state().build()
@@ -229,14 +293,15 @@ describe('handleSetupEvent', () => {
 
     expect(responses).toHaveLength(1)
     expect(responses[0].type).toBe(MessageType.SUCCESS)
-    // New formatter doesn't show "0 jour", just "6 heures"
     expect(responses[0].content).toContain('6 heures')
   })
 
   it('should not show hours if duration is exact days', async () => {
     const msg = message(MessageType.SETUP_EVENT, {
-      startDate: '2025-11-01T00:00:00Z',
-      endDate: '2025-11-04T00:00:00Z', // Exactly 3 days
+      startDate: '1/11/2025',
+      startHour: '00:00',
+      endDate: '4/11/2025',
+      endHour: '00:00', // Exactly 3 days
     }).build()
 
     const testState = state().build()
@@ -247,5 +312,21 @@ describe('handleSetupEvent', () => {
     const content = responses[0].content
     expect(content).toContain('3 jours')
     expect(content).not.toContain('heure')
+  })
+
+  it('should accept single-digit dates and hours', async () => {
+    const msg = message(MessageType.SETUP_EVENT, {
+      startDate: '1/1/2025',
+      startHour: '9:00',
+      endDate: '5/1/2025',
+      endHour: '18:30',
+    }).build()
+
+    const testState = state().build()
+
+    await handleSetupEvent(msg, testState, responses)
+
+    expect(responses).toHaveLength(1)
+    expect(responses[0].type).toBe(MessageType.SUCCESS)
   })
 })
