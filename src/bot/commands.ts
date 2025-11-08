@@ -230,20 +230,27 @@ export const setupCommand = {
         .setDescription('Configurer les dates de l\'événement')
         .addStringOption((option) =>
           option
-            .setName('start')
-            .setDescription('Date de début (ISO 8601: 2025-11-01T00:00:00Z)')
+            .setName('start-date')
+            .setDescription('Date de début (format: 1/11/2025)')
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
-            .setName('end')
-            .setDescription('Date de fin (ISO 8601: 2025-11-30T23:59:59Z)')
+            .setName('start-h')
+            .setDescription('Heure de début (format: 20:00)')
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
-            .setName('timezone')
-            .setDescription('Fuseau horaire (ex: Europe/Paris)')
+            .setName('end-date')
+            .setDescription('Date de fin (format: 30/11/2025)')
+            .setRequired(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName('end-h')
+            .setDescription('Heure de fin (format: 23:59)')
+            .setRequired(true)
         )
     )
     .addSubcommand((subcommand) =>

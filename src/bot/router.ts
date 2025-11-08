@@ -348,13 +348,15 @@ class DiscordRouter {
 
           case 'event': {
             messageType = MessageType.SETUP_EVENT
-            const startDate = interaction.options.getString('start', true)
-            const endDate = interaction.options.getString('end', true)
-            const timezone = interaction.options.getString('timezone')
+            const startDate = interaction.options.getString('start-date', true)
+            const startHour = interaction.options.getString('start-h', true)
+            const endDate = interaction.options.getString('end-date', true)
+            const endHour = interaction.options.getString('end-h', true)
             payload = {
               startDate,
+              startHour,
               endDate,
-              timezone: timezone || 'Europe/Paris',
+              endHour,
             }
             break
           }
