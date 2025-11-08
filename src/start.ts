@@ -5,7 +5,8 @@
  */
 
 import * as dotenv from 'dotenv'
-import { startBot } from './bot/index.js'
+import { startBot, stopBot } from './bot/index.js'
+import type { BotClient } from './bot/types.js'
 
 // Load environment variables
 dotenv.config()
@@ -26,12 +27,16 @@ if (!CLIENT_ID) {
 console.log('[Start] Starting Discord bot...')
 console.log(`[Start] Client ID: ${CLIENT_ID}`)
 
+// Store bot client for graceful shutdown
+let botClient: BotClient | null = null
+
 // Start the bot
 startBot({
   token: TOKEN,
   clientId: CLIENT_ID,
 })
-  .then(() => {
+  .then((client) => {
+    botClient = client
     console.log('[Start] Bot started successfully!')
   })
   .catch((error) => {
@@ -40,12 +45,22 @@ startBot({
   })
 
 // Handle graceful shutdown
-process.on('SIGINT', () => {
-  console.log('[Start] Shutting down...')
-  process.exit(0)
-})
+const handleShutdown = async (signal: string) => {
+  console.log(`[Start] Received ${signal}, shutting down gracefully...`)
 
-process.on('SIGTERM', () => {
-  console.log('[Start] Shutting down...')
-  process.exit(0)
-})
+  if (botClient) {
+    try {
+      await stopBot(botClient)
+      console.log('[Start] Bot stopped successfully')
+      process.exit(0)
+    } catch (error) {
+      console.error('[Start] Error during shutdown:', error)
+      process.exit(1)
+    }
+  } else {
+    process.exit(0)
+  }
+}
+
+process.on('SIGINT', () => handleShutdown('SIGINT'))
+process.on('SIGTERM', () => handleShutdown('SIGTERM'))

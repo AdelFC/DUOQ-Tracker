@@ -23,6 +23,7 @@ import { DailyLadderService } from '../services/daily-ladder.js'
 import { ApiKeyReminderService } from '../services/api-key-reminder.service.js'
 import { AutoPollService } from '../services/auto-poll.service.js'
 import { ChallengeEndService } from '../services/challenge-end.service.js'
+import { PersistenceService } from '../services/persistence.service.js'
 import { router } from './router.js'
 import { initDiscordLogger } from '../utils/discord-logger.js'
 
@@ -31,6 +32,7 @@ let dailyLadderService: DailyLadderService | null = null
 let apiKeyReminderService: ApiKeyReminderService | null = null
 let autoPollService: AutoPollService | null = null
 let challengeEndService: ChallengeEndService | null = null
+let persistenceService: PersistenceService | null = null
 let botClient: BotClient | null = null
 
 /**
@@ -80,6 +82,23 @@ export function createBot(config: BotConfig): BotClient {
  * Start the Discord bot
  */
 export async function startBot(config: BotConfig): Promise<BotClient> {
+  // Get state from router
+  const state = router.getState()
+
+  // Initialize Persistence Service and load saved state
+  persistenceService = new PersistenceService(state)
+  const hasLoadedState = await persistenceService.load()
+
+  if (hasLoadedState) {
+    console.log('[Bot] Loaded saved state from disk')
+  } else {
+    console.log('[Bot] Starting with fresh state')
+  }
+
+  // Start auto-save (every 5 minutes)
+  persistenceService.start()
+  console.log('[Bot] Persistence service started (auto-save every 5min)')
+
   const client = createBot(config)
 
   // Login to Discord
@@ -87,9 +106,6 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
 
   // Store client globally for service access
   botClient = client
-
-  // Get state from router
-  const state = router.getState()
 
   // Initialize Discord Logger (for error/warning notifications)
   initDiscordLogger(client, state)
@@ -135,6 +151,14 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
  * Stop the Discord bot
  */
 export async function stopBot(client: BotClient): Promise<void> {
+  // Save state before stopping
+  if (persistenceService) {
+    console.log('[Bot] Saving state before shutdown...')
+    await persistenceService.forceSave()
+    persistenceService.stop()
+    persistenceService = null
+  }
+
   // Stop Daily Ladder Service
   if (dailyLadderService) {
     dailyLadderService.stop()
