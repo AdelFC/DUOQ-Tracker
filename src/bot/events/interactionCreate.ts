@@ -1,14 +1,25 @@
 /**
  * Interaction Create Event
  *
- * Handles slash command interactions
+ * Handles slash command interactions and autocomplete
  */
 
-import { Client, Events, ChatInputCommandInteraction } from 'discord.js'
+import { Client, Events, ChatInputCommandInteraction, AutocompleteInteraction } from 'discord.js'
 import { router } from '../router.js'
 
 export function interactionCreate(client: Client): void {
   client.on(Events.InteractionCreate, async (interaction) => {
+    // Handle autocomplete interactions
+    if (interaction.isAutocomplete()) {
+      try {
+        await handleAutocomplete(interaction as AutocompleteInteraction)
+      } catch (error) {
+        console.error('[Bot] Error handling autocomplete:', error)
+      }
+      return
+    }
+
+    // Handle chat input command interactions
     if (!interaction.isChatInputCommand()) return
 
     try {
@@ -36,4 +47,34 @@ export function interactionCreate(client: Client): void {
       }
     }
   })
+}
+
+/**
+ * Handle autocomplete interactions
+ */
+async function handleAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+  const commandName = interaction.commandName
+  const focusedOption = interaction.options.getFocused(true)
+
+  // Handle /add-points autocomplete
+  if (commandName === 'add-points' && focusedOption.name === 'team_name') {
+    const state = router.getState()
+    const focusedValue = focusedOption.value.toLowerCase()
+
+    // Get all duo team names
+    const duos = Array.from(state.duos.values())
+
+    // Filter duos based on user input (case-insensitive)
+    const filtered = duos
+      .filter((duo) => duo.name.toLowerCase().includes(focusedValue))
+      .slice(0, 25) // Discord limits to 25 choices
+
+    // Map to autocomplete choices
+    const choices = filtered.map((duo) => ({
+      name: `${duo.name} (${duo.totalPoints} pts)`,
+      value: duo.name,
+    }))
+
+    await interaction.respond(choices)
+  }
 }

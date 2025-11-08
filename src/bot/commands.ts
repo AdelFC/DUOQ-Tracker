@@ -285,6 +285,7 @@ export const addPointsCommand = {
         .setName('team_name')
         .setDescription('Nom de l\'équipe duo')
         .setRequired(true)
+        .setAutocomplete(true)
     )
     .addIntegerOption((option) =>
       option
