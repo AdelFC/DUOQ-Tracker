@@ -91,6 +91,13 @@ export interface PlayerGameStats {
   deaths: number
   assists: number
 
+  // Multikills (optionnels - pour bonus spéciaux)
+  pentaKills?: number
+  quadraKills?: number
+  tripleKills?: number
+  firstBloodKill?: boolean
+  largestKillingSpree?: number
+
   // Rank change
   previousRank: RankInfo
   newRank: RankInfo

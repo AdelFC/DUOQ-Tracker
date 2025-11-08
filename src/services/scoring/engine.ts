@@ -8,7 +8,7 @@ import { calculateGameResult } from './game-result.js'
 import { calculateStreakBonus } from './streaks.js'
 import { calculateRankChange } from './rank-change.js'
 import { calculateRiskBonus } from './risk.js'
-import { calculateNoDeathBonus } from './bonuses.js'
+import { calculateNoDeathBonus, calculatePlayerSpecialBonus } from './bonuses.js'
 import { applyPlayerCap, applyDuoCap } from './caps.js'
 import { calculatePeakEloMultiplier } from './peak-elo-multiplier.js'
 
@@ -54,8 +54,8 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   // 4. Rank change
   const noobRankChange = calculateRankChange(noobStats.previousRank, noobStats.newRank)
 
-  // 5. Bonus spéciaux individuels (MVP, Pentakill - optionnels, pas implémentés v1)
-  const noobSpecialBonus = 0
+  // 5. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
+  const noobSpecialBonus = calculatePlayerSpecialBonus(noobStats)
 
   // 6. Sous-total
   const noobSubtotal =
@@ -108,8 +108,8 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   // 4. Rank change
   const carryRankChange = calculateRankChange(carryStats.previousRank, carryStats.newRank)
 
-  // 5. Bonus spéciaux individuels
-  const carrySpecialBonus = 0
+  // 5. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
+  const carrySpecialBonus = calculatePlayerSpecialBonus(carryStats)
 
   // 6. Sous-total
   const carrySubtotal =

@@ -3,7 +3,7 @@
 Ce document décrit en détail le système de calcul des points pour le DuoQ Challenge.
 
 **Dernière mise à jour** : 2025-11-08
-**Version** : 2.3
+**Version** : 2.4
 
 ## Vue d'ensemble
 
@@ -27,7 +27,7 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 2. Résultat de game (+5/-5/+8/-10/0)                │
 │ 3. Streak bonus/malus                               │
 │ 4. Rank change (+50/+100/-100/-200)                 │
-│ 5. Bonus spéciaux (MVP, Penta - non implémentés)    │
+│ 5. Bonus spéciaux (Penta/Quadra/Triple/FB/KS)       │
 │ 6. Sous-total Noob                                  │
 │ 7. Cap individuel (-25 / +70)                       │
 │ 7.5. Multiplicateur peak elo (0.75x - 1.15x)        │
@@ -41,7 +41,7 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 2. Résultat de game                                 │
 │ 3. Streak bonus/malus                               │
 │ 4. Rank change                                      │
-│ 5. Bonus spéciaux                                   │
+│ 5. Bonus spéciaux (Penta/Quadra/Triple/FB/KS)       │
 │ 6. Sous-total Carry                                 │
 │ 7. Cap individuel (-25 / +70)                       │
 │ 7.5. Multiplicateur peak elo (0.75x - 1.15x)        │
@@ -222,7 +222,114 @@ Voir [src/services/scoring/rank-change.ts](src/services/scoring/rank-change.ts)
 
 ---
 
-### 1.5. Cap Individuel
+### 1.5. Bonus Spéciaux Individuels
+
+Les bonus spéciaux récompensent les performances exceptionnelles individuelles (multikills, first blood, killing sprees).
+
+#### Formule
+
+**Multikills** (mutuellement exclusifs - seul le meilleur compte) :
+```
+Si pentaKills > 0:
+  bonus += 30 × pentaKills
+Sinon si quadraKills > 0:
+  bonus += 15 × quadraKills
+Sinon si tripleKills > 0:
+  bonus += 5 × tripleKills
+```
+
+**Bonus cumulatifs** (s'ajoutent aux multikills) :
+```
+Si firstBloodKill = true:
+  bonus += 5
+
+Si largestKillingSpree >= 7:
+  bonus += 10
+```
+
+#### Tableau récapitulatif
+
+| Bonus | Points | Cumulative ? | Seuil |
+|-------|--------|--------------|-------|
+| **Pentakill** | **+30 pts** | Non (prioritaire) | 1+ pentakill |
+| **Quadrakill** | **+15 pts** | Non (si pas de penta) | 1+ quadrakill |
+| **Triple kill** | **+5 pts** | Non (si pas de quadra/penta) | 1+ triple kill |
+| **First Blood** | **+5 pts** | Oui | First Blood obtenu |
+| **Killing Spree** | **+10 pts** | Oui | 7+ kills d'affilée |
+
+**Note** : Les multikills (Penta/Quadra/Triple) sont **mutuellement exclusifs** car un pentakill inclut déjà un quadra et un triple. Seul le meilleur multikill est compté. En revanche, First Blood et Killing Spree sont **cumulatifs** et s'ajoutent au multikill.
+
+#### Exemples
+
+**Exemple 1 : Carry avec Pentakill + First Blood + Killing Spree**
+```
+pentaKills = 1
+firstBloodKill = true
+largestKillingSpree = 15
+
+Bonus = 30 (penta) + 5 (FB) + 10 (KS) = 45 pts
+```
+
+**Exemple 2 : Noob avec Quadra + First Blood**
+```
+quadraKills = 1
+firstBloodKill = true
+largestKillingSpree = 4 (< 7, pas de bonus)
+
+Bonus = 15 (quadra) + 5 (FB) = 20 pts
+```
+
+**Exemple 3 : Carry avec Triple kill seulement**
+```
+tripleKills = 1
+firstBloodKill = false
+largestKillingSpree = 3
+
+Bonus = 5 (triple) = 5 pts
+```
+
+**Exemple 4 : Noob avec First Blood + Killing Spree (sans multikill)**
+```
+tripleKills = 0
+firstBloodKill = true
+largestKillingSpree = 8
+
+Bonus = 5 (FB) + 10 (KS) = 15 pts
+```
+
+**Exemple 5 : Game moyenne sans bonus spéciaux**
+```
+pentaKills = 0
+quadraKills = 0
+tripleKills = 0
+firstBloodKill = false
+largestKillingSpree = 3
+
+Bonus = 0 pts
+```
+
+#### Justification
+
+**Pourquoi ces bonus ?**
+- **Pentakill** : Performance exceptionnelle (rare) → forte récompense (+30 pts)
+- **Quadrakill** : Très bonne performance → récompense modérée (+15 pts)
+- **Triple kill** : Bonne performance → petite récompense (+5 pts)
+- **First Blood** : Avantage early game → récompense fixe (+5 pts)
+- **Killing Spree** : Domination sans mourir → récompense fixe (+10 pts)
+
+**Impact sur le scoring** :
+- Encourage les joueurs à viser des performances exceptionnelles
+- Les multikills sont rares donc ont un impact limité sur le ladder global
+- First Blood et Killing Spree sont plus accessibles et encouragent l'agression early game
+
+#### Implémentation
+Voir [src/services/scoring/bonuses.ts](src/services/scoring/bonuses.ts)
+
+**Backward compatibility** : Tous les champs sont optionnels. Si les données ne sont pas présentes dans la Riot API, le bonus est simplement de 0 pts (pas de crash).
+
+---
+
+### 1.6. Cap Individuel
 
 Après calcul du sous-total, chaque joueur est plafonné pour éviter les exploits.
 
@@ -245,7 +352,7 @@ Voir [src/services/scoring/caps.ts](src/services/scoring/caps.ts)
 
 ---
 
-### 1.6. Multiplicateur Peak Elo (Anti-Smurf)
+### 1.7. Multiplicateur Peak Elo (Anti-Smurf)
 
 Le multiplicateur peak elo est un système **anti-smurf** qui pénalise les joueurs jouant significativement en dessous de leur vrai niveau (peak elo), tout en **récompensant la progression** pour ceux qui dépassent leur peak.
 
@@ -546,13 +653,7 @@ Le bot envoie automatiquement les erreurs et warnings vers le channel dev Discor
 
 ## Améliorations futures
 
-### 1. Bonus spéciaux individuels
-
-**Status** : MVP et Pentakill bonus sont mentionnés dans les specs mais non implémentés pour v1.
-
-**Raison** : Ces données nécessitent une analyse plus approfondie des statistiques de game (MVP = meilleur KDA ? Plus de dégâts ? Plus d'objectifs ?).
-
-### 2. Persistence Layer
+### 1. Persistence Layer
 
 **Status** : Actuellement in-memory (volatile)
 
@@ -570,9 +671,9 @@ Le bot envoie automatiquement les erreurs et warnings vers le channel dev Discor
 | **Streaks** | [src/services/scoring/streaks.ts](src/services/scoring/streaks.ts) | Bonus/malus de streaks |
 | **Rank Change** | [src/services/scoring/rank-change.ts](src/services/scoring/rank-change.ts) | Bonus/malus de changement de rank |
 | **Risk** | [src/services/scoring/risk.ts](src/services/scoring/risk.ts) | Bonus de prise de risque (off-role/champ) |
-| **Bonuses** | [src/services/scoring/bonuses.ts](src/services/scoring/bonuses.ts) | Bonus "No Death" |
+| **Bonuses** | [src/services/scoring/bonuses.ts](src/services/scoring/bonuses.ts) | Bonus "No Death" + Bonus spéciaux individuels |
 | **Caps** | [src/services/scoring/caps.ts](src/services/scoring/caps.ts) | Plafonds individuels et duo |
-| **Rank Multiplier** | [src/services/scoring/rank-multiplier.ts](src/services/scoring/rank-multiplier.ts) | Multiplicateur pour duos déséquilibrés |
+| **Peak Elo Multiplier** | [src/services/scoring/peak-elo-multiplier.ts](src/services/scoring/peak-elo-multiplier.ts) | Multiplicateur anti-smurf basé sur peak elo |
 | **Rank Utils** | [src/services/scoring/rank-utils.ts](src/services/scoring/rank-utils.ts) | Utilitaires de conversion rank ↔ valeur |
 
 ---
