@@ -98,6 +98,14 @@ export interface MatchParticipant {
   deaths: number
   assists: number
 
+  // Multikills (optionnels - ajoutés pour bonus spéciaux)
+  pentaKills?: number
+  quadraKills?: number
+  tripleKills?: number
+  doubleKills?: number
+  firstBloodKill?: boolean
+  largestKillingSpree?: number
+
   // Stats (pour détection MVP future)
   goldEarned: number
   totalDamageDealtToChampions: number

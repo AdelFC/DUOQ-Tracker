@@ -409,10 +409,17 @@ export class AutoPollService {
           assists: noobData.assists,
           previousRank: noob.currentRank,
           newRank: noobNewRank,
+          peakElo: noob.peakElo,
           isOffRole: noob.mainRoleString
             ? roleToLane(noob.mainRoleString) !== noobData.teamPosition
             : false,
           isOffChampion: noob.mainChampion ? noob.mainChampion !== noobData.championName : false,
+          // Multikills (bonus spéciaux)
+          pentaKills: noobData.pentaKills,
+          quadraKills: noobData.quadraKills,
+          tripleKills: noobData.tripleKills,
+          firstBloodKill: noobData.firstBloodKill,
+          largestKillingSpree: noobData.largestKillingSpree,
         },
         carryStats: {
           puuid: carry.puuid || '',
@@ -426,12 +433,19 @@ export class AutoPollService {
           assists: carryData.assists,
           previousRank: carry.currentRank,
           newRank: carryNewRank,
+          peakElo: carry.peakElo,
           isOffRole: carry.mainRoleString
             ? roleToLane(carry.mainRoleString) !== carryData.teamPosition
             : false,
           isOffChampion: carry.mainChampion
             ? carry.mainChampion !== carryData.championName
             : false,
+          // Multikills (bonus spéciaux)
+          pentaKills: carryData.pentaKills,
+          quadraKills: carryData.quadraKills,
+          tripleKills: carryData.tripleKills,
+          firstBloodKill: carryData.firstBloodKill,
+          largestKillingSpree: carryData.largestKillingSpree,
         },
       }
 

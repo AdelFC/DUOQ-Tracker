@@ -91,9 +91,17 @@ export interface PlayerGameStats {
   deaths: number
   assists: number
 
+  // Multikills (optionnels - pour bonus spéciaux)
+  pentaKills?: number
+  quadraKills?: number
+  tripleKills?: number
+  firstBloodKill?: boolean
+  largestKillingSpree?: number
+
   // Rank change
   previousRank: RankInfo
   newRank: RankInfo
+  peakElo?: string // Peak elo du joueur (ex: "D4", "P2") - pour multiplicateur peak elo (optionnel, défaut = current rank)
 
   // Risk detection
   isOffRole: boolean // Pas sur son main role

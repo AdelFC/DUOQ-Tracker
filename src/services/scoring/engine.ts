@@ -8,9 +8,9 @@ import { calculateGameResult } from './game-result.js'
 import { calculateStreakBonus } from './streaks.js'
 import { calculateRankChange } from './rank-change.js'
 import { calculateRiskBonus } from './risk.js'
-import { calculateNoDeathBonus } from './bonuses.js'
+import { calculateNoDeathBonus, calculatePlayerSpecialBonus } from './bonuses.js'
 import { applyPlayerCap, applyDuoCap } from './caps.js'
-import { calculatePlayerRankMultiplier } from './rank-multiplier.js'
+import { calculatePeakEloMultiplier } from './peak-elo-multiplier.js'
 
 import type { PlayerGameStats, GameData } from '../../types/game.js'
 import type { ScoreBreakdown, PlayerScore, DuoScore } from '../../types/scoring.js'
@@ -54,8 +54,8 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   // 4. Rank change
   const noobRankChange = calculateRankChange(noobStats.previousRank, noobStats.newRank)
 
-  // 5. Bonus spéciaux individuels (MVP, Pentakill - optionnels, pas implémentés v1)
-  const noobSpecialBonus = 0
+  // 5. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
+  const noobSpecialBonus = calculatePlayerSpecialBonus(noobStats)
 
   // 6. Sous-total
   const noobSubtotal =
@@ -68,12 +68,12 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   // 7. Plafond individuel
   const noobCapped = applyPlayerCap(noobSubtotal)
 
-  // 7.5. Multiplicateur de rank (Phase 1.5)
-  const noobRankMultiplier = calculatePlayerRankMultiplier(noobStats.newRank, carryStats.newRank)
-  const noobAfterMultiplier = noobCapped * noobRankMultiplier
+  // 7.5. Multiplicateur peak elo (anti-smurf + bonus progression)
+  const noobPeakMultiplier = calculatePeakEloMultiplier(noobStats.peakElo, noobStats.newRank)
+  const noobAfterPeakMultiplier = noobCapped * noobPeakMultiplier
 
   // 8. Arrondi à l'entier
-  const noobFinal = Math.round(noobAfterMultiplier)
+  const noobFinal = Math.round(noobAfterPeakMultiplier)
 
   const noobScore: PlayerScore = {
     kda: noobKDA,
@@ -108,8 +108,8 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   // 4. Rank change
   const carryRankChange = calculateRankChange(carryStats.previousRank, carryStats.newRank)
 
-  // 5. Bonus spéciaux individuels
-  const carrySpecialBonus = 0
+  // 5. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
+  const carrySpecialBonus = calculatePlayerSpecialBonus(carryStats)
 
   // 6. Sous-total
   const carrySubtotal =
@@ -122,12 +122,12 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   // 7. Plafond individuel
   const carryCapped = applyPlayerCap(carrySubtotal)
 
-  // 7.5. Multiplicateur de rank (Phase 1.5)
-  const carryRankMultiplier = calculatePlayerRankMultiplier(carryStats.newRank, noobStats.newRank)
-  const carryAfterMultiplier = carryCapped * carryRankMultiplier
+  // 7.5. Multiplicateur peak elo (anti-smurf + bonus progression)
+  const carryPeakMultiplier = calculatePeakEloMultiplier(carryStats.peakElo, carryStats.newRank)
+  const carryAfterPeakMultiplier = carryCapped * carryPeakMultiplier
 
   // 8. Arrondi à l'entier
-  const carryFinal = Math.round(carryAfterMultiplier)
+  const carryFinal = Math.round(carryAfterPeakMultiplier)
 
   const carryScore: PlayerScore = {
     kda: carryKDA,

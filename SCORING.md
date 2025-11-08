@@ -2,8 +2,8 @@
 
 Ce document décrit en détail le système de calcul des points pour le DuoQ Challenge.
 
-**Dernière mise à jour** : 2025-11-07
-**Version** : 2.1
+**Dernière mise à jour** : 2025-11-08
+**Version** : 2.4
 
 ## Vue d'ensemble
 
@@ -12,7 +12,7 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 - **Performance individuelle** (KDA, rank change, streaks)
 - **Résultat de la partie** (victoire/défaite/remake/surrender)
 - **Performance collective** (bonus duo, prise de risque)
-- **Équilibrage** (multiplicateur de rank pour duos déséquilibrés)
+- **Anti-smurf** (multiplicateur peak elo)
 - **Plafonds** (caps pour éviter les exploits)
 
 ---
@@ -27,10 +27,10 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 2. Résultat de game (+5/-5/+8/-10/0)                │
 │ 3. Streak bonus/malus                               │
 │ 4. Rank change (+50/+100/-100/-200)                 │
-│ 5. Bonus spéciaux (MVP, Penta - non implémentés)    │
+│ 5. Bonus spéciaux (Penta/Quadra/Triple/FB/KS)       │
 │ 6. Sous-total Noob                                  │
 │ 7. Cap individuel (-25 / +70)                       │
-│ 7.5. Multiplicateur de rank (0.5x - 1.0x)           │
+│ 7.5. Multiplicateur peak elo (0.75x - 1.15x)        │
 │ 8. Arrondi → Score Noob final                       │
 └─────────────────────────────────────────────────────┘
 
@@ -41,10 +41,10 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 2. Résultat de game                                 │
 │ 3. Streak bonus/malus                               │
 │ 4. Rank change                                      │
-│ 5. Bonus spéciaux                                   │
+│ 5. Bonus spéciaux (Penta/Quadra/Triple/FB/KS)       │
 │ 6. Sous-total Carry                                 │
 │ 7. Cap individuel (-25 / +70)                       │
-│ 7.5. Multiplicateur de rank (0.5x - 1.0x)           │
+│ 7.5. Multiplicateur peak elo (0.75x - 1.15x)        │
 │ 8. Arrondi → Score Carry final                      │
 └─────────────────────────────────────────────────────┘
 
@@ -222,7 +222,114 @@ Voir [src/services/scoring/rank-change.ts](src/services/scoring/rank-change.ts)
 
 ---
 
-### 1.5. Cap Individuel
+### 1.5. Bonus Spéciaux Individuels
+
+Les bonus spéciaux récompensent les performances exceptionnelles individuelles (multikills, first blood, killing sprees).
+
+#### Formule
+
+**Multikills** (mutuellement exclusifs - seul le meilleur compte) :
+```
+Si pentaKills > 0:
+  bonus += 30 × pentaKills
+Sinon si quadraKills > 0:
+  bonus += 15 × quadraKills
+Sinon si tripleKills > 0:
+  bonus += 5 × tripleKills
+```
+
+**Bonus cumulatifs** (s'ajoutent aux multikills) :
+```
+Si firstBloodKill = true:
+  bonus += 5
+
+Si largestKillingSpree >= 7:
+  bonus += 10
+```
+
+#### Tableau récapitulatif
+
+| Bonus | Points | Cumulative ? | Seuil |
+|-------|--------|--------------|-------|
+| **Pentakill** | **+30 pts** | Non (prioritaire) | 1+ pentakill |
+| **Quadrakill** | **+15 pts** | Non (si pas de penta) | 1+ quadrakill |
+| **Triple kill** | **+5 pts** | Non (si pas de quadra/penta) | 1+ triple kill |
+| **First Blood** | **+5 pts** | Oui | First Blood obtenu |
+| **Killing Spree** | **+10 pts** | Oui | 7+ kills d'affilée |
+
+**Note** : Les multikills (Penta/Quadra/Triple) sont **mutuellement exclusifs** car un pentakill inclut déjà un quadra et un triple. Seul le meilleur multikill est compté. En revanche, First Blood et Killing Spree sont **cumulatifs** et s'ajoutent au multikill.
+
+#### Exemples
+
+**Exemple 1 : Carry avec Pentakill + First Blood + Killing Spree**
+```
+pentaKills = 1
+firstBloodKill = true
+largestKillingSpree = 15
+
+Bonus = 30 (penta) + 5 (FB) + 10 (KS) = 45 pts
+```
+
+**Exemple 2 : Noob avec Quadra + First Blood**
+```
+quadraKills = 1
+firstBloodKill = true
+largestKillingSpree = 4 (< 7, pas de bonus)
+
+Bonus = 15 (quadra) + 5 (FB) = 20 pts
+```
+
+**Exemple 3 : Carry avec Triple kill seulement**
+```
+tripleKills = 1
+firstBloodKill = false
+largestKillingSpree = 3
+
+Bonus = 5 (triple) = 5 pts
+```
+
+**Exemple 4 : Noob avec First Blood + Killing Spree (sans multikill)**
+```
+tripleKills = 0
+firstBloodKill = true
+largestKillingSpree = 8
+
+Bonus = 5 (FB) + 10 (KS) = 15 pts
+```
+
+**Exemple 5 : Game moyenne sans bonus spéciaux**
+```
+pentaKills = 0
+quadraKills = 0
+tripleKills = 0
+firstBloodKill = false
+largestKillingSpree = 3
+
+Bonus = 0 pts
+```
+
+#### Justification
+
+**Pourquoi ces bonus ?**
+- **Pentakill** : Performance exceptionnelle (rare) → forte récompense (+30 pts)
+- **Quadrakill** : Très bonne performance → récompense modérée (+15 pts)
+- **Triple kill** : Bonne performance → petite récompense (+5 pts)
+- **First Blood** : Avantage early game → récompense fixe (+5 pts)
+- **Killing Spree** : Domination sans mourir → récompense fixe (+10 pts)
+
+**Impact sur le scoring** :
+- Encourage les joueurs à viser des performances exceptionnelles
+- Les multikills sont rares donc ont un impact limité sur le ladder global
+- First Blood et Killing Spree sont plus accessibles et encouragent l'agression early game
+
+#### Implémentation
+Voir [src/services/scoring/bonuses.ts](src/services/scoring/bonuses.ts)
+
+**Backward compatibility** : Tous les champs sont optionnels. Si les données ne sont pas présentes dans la Riot API, le bonus est simplement de 0 pts (pas de crash).
+
+---
+
+### 1.6. Cap Individuel
 
 Après calcul du sous-total, chaque joueur est plafonné pour éviter les exploits.
 
@@ -245,50 +352,110 @@ Voir [src/services/scoring/caps.ts](src/services/scoring/caps.ts)
 
 ---
 
-### 1.6. Multiplicateur de Rank
+### 1.7. Multiplicateur Peak Elo (Anti-Smurf)
 
-Le multiplicateur de rank sert à **équilibrer les duos déséquilibrés**. Si un joueur est significativement plus bas en rank que son partenaire, ses gains sont réduits.
+Le multiplicateur peak elo est un système **anti-smurf** qui pénalise les joueurs jouant significativement en dessous de leur vrai niveau (peak elo), tout en **récompensant la progression** pour ceux qui dépassent leur peak.
 
 #### Principe
 
-- **Le joueur avec le rank le PLUS ÉLEVÉ n'est JAMAIS pénalisé** (multiplicateur = 1.0)
-- Si le joueur plus faible est > 1 tier en dessous de la moyenne du duo, son multiplicateur est réduit
+- Compare le **peak elo** du joueur (son meilleur rang historique) avec son **rank actuel**
+- Applique un **bonus** si le joueur dépasse son peak (progression)
+- Applique un **malus** si le joueur est trop en dessous de son peak (smurf)
+- Tolérance de **1 tier** en dessous (normal decay, meta shifts)
 
 #### Formule
 
 ```
-Moyenne du duo = (rankNoob + rankCarry) / 2
-Seuil = Moyenne - 1 tier (4 divisions)
+tierDiff = floor((peakValue - currentValue) / 4)
 
-Si playerRank >= partnerRank :
-    multiplier = 1.0 (pas de pénalité)
+BONUS (au-dessus du peak elo):
+  Si tierDiff < 0 (joueur au-dessus de son peak):
+    tierAbove = abs(tierDiff)
+    Si tierAbove >= 3: multiplier = 1.15 (+15% bonus max)
+    Si tierAbove === 2: multiplier = 1.10 (+10% bonus)
+    Si tierAbove === 1: multiplier = 1.05 (+5% bonus)
 
-Si playerRank >= seuil :
-    multiplier = 1.0 (dans la tolérance)
+TOLÉRANCE (0-1 tier en dessous):
+  Si tierDiff <= 1:
+    multiplier = 1.0 (pas de malus)
 
-Si playerRank < seuil :
-    distance = seuil - playerRank
-    multiplier = max(0.5, 1.0 - distance × 0.05)
+MALUS (smurfs, 2+ tiers en dessous):
+  Si tierDiff === 2: multiplier = 0.95  (-5%)
+  Si tierDiff === 3: multiplier = 0.875 (-12.5%)
+  Si tierDiff === 4: multiplier = 0.80  (-20%)
+  Si tierDiff >= 5: multiplier = 0.75  (-25% max)
 ```
 
-#### Exemple : Duo déséquilibré
+#### Exemples
 
+**Cas 1 : Progression (BONUS)**
 ```
-Carry : Diamond II (rank = 26)
-Noob  : Silver III (rank = 9)
+Peak Elo: Gold IV (rank = 12)
+Current Rank: Emerald IV (rank = 20)
+Écart: +8 divisions = +2 tiers
 
-Moyenne = (26 + 9) / 2 = 17.5
-Seuil = 17.5 - 4 = 13.5
-
-Carry : 26 >= 9 → multiplier = 1.0 ✓ (pas de pénalité)
-Noob  : 9 < 13.5 → distance = 4.5
-        → multiplier = 1.0 - (4.5 × 0.05) = 0.775
+→ tierDiff = floor((12 - 20) / 4) = -2
+→ tierAbove = 2
+→ multiplier = 1.10 (+10% bonus pour progression!)
 ```
 
-Le Noob ne gagne que **77.5%** de ses points, le Carry garde **100%**.
+**Cas 2 : Tolérance (pas de malus)**
+```
+Peak Elo: Platinum IV (rank = 16)
+Current Rank: Gold II (rank = 14)
+Écart: -2 divisions = -0.5 tier
+
+→ tierDiff = floor((16 - 14) / 4) = 0
+→ multiplier = 1.0 (tolérance, pas de malus)
+```
+
+**Cas 3 : Petit smurf (léger malus)**
+```
+Peak Elo: Platinum IV (rank = 16)
+Current Rank: Silver IV (rank = 8)
+Écart: -8 divisions = -2 tiers
+
+→ tierDiff = floor((16 - 8) / 4) = 2
+→ multiplier = 0.95 (-5% malus)
+```
+
+**Cas 4 : Gros smurf (malus sévère)**
+```
+Peak Elo: Diamond IV (rank = 24)
+Current Rank: Bronze IV (rank = 4)
+Écart: -20 divisions = -5 tiers
+
+→ tierDiff = floor((24 - 4) / 4) = 5
+→ multiplier = 0.75 (-25% malus max)
+```
+
+#### Tableau récapitulatif
+
+| Écart peak → current | tierDiff | Multiplicateur | Impact |
+|----------------------|----------|----------------|--------|
+| +3 tiers ou plus | <= -3 | **1.15x** | +15% bonus max |
+| +2 tiers | -2 | **1.10x** | +10% bonus |
+| +1 tier | -1 | **1.05x** | +5% bonus |
+| 0-1 tier en dessous | 0 ou 1 | **1.00x** | Tolérance |
+| -2 tiers | 2 | **0.95x** | -5% malus |
+| -3 tiers | 3 | **0.875x** | -12.5% malus |
+| -4 tiers | 4 | **0.80x** | -20% malus |
+| -5 tiers ou plus | >= 5 | **0.75x** | -25% malus max |
+
+#### Justification
+
+**Pourquoi ce système ?**
+- **Fairness** : Empêche les smurfs de dominer le ladder en jouant en bas elo
+- **Progression encouragée** : Récompense les joueurs qui s'améliorent et dépassent leur peak
+- **Tolérance** : Pas de pénalité pour 1 tier de descente (normal decay, meta changes)
+- **Malus progressif** : Plus l'écart est grand, plus la pénalité est sévère
+
+**Impact sur un challenge "Fresh Start"**
+- Si tous les duos partent de Bronze IV avec des peak elos variés, ce système pénalise les joueurs forts qui ne remontent pas assez vite
+- Le bonus de progression encourage les joueurs à climb activement
 
 #### Implémentation
-Voir [src/services/scoring/rank-multiplier.ts](src/services/scoring/rank-multiplier.ts)
+Voir [src/services/scoring/peak-elo-multiplier.ts](src/services/scoring/peak-elo-multiplier.ts)
 
 ---
 
@@ -486,13 +653,7 @@ Le bot envoie automatiquement les erreurs et warnings vers le channel dev Discor
 
 ## Améliorations futures
 
-### 1. Bonus spéciaux individuels
-
-**Status** : MVP et Pentakill bonus sont mentionnés dans les specs mais non implémentés pour v1.
-
-**Raison** : Ces données nécessitent une analyse plus approfondie des statistiques de game (MVP = meilleur KDA ? Plus de dégâts ? Plus d'objectifs ?).
-
-### 2. Persistence Layer
+### 1. Persistence Layer
 
 **Status** : Actuellement in-memory (volatile)
 
@@ -510,9 +671,9 @@ Le bot envoie automatiquement les erreurs et warnings vers le channel dev Discor
 | **Streaks** | [src/services/scoring/streaks.ts](src/services/scoring/streaks.ts) | Bonus/malus de streaks |
 | **Rank Change** | [src/services/scoring/rank-change.ts](src/services/scoring/rank-change.ts) | Bonus/malus de changement de rank |
 | **Risk** | [src/services/scoring/risk.ts](src/services/scoring/risk.ts) | Bonus de prise de risque (off-role/champ) |
-| **Bonuses** | [src/services/scoring/bonuses.ts](src/services/scoring/bonuses.ts) | Bonus "No Death" |
+| **Bonuses** | [src/services/scoring/bonuses.ts](src/services/scoring/bonuses.ts) | Bonus "No Death" + Bonus spéciaux individuels |
 | **Caps** | [src/services/scoring/caps.ts](src/services/scoring/caps.ts) | Plafonds individuels et duo |
-| **Rank Multiplier** | [src/services/scoring/rank-multiplier.ts](src/services/scoring/rank-multiplier.ts) | Multiplicateur pour duos déséquilibrés |
+| **Peak Elo Multiplier** | [src/services/scoring/peak-elo-multiplier.ts](src/services/scoring/peak-elo-multiplier.ts) | Multiplicateur anti-smurf basé sur peak elo |
 | **Rank Utils** | [src/services/scoring/rank-utils.ts](src/services/scoring/rank-utils.ts) | Utilitaires de conversion rank ↔ valeur |
 
 ---

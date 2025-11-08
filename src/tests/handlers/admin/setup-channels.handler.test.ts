@@ -16,18 +16,19 @@ describe('handleSetupChannels', () => {
     responses = []
   })
 
-  it('should configure both channels successfully', async () => {
+  it('should configure all three channels successfully', async () => {
     const msg = message(MessageType.SETUP_CHANNELS, {
       generalChannelId: '123456789',
       trackerChannelId: '987654321',
+      devChannelId: '555555555',
     }).build()
 
     const testState = state().build()
 
     await handleSetupChannels(msg, testState, responses)
 
-    // Should have 3 responses: success + 2 test messages
-    expect(responses).toHaveLength(3)
+    // Should have 4 responses: success + 3 test messages (general, tracker, dev)
+    expect(responses).toHaveLength(4)
 
     // Check success response
     const successResponse = responses[0]
@@ -47,10 +48,15 @@ describe('handleSetupChannels', () => {
     expect(trackerTest).toBeDefined()
     expect(trackerTest?.content).toContain('notifications automatiques')
 
+    const devTest = responses.find((r) => r.targetId === '555555555')
+    expect(devTest).toBeDefined()
+    expect(devTest?.content).toContain('logs')
+
     // Check state was updated
     const config = testState.config as ConfigService
     expect(await config.get('generalChannelId')).toBe('123456789')
     expect(await config.get('trackerChannelId')).toBe('987654321')
+    expect(await config.get('devChannelId')).toBe('555555555')
   })
 
   it('should reject if channels are identical', async () => {
@@ -126,25 +132,29 @@ describe('handleSetupChannels', () => {
     // First configuration
     await config.set('generalChannelId', '111111')
     await config.set('trackerChannelId', '222222')
+    await config.set('devChannelId', '333333')
 
     // Second configuration (override)
     const msg = message(MessageType.SETUP_CHANNELS, {
-      generalChannelId: '333333',
-      trackerChannelId: '444444',
+      generalChannelId: '444444',
+      trackerChannelId: '555555',
+      devChannelId: '666666',
     }).build()
 
     await handleSetupChannels(msg, testState, responses)
 
     // Should succeed and override
     expect(responses[0].type).toBe(MessageType.SUCCESS)
-    expect(await config.get('generalChannelId')).toBe('333333')
-    expect(await config.get('trackerChannelId')).toBe('444444')
+    expect(await config.get('generalChannelId')).toBe('444444')
+    expect(await config.get('trackerChannelId')).toBe('555555')
+    expect(await config.get('devChannelId')).toBe('666666')
   })
 
   it('should send test message to general channel', async () => {
     const msg = message(MessageType.SETUP_CHANNELS, {
       generalChannelId: '123456789',
       trackerChannelId: '987654321',
+      devChannelId: '555555555',
     }).build()
 
     const testState = state().build()
@@ -164,6 +174,7 @@ describe('handleSetupChannels', () => {
     const msg = message(MessageType.SETUP_CHANNELS, {
       generalChannelId: '123456789',
       trackerChannelId: '987654321',
+      devChannelId: '555555555',
     }).build()
 
     const testState = state().build()
