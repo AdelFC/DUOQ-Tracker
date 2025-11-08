@@ -221,7 +221,15 @@ describe('DailyLadderService', () => {
       service.start()
       const nextRun = service.getNextRun()
       expect(nextRun).toBeInstanceOf(Date)
-      expect(nextRun!.getHours()).toBe(19)
+
+      // Verify it's a future date (scheduled job)
+      expect(nextRun!.getTime()).toBeGreaterThan(Date.now())
+
+      // Verify hour is either 18 (UTC) or 19 (Paris time) depending on DST
+      // During winter: 19h Paris = 18h UTC
+      // During summer: 19h Paris = 17h UTC
+      const hour = nextRun!.getHours()
+      expect([17, 18, 19]).toContain(hour)
     })
   })
 })

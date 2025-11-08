@@ -20,9 +20,10 @@ describe('handleSetupStatus', () => {
     const testState = state().build()
     const config = testState.config as ConfigService
 
-    // Configure everything
+    // Configure everything (including devChannelId)
     await config.set('generalChannelId', '123456789')
     await config.set('trackerChannelId', '987654321')
+    await config.set('devChannelId', '555555555')
     await config.set('eventStartDate', '2025-11-01T00:00:00Z')
     await config.set('eventEndDate', '2025-11-30T23:59:59Z')
     await config.set('eventTimezone', 'Europe/Paris')
@@ -52,6 +53,7 @@ describe('handleSetupStatus', () => {
     expect(channelsField).toBeDefined()
     expect(channelsField.value).toContain('<#123456789>')
     expect(channelsField.value).toContain('<#987654321>')
+    expect(channelsField.value).toContain('<#555555555>')
 
     // Check event field
     const eventField = embed.fields.find((f: any) => f.name.includes('Événement'))

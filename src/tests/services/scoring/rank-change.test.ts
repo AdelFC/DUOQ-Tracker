@@ -38,14 +38,14 @@ describe('calculateRankChange', () => {
       expect(result.final).toBe(-100)
     })
 
-    it('should give 0 points for no division change', () => {
+    it('should give LP conversion points for no division change (LP only)', () => {
       const previous: RankInfo = { tier: 'GOLD', division: 'IV', lp: 50 }
       const current: RankInfo = { tier: 'GOLD', division: 'IV', lp: 70 }
 
       const result = calculateRankChange(previous, current)
 
-      expect(result.tierBonus).toBe(0)
-      expect(result.final).toBe(0)
+      expect(result.tierBonus).toBe(0) // No tier/division change
+      expect(result.final).toBe(8) // +20 LP × 0.4 = +8 pts
     })
   })
 
@@ -112,14 +112,14 @@ describe('calculateRankChange', () => {
       expect(result.final).toBe(-200)
     })
 
-    it('should give 0 points for LP change in Master (no tier/div change)', () => {
+    it('should give LP conversion points for LP change in Master (no tier change)', () => {
       const previous: RankInfo = { tier: 'MASTER', division: null, lp: 100 }
       const current: RankInfo = { tier: 'MASTER', division: null, lp: 150 }
 
       const result = calculateRankChange(previous, current)
 
-      expect(result.tierBonus).toBe(0)
-      expect(result.final).toBe(0)
+      expect(result.tierBonus).toBe(0) // No tier change
+      expect(result.final).toBe(20) // +50 LP × 0.4 = +20 pts (Master+ always counts LP)
     })
   })
 
