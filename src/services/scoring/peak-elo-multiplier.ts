@@ -27,11 +27,16 @@ import type { RankInfo } from '../../types/player.js'
 
 /**
  * Calcule le multiplicateur basé sur le peak elo du joueur
- * @param peakElo - Peak elo du joueur (ex: "D4", "P2")
+ * @param peakElo - Peak elo du joueur (ex: "D4", "P2"). Si undefined/vide, considère peak = current (1.0x)
  * @param currentRank - Rank actuel du joueur
  * @returns Multiplicateur entre 0.75 et 1.15
  */
-export function calculatePeakEloMultiplier(peakElo: string, currentRank: RankInfo): number {
+export function calculatePeakEloMultiplier(peakElo: string | undefined, currentRank: RankInfo): number {
+  // Si pas de peakElo fourni, on considère que peak = current rank (pas de bonus/malus)
+  if (!peakElo) {
+    return 1.0
+  }
+
   const peakValue = rankToValue(parseRankString(peakElo))
   const currentValue = rankToValue(currentRank)
 

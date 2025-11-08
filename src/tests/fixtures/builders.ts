@@ -283,10 +283,18 @@ export class PlayerGameStatsBuilder {
     return this
   }
 
+  withPeakElo(peakElo: string): this {
+    (this.stats as any).peakElo = peakElo
+    return this
+  }
+
   build(): PlayerGameStats {
     if (!this.stats.puuid) {
       throw new Error('PlayerGameStatsBuilder: puuid is required')
     }
+
+    const newRank = this.stats.newRank || { tier: 'GOLD', division: 'IV', lp: 70 }
+    const peakElo = (this.stats as any).peakElo || `${newRank.tier.charAt(0)}${newRank.division || ''}` // Default: same as newRank (e.g. "G4")
 
     return {
       puuid: this.stats.puuid,
@@ -299,7 +307,8 @@ export class PlayerGameStatsBuilder {
       deaths: this.stats.deaths ?? 0,
       assists: this.stats.assists ?? 0,
       previousRank: this.stats.previousRank || { tier: 'GOLD', division: 'IV', lp: 50 },
-      newRank: this.stats.newRank || { tier: 'GOLD', division: 'IV', lp: 70 },
+      newRank,
+      peakElo,
       isOffRole: this.stats.isOffRole ?? false,
       isOffChampion: this.stats.isOffChampion ?? false,
     }

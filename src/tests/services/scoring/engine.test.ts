@@ -34,6 +34,7 @@ describe('calculateGameScore', () => {
         assists: 15,
         previousRank: noobPrevRank,
         newRank: noobNewRank,
+        peakElo: 'S4', // Peak = Silver 4 (à son niveau, pas de smurf)
         isOffRole: true, // MID au lieu de TOP
         isOffChampion: true, // Yasuo au lieu de Garen
       }
@@ -50,6 +51,7 @@ describe('calculateGameScore', () => {
         assists: 20,
         previousRank: carryRank,
         newRank: carryRank, // Stable
+        peakElo: 'G3', // Peak = Gold 3 (à son niveau, pas de smurf)
         isOffRole: false,
         isOffChampion: false,
       }

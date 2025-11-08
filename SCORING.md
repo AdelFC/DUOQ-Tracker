@@ -3,16 +3,16 @@
 Ce document décrit en détail le système de calcul des points pour le DuoQ Challenge.
 
 **Dernière mise à jour** : 2025-11-08
-**Version** : 2.2
+**Version** : 2.3
 
 ## Vue d'ensemble
 
-Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque partie jouée. Le score final est calculé en **15 étapes séquentielles** qui prennent en compte :
+Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque partie jouée. Le score final est calculé en **14 étapes séquentielles** qui prennent en compte :
 
 - **Performance individuelle** (KDA, rank change, streaks)
 - **Résultat de la partie** (victoire/défaite/remake/surrender)
 - **Performance collective** (bonus duo, prise de risque)
-- **Équilibrage** (multiplicateur de rank pour duos déséquilibrés, anti-smurf)
+- **Anti-smurf** (multiplicateur peak elo)
 - **Plafonds** (caps pour éviter les exploits)
 
 ---
@@ -30,8 +30,7 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 5. Bonus spéciaux (MVP, Penta - non implémentés)    │
 │ 6. Sous-total Noob                                  │
 │ 7. Cap individuel (-25 / +70)                       │
-│ 7.5. Multiplicateur de rank (0.5x - 1.0x)           │
-│ 7.6. Multiplicateur peak elo (0.75x - 1.15x)        │
+│ 7.5. Multiplicateur peak elo (0.75x - 1.15x)        │
 │ 8. Arrondi → Score Noob final                       │
 └─────────────────────────────────────────────────────┘
 
@@ -45,8 +44,7 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │ 5. Bonus spéciaux                                   │
 │ 6. Sous-total Carry                                 │
 │ 7. Cap individuel (-25 / +70)                       │
-│ 7.5. Multiplicateur de rank (0.5x - 1.0x)           │
-│ 7.6. Multiplicateur peak elo (0.75x - 1.15x)        │
+│ 7.5. Multiplicateur peak elo (0.75x - 1.15x)        │
 │ 8. Arrondi → Score Carry final                      │
 └─────────────────────────────────────────────────────┘
 
@@ -247,54 +245,7 @@ Voir [src/services/scoring/caps.ts](src/services/scoring/caps.ts)
 
 ---
 
-### 1.6. Multiplicateur de Rank
-
-Le multiplicateur de rank sert à **équilibrer les duos déséquilibrés**. Si un joueur est significativement plus bas en rank que son partenaire, ses gains sont réduits.
-
-#### Principe
-
-- **Le joueur avec le rank le PLUS ÉLEVÉ n'est JAMAIS pénalisé** (multiplicateur = 1.0)
-- Si le joueur plus faible est > 1 tier en dessous de la moyenne du duo, son multiplicateur est réduit
-
-#### Formule
-
-```
-Moyenne du duo = (rankNoob + rankCarry) / 2
-Seuil = Moyenne - 1 tier (4 divisions)
-
-Si playerRank >= partnerRank :
-    multiplier = 1.0 (pas de pénalité)
-
-Si playerRank >= seuil :
-    multiplier = 1.0 (dans la tolérance)
-
-Si playerRank < seuil :
-    distance = seuil - playerRank
-    multiplier = max(0.5, 1.0 - distance × 0.05)
-```
-
-#### Exemple : Duo déséquilibré
-
-```
-Carry : Diamond II (rank = 26)
-Noob  : Silver III (rank = 9)
-
-Moyenne = (26 + 9) / 2 = 17.5
-Seuil = 17.5 - 4 = 13.5
-
-Carry : 26 >= 9 → multiplier = 1.0 ✓ (pas de pénalité)
-Noob  : 9 < 13.5 → distance = 4.5
-        → multiplier = 1.0 - (4.5 × 0.05) = 0.775
-```
-
-Le Noob ne gagne que **77.5%** de ses points, le Carry garde **100%**.
-
-#### Implémentation
-Voir [src/services/scoring/rank-multiplier.ts](src/services/scoring/rank-multiplier.ts)
-
----
-
-### 1.7. Multiplicateur Peak Elo (Anti-Smurf)
+### 1.6. Multiplicateur Peak Elo (Anti-Smurf)
 
 Le multiplicateur peak elo est un système **anti-smurf** qui pénalise les joueurs jouant significativement en dessous de leur vrai niveau (peak elo), tout en **récompensant la progression** pour ceux qui dépassent leur peak.
 
