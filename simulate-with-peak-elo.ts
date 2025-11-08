@@ -9,7 +9,7 @@ import type { RankInfo } from './src/types/player.js'
 import type { GameData } from './src/types/game.js'
 
 // ========================================
-// Multiplicateur Peak Elo (Hybride)
+// Multiplicateur Peak Elo (Hybride Douce - malus divisés par 2)
 // ========================================
 function calculatePeakEloMultiplier(peakElo: string, currentRank: RankInfo): number {
   const peakValue = rankToValue(parseRankString(peakElo))
@@ -18,10 +18,10 @@ function calculatePeakEloMultiplier(peakElo: string, currentRank: RankInfo): num
   const tierDiff = Math.floor((peakValue - currentValue) / 4)
 
   if (tierDiff <= 1) return 1.0
-  if (tierDiff === 2) return 0.90
-  if (tierDiff === 3) return 0.75
-  if (tierDiff === 4) return 0.60
-  if (tierDiff >= 5) return 0.5
+  if (tierDiff === 2) return 0.95  // -5% (était -10%)
+  if (tierDiff === 3) return 0.875 // -12.5% (était -25%)
+  if (tierDiff === 4) return 0.80  // -20% (était -40%)
+  if (tierDiff >= 5) return 0.75   // -25% (était -50%)
 
   return 1.0
 }
