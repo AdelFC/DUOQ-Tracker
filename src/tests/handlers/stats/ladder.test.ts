@@ -187,9 +187,9 @@ describe('Handler Ladder', () => {
       expect(description).toContain('🥈') // 2ème
       expect(description).toContain('🥉') // 3ème
 
-      // Vérifier les scores
+      // Vérifier les scores (format réel: "10W - 2L")
       expect(description).toContain('150') // duo1
-      expect(description).toContain('10W/2L') // duo1
+      expect(description).toContain('10W - 2L') // duo1
     })
 
     it('devrait afficher "Aucun duo" si le classement est vide', () => {
@@ -304,10 +304,15 @@ describe('Handler Ladder', () => {
       const content = responses[0].content
       const embed = JSON.parse(content)
 
-      // Format: 🥇 Test Duo • 80 pts (5W/2L)
-      //         └─ Noob 👥 Carry
+      // Format réel du formatter:
+      // 🥇 **Test Duo**
+      //    💎 **80** pts
+      //    📊 5W - 2L (`71%`)
+      //    [progress bar]
+      //    👥 Noob 👥 Carry
       expect(embed.description).toContain('Test Duo')
-      expect(embed.description).toContain('└─')
+      expect(embed.description).toContain('80')
+      expect(embed.description).toContain('5W - 2L')
       expect(embed.description).toContain('Noob')
       expect(embed.description).toContain('👥')
       expect(embed.description).toContain('Carry')
@@ -431,7 +436,7 @@ describe('Handler Ladder', () => {
 
       expect(embed.description).toContain('Fresh Duo')
       expect(embed.description).toContain('**0** pts')
-      expect(embed.description).toContain('0W/0L')
+      expect(embed.description).toContain('0W - 0L')
     })
 
     it('devrait gérer les duos avec points négatifs', () => {

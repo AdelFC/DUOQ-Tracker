@@ -230,20 +230,27 @@ export const setupCommand = {
         .setDescription('Configurer les dates de l\'événement')
         .addStringOption((option) =>
           option
-            .setName('start')
-            .setDescription('Date de début (ISO 8601: 2025-11-01T00:00:00Z)')
+            .setName('start-date')
+            .setDescription('Date de début (format: 1/11/2025)')
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
-            .setName('end')
-            .setDescription('Date de fin (ISO 8601: 2025-11-30T23:59:59Z)')
+            .setName('start-h')
+            .setDescription('Heure de début (format: 20:00)')
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
-            .setName('timezone')
-            .setDescription('Fuseau horaire (ex: Europe/Paris)')
+            .setName('end-date')
+            .setDescription('Date de fin (format: 30/11/2025)')
+            .setRequired(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName('end-h')
+            .setDescription('Heure de fin (format: 23:59)')
+            .setRequired(true)
         )
     )
     .addSubcommand((subcommand) =>
@@ -270,4 +277,27 @@ export const testCommand = {
     .setName('test')
     .setDescription('[ADMIN] Tester toutes les commandes du bot avec des données mock')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+}
+
+/**
+ * /add-points - Ajouter/retirer des points à un duo (admin)
+ */
+export const addPointsCommand = {
+  data: new SlashCommandBuilder()
+    .setName('add-points')
+    .setDescription('[ADMIN] Ajouter ou retirer des points à un duo')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .addStringOption((option) =>
+      option
+        .setName('team_name')
+        .setDescription('Nom de l\'équipe duo')
+        .setRequired(true)
+        .setAutocomplete(true)
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName('points')
+        .setDescription('Nombre de points à ajouter (négatif pour retirer)')
+        .setRequired(true)
+    ),
 }

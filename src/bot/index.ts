@@ -18,11 +18,13 @@ import {
   keyCommand,
   setupCommand,
   testCommand,
+  addPointsCommand,
 } from './commands'
 import { DailyLadderService } from '../services/daily-ladder.js'
 import { ApiKeyReminderService } from '../services/api-key-reminder.service.js'
 import { AutoPollService } from '../services/auto-poll.service.js'
 import { ChallengeEndService } from '../services/challenge-end.service.js'
+import { PersistenceService } from '../services/persistence.service.js'
 import { router } from './router.js'
 import { initDiscordLogger } from '../utils/discord-logger.js'
 
@@ -31,6 +33,7 @@ let dailyLadderService: DailyLadderService | null = null
 let apiKeyReminderService: ApiKeyReminderService | null = null
 let autoPollService: AutoPollService | null = null
 let challengeEndService: ChallengeEndService | null = null
+let persistenceService: PersistenceService | null = null
 let botClient: BotClient | null = null
 
 /**
@@ -60,6 +63,7 @@ export function createBot(config: BotConfig): BotClient {
     // Admin
     setupCommand,
     testCommand,
+    addPointsCommand,
     // Dev
     devCommand,
     keyCommand,
@@ -80,6 +84,23 @@ export function createBot(config: BotConfig): BotClient {
  * Start the Discord bot
  */
 export async function startBot(config: BotConfig): Promise<BotClient> {
+  // Get state from router
+  const state = router.getState()
+
+  // Initialize Persistence Service and load saved state
+  persistenceService = new PersistenceService(state)
+  const hasLoadedState = await persistenceService.load()
+
+  if (hasLoadedState) {
+    console.log('[Bot] Loaded saved state from disk')
+  } else {
+    console.log('[Bot] Starting with fresh state')
+  }
+
+  // Start auto-save (every 5 minutes)
+  persistenceService.start()
+  console.log('[Bot] Persistence service started (auto-save every 5min)')
+
   const client = createBot(config)
 
   // Login to Discord
@@ -87,9 +108,6 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
 
   // Store client globally for service access
   botClient = client
-
-  // Get state from router
-  const state = router.getState()
 
   // Initialize Discord Logger (for error/warning notifications)
   initDiscordLogger(client, state)
@@ -103,16 +121,22 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
   apiKeyReminderService = new ApiKeyReminderService(client, state)
   apiKeyReminderService.start()
 
-  // Start Auto Poll Service (automatic game detection every 30 seconds)
+  // Start Auto Poll Service (automatic game detection with tiered intervals)
+  // Interval adjusts automatically based on number of duos:
+  // - 1-4 duos: 30s
+  // - 5-8 duos: 45s
+  // - 9-12 duos: 60s
+  // - 13-16 duos: 90s
+  // - 17-20 duos: 120s
+  // - 21+ duos: scales linearly
   if (state.riotService) {
     autoPollService = new AutoPollService(
       client,
       state,
-      state.riotService,
-      30000 // Poll every 30 seconds (rate limiting: 12 duos * 2 calls / 30s = ~48 calls/min < 50 calls/min limit)
+      state.riotService
     )
     autoPollService.start()
-    console.log('[Bot] AutoPoll service started')
+    console.log('[Bot] AutoPoll service started with dynamic interval')
   } else {
     console.warn('[Bot] RiotService not available, AutoPoll not started')
   }
@@ -129,6 +153,14 @@ export async function startBot(config: BotConfig): Promise<BotClient> {
  * Stop the Discord bot
  */
 export async function stopBot(client: BotClient): Promise<void> {
+  // Save state before stopping
+  if (persistenceService) {
+    console.log('[Bot] Saving state before shutdown...')
+    await persistenceService.forceSave()
+    persistenceService.stop()
+    persistenceService = null
+  }
+
   // Stop Daily Ladder Service
   if (dailyLadderService) {
     dailyLadderService.stop()

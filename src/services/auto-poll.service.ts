@@ -16,16 +16,94 @@ import { logError, logWarn } from '../utils/discord-logger.js'
 export class AutoPollService {
   private intervalId: NodeJS.Timeout | null = null
   private isPolling = false
+  private currentIntervalMs: number
+
+  /**
+   * Riot API Rate Limits:
+   * - 20 requests / 1 second
+   * - 100 requests / 2 minutes
+   *
+   * Per duo per poll:
+   * - 2 calls: getRecentMatchIds (noob + carry)
+   * - ~1 call: getMatchDetails (average, only for new matches)
+   * - ~2 calls: getRank (average, only for new matches)
+   * - Total: ~5 calls per duo per poll
+   *
+   * Tiered interval system (by duo count):
+   * - 1-4 duos: 30s (~8-16 calls/min)
+   * - 5-8 duos: 45s (~13-21 calls/min)
+   * - 9-12 duos: 60s (~18-24 calls/min)
+   * - 13-16 duos: 90s (~17-21 calls/min)
+   * - 17-20 duos: 120s (~17-20 calls/min)
+   * - 21+ duos: 150s+ (scales linearly: nbDuos * 7.5s)
+   *
+   * All tiers stay under 40 calls/min (80% safety margin)
+   */
+  private readonly TIER_INTERVALS = [
+    { maxDuos: 4, intervalMs: 30000 },   // 1-4 duos: 30s
+    { maxDuos: 8, intervalMs: 45000 },   // 5-8 duos: 45s
+    { maxDuos: 12, intervalMs: 60000 },  // 9-12 duos: 60s
+    { maxDuos: 16, intervalMs: 90000 },  // 13-16 duos: 90s
+    { maxDuos: 20, intervalMs: 120000 }, // 17-20 duos: 120s
+  ]
+  private readonly LINEAR_MS_PER_DUO = 7500 // For 21+ duos: 7.5s per duo
 
   constructor(
     private client: Client,
     private state: State,
     private riotService: RiotApiService,
-    private pollingIntervalMs: number = 60000 // Default: 1 minute
-  ) {}
+    private baseIntervalMs: number = 60000 // Fallback if no duos
+  ) {
+    this.currentIntervalMs = baseIntervalMs
+  }
 
   /**
-   * Start automatic polling
+   * Calculate optimal polling interval based on number of duos (tiered system)
+   */
+  private calculateInterval(): number {
+    const nbDuos = this.state.duos.size
+
+    if (nbDuos === 0) {
+      return this.baseIntervalMs
+    }
+
+    // Check tier intervals
+    for (const tier of this.TIER_INTERVALS) {
+      if (nbDuos <= tier.maxDuos) {
+        return tier.intervalMs
+      }
+    }
+
+    // For 21+ duos, use linear scaling
+    return nbDuos * this.LINEAR_MS_PER_DUO
+  }
+
+  /**
+   * Adjust interval if number of duos changed significantly
+   */
+  private adjustIntervalIfNeeded(): void {
+    const optimalInterval = this.calculateInterval()
+
+    // Only adjust if difference is more than 10%
+    const difference = Math.abs(optimalInterval - this.currentIntervalMs)
+    const threshold = this.currentIntervalMs * 0.1
+
+    if (difference > threshold) {
+      const oldInterval = this.currentIntervalMs
+      this.currentIntervalMs = optimalInterval
+
+      console.log(
+        `[AutoPoll] Interval adjusted: ${oldInterval / 1000}s → ${optimalInterval / 1000}s (${this.state.duos.size} duos)`
+      )
+
+      // Restart with new interval
+      this.stop()
+      this.start()
+    }
+  }
+
+  /**
+   * Start automatic polling with dynamic interval
    */
   start(): void {
     if (this.intervalId) {
@@ -33,7 +111,15 @@ export class AutoPollService {
       return
     }
 
-    console.log(`[AutoPoll] Started (polling every ${this.pollingIntervalMs / 1000}s)`)
+    // Calculate optimal interval based on current number of duos
+    this.currentIntervalMs = this.calculateInterval()
+
+    const nbDuos = this.state.duos.size
+    const callsPerMin = nbDuos > 0 ? (60000 / this.currentIntervalMs) * nbDuos * 2 : 0
+
+    console.log(
+      `[AutoPoll] Started - Interval: ${this.currentIntervalMs / 1000}s | Duos: ${nbDuos} | Est. API calls: ~${Math.round(callsPerMin)}/min`
+    )
 
     // Poll immediately on start
     this.poll()
@@ -41,7 +127,7 @@ export class AutoPollService {
     // Then poll at regular intervals
     this.intervalId = setInterval(() => {
       this.poll()
-    }, this.pollingIntervalMs)
+    }, this.currentIntervalMs)
   }
 
   /**
@@ -192,6 +278,9 @@ export class AutoPollService {
       if (totalGamesFound > 0) {
         console.log(`[AutoPoll] Found ${totalGamesFound} new game(s)`)
       }
+
+      // Check if we need to adjust interval based on number of duos
+      this.adjustIntervalIfNeeded()
     } catch (error) {
       console.error('[AutoPoll] Error during poll:', error)
       await logError('Erreur critique dans AutoPoll service', error as Error)

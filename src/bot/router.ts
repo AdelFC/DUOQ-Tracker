@@ -29,6 +29,7 @@ import { handleDevStatus } from '../handlers/dev/dev-status.handler'
 import { handleDevReset } from '../handlers/dev/dev-reset.handler'
 import { handleKeySet } from '../handlers/dev/key-set.handler'
 import { handleKeyShow } from '../handlers/dev/key-show.handler'
+import { handleAddPoints } from '../handlers/admin/add-points.handler'
 
 type CommandName =
   | 'register'
@@ -42,6 +43,7 @@ type CommandName =
   | 'key'
   | 'setup'
   | 'test'
+  | 'add-points'
 
 /**
  * Discord Router
@@ -242,6 +244,10 @@ class DiscordRouter {
         handleKeyShow(msg, this.state, responses)
         break
 
+      case MessageType.ADD_POINTS:
+        await handleAddPoints(msg, this.state, responses)
+        break
+
       default:
         responses.push({
           type: MessageType.ERROR,
@@ -342,13 +348,15 @@ class DiscordRouter {
 
           case 'event': {
             messageType = MessageType.SETUP_EVENT
-            const startDate = interaction.options.getString('start', true)
-            const endDate = interaction.options.getString('end', true)
-            const timezone = interaction.options.getString('timezone')
+            const startDate = interaction.options.getString('start-date', true)
+            const startHour = interaction.options.getString('start-h', true)
+            const endDate = interaction.options.getString('end-date', true)
+            const endHour = interaction.options.getString('end-h', true)
             payload = {
               startDate,
+              startHour,
               endDate,
-              timezone: timezone || 'Europe/Paris',
+              endHour,
             }
             break
           }
@@ -444,6 +452,18 @@ class DiscordRouter {
           default:
             messageType = MessageType.ERROR
             payload = { error: 'Unknown key subcommand' }
+        }
+        break
+      }
+
+      case 'add-points': {
+        messageType = MessageType.ADD_POINTS
+        const teamName = interaction.options.getString('team_name', true)
+        const points = interaction.options.getInteger('points', true)
+        payload = {
+          teamName,
+          points,
+          adminId: sourceId,
         }
         break
       }

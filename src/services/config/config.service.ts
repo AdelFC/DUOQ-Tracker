@@ -80,6 +80,17 @@ export class ConfigService {
   }
 
   /**
+   * Récupère toutes les valeurs de configuration (pour persistence)
+   */
+  getAll(): Record<string, string | null> {
+    const all: Record<string, string | null> = {}
+    for (const [key, value] of this.config.entries()) {
+      all[key] = value
+    }
+    return all
+  }
+
+  /**
    * Définit les dates de l'événement
    */
   async setEventDates(startDate: string, endDate: string, timezone?: string): Promise<void> {

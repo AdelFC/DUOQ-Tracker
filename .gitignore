@@ -17,6 +17,10 @@ database/
 *.db-shm
 *.db-wal
 
+# Persistence
+data/
+*.json.backup
+
 # IDE
 .vscode/
 .idea/
