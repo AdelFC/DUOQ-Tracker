@@ -17,6 +17,7 @@ import {
   keyCommand,
   setupCommand,
   testCommand,
+  addPointsCommand,
 } from './commands'
 import * as dotenv from 'dotenv'
 
@@ -50,6 +51,7 @@ const commands = [
   // Admin
   setupCommand.data.toJSON(),
   testCommand.data.toJSON(),
+  addPointsCommand.data.toJSON(),
 ]
 
 // Create REST client
