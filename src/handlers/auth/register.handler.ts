@@ -196,10 +196,12 @@ export async function registerHandler(msg: Message, state: State, responses: Res
   // Parser le peak elo pour initialiser le rank actuel
   const peakRankInfo = parseRankString(peakElo)
 
-  // Validation 6: Vérifier le Riot ID via l'API Riot
+  // Validation 6: Vérifier le Riot ID via l'API Riot et récupérer le rang actuel
   let puuid = ''
   let validatedGameName = gameName.trim()
   let validatedTagLine = tagLine.trim()
+  let summonerId = ''
+  let currentActualRank = peakRankInfo // Fallback si on ne peut pas fetcher
 
   if (state.riotService) {
     try {
@@ -230,6 +232,21 @@ export async function registerHandler(msg: Message, state: State, responses: Res
       puuid = accountInfo.puuid
       validatedGameName = accountInfo.gameName
       validatedTagLine = accountInfo.tagLine
+
+      // Récupérer le rang actuel pour initialRank (progression tracking)
+      try {
+        const summonerInfo = await state.riotService.getSummonerByPuuid(puuid)
+        if (summonerInfo) {
+          summonerId = summonerInfo.id
+          const rankInfo = await state.riotService.getRankBySummonerId(summonerId)
+          if (rankInfo) {
+            currentActualRank = rankInfo
+          }
+        }
+      } catch (rankError) {
+        console.warn('[Register] Could not fetch current rank, using peakElo as fallback:', rankError)
+        // Continue avec peakElo comme fallback
+      }
     } catch (error) {
       responses.push({
         type: MessageType.ERROR,
@@ -260,8 +277,8 @@ export async function registerHandler(msg: Message, state: State, responses: Res
     role: 'noob', // Par défaut, sera déterminé lors du /link
     duoId: 0, // À assigner lors du /link
     peakElo,
-    initialRank: peakRankInfo, // Initialisé au peak elo
-    currentRank: peakRankInfo,
+    initialRank: currentActualRank, // Rang actuel au moment de l'inscription (pour progression)
+    currentRank: currentActualRank, // Rang actuel (sera mis à jour après chaque game)
     mainRoleString: mainRole,
     mainChampion,
     detectedMainRole: null, // À détecter après analyse des games
@@ -280,6 +297,14 @@ export async function registerHandler(msg: Message, state: State, responses: Res
 
   // Sauvegarder
   state.players.set(discordId, player)
+
+  // Formater le rang actuel pour l'affichage
+  const formatRankForDisplay = (rank: typeof currentActualRank): string => {
+    if (rank.tier === 'MASTER' || rank.tier === 'GRANDMASTER' || rank.tier === 'CHALLENGER') {
+      return `${rank.tier} (${rank.lp} LP)`
+    }
+    return `${rank.tier} ${rank.division} (${rank.lp} LP)`
+  }
 
   // Réponse de succès
   responses.push({
@@ -307,6 +332,11 @@ export async function registerHandler(msg: Message, state: State, responses: Res
         {
           name: 'Peak Elo',
           value: peakElo,
+          inline: true,
+        },
+        {
+          name: 'Rang actuel',
+          value: formatRankForDisplay(currentActualRank),
           inline: true,
         },
       ],

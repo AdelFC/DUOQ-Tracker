@@ -301,3 +301,30 @@ export const addPointsCommand = {
         .setRequired(true)
     ),
 }
+
+/**
+ * /admin - Commandes admin temporaires (À SUPPRIMER après usage)
+ */
+export const adminCommand = {
+  data: new SlashCommandBuilder()
+    .setName('admin')
+    .setDescription('[ADMIN TEMP] Commandes de maintenance temporaire')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('set-initial-rank')
+        .setDescription('Corriger l\'initialRank d\'un joueur (temporaire)')
+        .addUserOption((option) =>
+          option
+            .setName('joueur')
+            .setDescription('Le joueur à corriger')
+            .setRequired(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName('rank')
+            .setDescription('Rang initial (ex: G2, P4, D1, M, GM, C)')
+            .setRequired(true)
+        )
+    ),
+}
