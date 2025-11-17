@@ -43,13 +43,12 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │         CALCUL INDIVIDUEL (Noob)                    │
 ├─────────────────────────────────────────────────────┤
 │ 1. P_KDA (avec bonus Noob)                          │
-│ 2. Résultat de game (+25/+20/-20/-30/0)             │
-│ 3. Streak (progressif + ponctuel)                   │
-│ 4. Bonus spéciaux (Penta/Quadra/Triple/FB/KS)       │
-│ 5. Sous-total Noob                                  │
-│ 6. Cap individuel (-40 / +60)                       │
-│ 7. Multiplicateur peak elo (0.70x - 1.20x)          │
-│ 8. Arrondi → Score Noob final                       │
+│ 2. Streak (progressif + ponctuel)                   │
+│ 3. Bonus spéciaux (Penta/Quadra/Triple/FB/KS)       │
+│ 4. Sous-total Noob                                  │
+│ 5. Cap individuel (-40 / +60)                       │
+│ 6. Multiplicateur peak elo (0.70x - 1.20x)          │
+│ 7. Arrondi → Score Noob final                       │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
@@ -62,11 +61,12 @@ Le système de scoring évalue la performance d'un duo (Noob + Carry) sur chaque
 │         CALCUL DUO                                  │
 ├─────────────────────────────────────────────────────┤
 │ 9. Somme = Score Noob + Score Carry                 │
-│ 10. Bonus de prise de risque (0/+10/+15)            │
-│ 11. Bonus "No Death" (+20 si 0 mort pour les 2)     │
-│ 12. Sous-total Duo                                  │
-│ 13. Cap duo (-70 / +120)                            │
-│ 14. Arrondi → SCORE FINAL                           │
+│ 10. Résultat de game (+25/+20/-20/-30, 1×)          │
+│ 11. Bonus de prise de risque (0/+10/+15)            │
+│ 12. Bonus "No Death" (+20 si 0 mort pour les 2)     │
+│ 13. Sous-total Duo                                  │
+│ 14. Cap duo (-70 / +120)                            │
+│ 15. Arrondi → SCORE FINAL                           │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -123,6 +123,8 @@ Voir [src/services/scoring/kda.ts](src/services/scoring/kda.ts)
 ---
 
 ### 1.2. Résultat de partie
+
+⚠️ **Important** : Bien que listé ici pour référence, le résultat de partie est **comptabilisé une seule fois au niveau du duo** (étape 10), pas individuellement pour chaque joueur.
 
 Le résultat de la partie donne des points fixes selon l'issue.
 

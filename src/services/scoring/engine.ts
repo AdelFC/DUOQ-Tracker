@@ -91,28 +91,19 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
     'noob'
   )
 
-  // 2. Résultat de game
-  const noobGameResult = calculateGameResult({
-    win,
-    duration,
-    surrender,
-    remake,
-  })
-
-  // 3. Streak (progressif + ponctuel)
+  // 2. Streak (progressif + ponctuel)
   const noobStreakResult = calculateStreakBonus(win, noobStreak)
 
-  // 4. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
+  // 3. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
   const noobSpecialBonus = calculatePlayerSpecialBonus(noobStats)
 
-  // 5. Sous-total
-  const noobSubtotal =
-    noobKDA.final + noobGameResult.final + noobStreakResult.total + noobSpecialBonus.total
+  // 4. Sous-total (sans gameResult qui sera ajouté au niveau duo)
+  const noobSubtotal = noobKDA.final + noobStreakResult.total + noobSpecialBonus.total
 
-  // 6. Plafond individuel
+  // 5. Plafond individuel
   const noobCapped = applyPlayerCap(noobSubtotal)
 
-  // 7. Multiplicateur peak elo (anti-smurf + bonus progression)
+  // 6. Multiplicateur peak elo (anti-smurf + bonus progression)
   const noobPeakMult = calculatePeakEloMultiplier(noobStats.peakElo, noobStats.newRank)
   const noobAfterPeakMultiplier = noobCapped * noobPeakMult
 
@@ -128,12 +119,20 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
     tierDiff: noobTierDiff,
   }
 
-  // 8. Arrondi à l'entier
+  // 7. Arrondi à l'entier
   const noobFinal = Math.round(noobAfterPeakMultiplier)
+
+  // Note: gameResult est calculé mais stocké pour affichage, pas ajouté au score ici
+  const noobGameResult = calculateGameResult({
+    win,
+    duration,
+    surrender,
+    remake,
+  })
 
   const noobScore: PlayerScore = {
     kda: noobKDA,
-    gameResult: noobGameResult,
+    gameResult: noobGameResult, // Pour affichage seulement
     streak: noobStreakResult,
     specialBonuses: noobSpecialBonus,
     subtotal: noobSubtotal,
@@ -152,28 +151,19 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
     'carry'
   )
 
-  // 2. Résultat de game
-  const carryGameResult = calculateGameResult({
-    win,
-    duration,
-    surrender,
-    remake,
-  })
-
-  // 3. Streak (progressif + ponctuel)
+  // 2. Streak (progressif + ponctuel)
   const carryStreakResult = calculateStreakBonus(win, carryStreak)
 
-  // 4. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
+  // 3. Bonus spéciaux individuels (Pentakill, Quadra, Triple, First Blood, Killing Spree)
   const carrySpecialBonus = calculatePlayerSpecialBonus(carryStats)
 
-  // 5. Sous-total
-  const carrySubtotal =
-    carryKDA.final + carryGameResult.final + carryStreakResult.total + carrySpecialBonus.total
+  // 4. Sous-total (sans gameResult qui sera ajouté au niveau duo)
+  const carrySubtotal = carryKDA.final + carryStreakResult.total + carrySpecialBonus.total
 
-  // 6. Plafond individuel
+  // 5. Plafond individuel
   const carryCapped = applyPlayerCap(carrySubtotal)
 
-  // 7. Multiplicateur peak elo (anti-smurf + bonus progression)
+  // 6. Multiplicateur peak elo (anti-smurf + bonus progression)
   const carryPeakMult = calculatePeakEloMultiplier(carryStats.peakElo, carryStats.newRank)
   const carryAfterPeakMultiplier = carryCapped * carryPeakMult
 
@@ -189,12 +179,20 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
     tierDiff: carryTierDiff,
   }
 
-  // 8. Arrondi à l'entier
+  // 7. Arrondi à l'entier
   const carryFinal = Math.round(carryAfterPeakMultiplier)
+
+  // Note: gameResult est calculé mais stocké pour affichage, pas ajouté au score ici
+  const carryGameResult = calculateGameResult({
+    win,
+    duration,
+    surrender,
+    remake,
+  })
 
   const carryScore: PlayerScore = {
     kda: carryKDA,
-    gameResult: carryGameResult,
+    gameResult: carryGameResult, // Pour affichage seulement
     streak: carryStreakResult,
     specialBonuses: carrySpecialBonus,
     subtotal: carrySubtotal,
@@ -207,10 +205,18 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   // │ CALCUL DUO                                              │
   // └─────────────────────────────────────────────────────────┘
 
-  // 9. Somme duo
+  // 9. Somme duo (scores individuels)
   const duoSum = noobFinal + carryFinal
 
-  // 10. Prise de risque
+  // 10. Résultat de game (comptabilisé UNE SEULE FOIS au niveau duo)
+  const gameResult = calculateGameResult({
+    win,
+    duration,
+    surrender,
+    remake,
+  })
+
+  // 11. Prise de risque
   const riskBonus = calculateRiskBonus({
     noobOffRole: noobStats.isOffRole,
     noobOffChampion: noobStats.isOffChampion,
@@ -218,16 +224,16 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
     carryOffChampion: carryStats.isOffChampion,
   })
 
-  // 11. Bonus spéciaux duo
+  // 12. Bonus spéciaux duo
   const noDeathBonus = calculateNoDeathBonus(noobStats.deaths, carryStats.deaths)
 
-  // 12. Sous-total duo
-  const duoSubtotal = duoSum + riskBonus.final + noDeathBonus
+  // 13. Sous-total duo
+  const duoSubtotal = duoSum + gameResult.final + riskBonus.final + noDeathBonus
 
-  // 13. Plafond duo
+  // 14. Plafond duo
   const duoCapped = applyDuoCap(duoSubtotal)
 
-  // 14. Arrondi final
+  // 15. Arrondi final
   const duoFinal = Math.round(duoCapped)
 
   const duoScore: DuoScore = {
