@@ -10,7 +10,7 @@ import { calculateRiskBonus } from './risk.js'
 import { calculateNoDeathBonus, calculatePlayerSpecialBonus } from './bonuses.js'
 import { applyPlayerCap, applyDuoCap } from './caps.js'
 import { calculatePeakEloMultiplier } from './peak-elo-multiplier.js'
-import { rankToValue, parseRankString } from './rank-utils.js'
+import { rankToValue, parseRankString, formatRankString } from './rank-utils.js'
 
 import type { PlayerGameStats, GameData } from '../../types/game.js'
 import type {
@@ -56,7 +56,7 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
       },
       subtotal: 0,
       capped: 0,
-      peakMultiplier: { multiplier: 1.0, tierDiff: 0 },
+      peakMultiplier: { multiplier: 1.0, tierDiff: 0, currentRank: '' },
       final: 0,
     }
 
@@ -104,19 +104,22 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   const noobCapped = applyPlayerCap(noobSubtotal)
 
   // 6. Multiplicateur peak elo (anti-smurf + bonus progression)
-  const noobPeakMult = calculatePeakEloMultiplier(noobStats.peakElo, noobStats.newRank)
+  // IMPORTANT: Utilise previousRank (rank au moment de la game) pour refléter les conditions réelles
+  const noobPeakMult = calculatePeakEloMultiplier(noobStats.peakElo, noobStats.previousRank)
   const noobAfterPeakMultiplier = noobCapped * noobPeakMult
 
   // Calcul du tierDiff pour le breakdown
   const noobPeakValue = noobStats.peakElo
     ? rankToValue(parseRankString(noobStats.peakElo))
-    : rankToValue(noobStats.newRank)
-  const noobCurrentValue = rankToValue(noobStats.newRank)
+    : rankToValue(noobStats.previousRank)
+  const noobCurrentValue = rankToValue(noobStats.previousRank)
   const noobTierDiff = Math.floor((noobPeakValue - noobCurrentValue) / 4)
 
   const noobPeakMultiplier: PeakEloMultiplier = {
     multiplier: noobPeakMult,
     tierDiff: noobTierDiff,
+    peakRank: noobStats.peakElo, // Déjà formaté (ex: "D1", "P2")
+    currentRank: formatRankString(noobStats.previousRank), // Rank au moment de la game
   }
 
   // 7. Arrondi à l'entier
@@ -164,19 +167,22 @@ export function calculateGameScore(input: ScoringInput): ScoreBreakdown {
   const carryCapped = applyPlayerCap(carrySubtotal)
 
   // 6. Multiplicateur peak elo (anti-smurf + bonus progression)
-  const carryPeakMult = calculatePeakEloMultiplier(carryStats.peakElo, carryStats.newRank)
+  // IMPORTANT: Utilise previousRank (rank au moment de la game) pour refléter les conditions réelles
+  const carryPeakMult = calculatePeakEloMultiplier(carryStats.peakElo, carryStats.previousRank)
   const carryAfterPeakMultiplier = carryCapped * carryPeakMult
 
   // Calcul du tierDiff pour le breakdown
   const carryPeakValue = carryStats.peakElo
     ? rankToValue(parseRankString(carryStats.peakElo))
-    : rankToValue(carryStats.newRank)
-  const carryCurrentValue = rankToValue(carryStats.newRank)
+    : rankToValue(carryStats.previousRank)
+  const carryCurrentValue = rankToValue(carryStats.previousRank)
   const carryTierDiff = Math.floor((carryPeakValue - carryCurrentValue) / 4)
 
   const carryPeakMultiplier: PeakEloMultiplier = {
     multiplier: carryPeakMult,
     tierDiff: carryTierDiff,
+    peakRank: carryStats.peakElo, // Déjà formaté (ex: "D1", "P2")
+    currentRank: formatRankString(carryStats.previousRank), // Rank au moment de la game
   }
 
   // 7. Arrondi à l'entier

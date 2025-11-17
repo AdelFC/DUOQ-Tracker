@@ -42,6 +42,8 @@ export interface SpecialBonuses {
 export interface PeakEloMultiplier {
   multiplier: number // 0.70 à 1.20
   tierDiff: number // Différence en tiers avec le peak
+  peakRank?: string // Peak rank formaté (ex: "D1", "P2"). Optionnel si pas de peak défini
+  currentRank: string // Rank actuel formaté (ex: "G2", "S4")
 }
 
 export interface RiskBonus {

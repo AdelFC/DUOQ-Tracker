@@ -166,13 +166,30 @@ export function formatGameScored(payload: {
 
     const formatNum = (n: number) => (n > 0 ? `+${n}` : `${n}`)
 
+    // Formatage du peak multiplier avec détails
+    const formatPeakMultiplier = (pm: any) => {
+      if (pm.multiplier === 1.0) return null
+
+      const mult = `×${pm.multiplier.toFixed(2)}`
+
+      // Si on a le peak rank et le current rank, afficher le détail
+      if (pm.peakRank && pm.currentRank) {
+        const tierDiffAbs = Math.abs(pm.tierDiff)
+        const direction = pm.tierDiff > 0 ? '-' : '+'
+        return `*Peak: ${mult} (${pm.peakRank} → ${pm.currentRank}, ${direction}${tierDiffAbs} tier${tierDiffAbs > 1 ? 's' : ''})*`
+      }
+
+      // Fallback si pas de détails
+      return `*Peak: ${mult}*`
+    }
+
     const noobDetails = [
       `*KDA: ${formatNum(Math.round(noob.kda.final))}*`,
       `*Résultat: ${formatNum(noob.gameResult.final)}*`,
       `*Streak: ${formatNum(noob.streak.total)}${noob.streak.milestone ? ` (${formatNum(noob.streak.progressive)}+${formatNum(noob.streak.milestone)})` : ''}*`,
       noob.specialBonuses.total > 0 ? `*Bonus: ${formatNum(noob.specialBonuses.total)}*` : null,
       `*Cap: ${formatNum(noob.capped)}*`,
-      noob.peakMultiplier.multiplier !== 1.0 ? `*Peak: ×${noob.peakMultiplier.multiplier.toFixed(2)}*` : null,
+      formatPeakMultiplier(noob.peakMultiplier),
     ]
       .filter(Boolean)
       .join(' | ')
@@ -183,7 +200,7 @@ export function formatGameScored(payload: {
       `*Streak: ${formatNum(carry.streak.total)}${carry.streak.milestone ? ` (${formatNum(carry.streak.progressive)}+${formatNum(carry.streak.milestone)})` : ''}*`,
       carry.specialBonuses.total > 0 ? `*Bonus: ${formatNum(carry.specialBonuses.total)}*` : null,
       `*Cap: ${formatNum(carry.capped)}*`,
-      carry.peakMultiplier.multiplier !== 1.0 ? `*Peak: ×${carry.peakMultiplier.multiplier.toFixed(2)}*` : null,
+      formatPeakMultiplier(carry.peakMultiplier),
     ]
       .filter(Boolean)
       .join(' | ')
