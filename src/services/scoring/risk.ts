@@ -1,6 +1,6 @@
 /**
  * Calcul du bonus de prise de risque (DUO)
- * Formules (SPECIFICATIONS.md v2.1 - Section 5):
+ * Formules (v3.0 - Refonte scoring):
  *
  * Évaluation (4 conditions):
  * 1. Noob hors rôle principal?
@@ -11,10 +11,9 @@
  * H = nombre de conditions vraies
  *
  * Bonus selon H:
- * - H = 4: +25 points
- * - H = 3: +15 points
- * - H = 2: +5 points
- * - H ≤ 1: 0 points
+ * - H = 4: +15 points
+ * - H = 3: +10 points
+ * - H ≤ 2: 0 points
  */
 
 import type { RiskBonus } from '../../types/scoring.js'
@@ -37,17 +36,15 @@ export function calculateRiskBonus(input: RiskInput): RiskBonus {
   // Comptage des conditions vraies
   const H = [noobOffRole, noobOffChampion, carryOffRole, carryOffChampion].filter(Boolean).length
 
-  // Calcul du bonus selon H
+  // Calcul du bonus selon H (v3.0)
   let final: number
 
   if (H === 4) {
-    final = 25
-  } else if (H === 3) {
     final = 15
-  } else if (H === 2) {
-    final = 5
+  } else if (H === 3) {
+    final = 10
   } else {
-    // H <= 1
+    // H <= 2
     final = 0
   }
 

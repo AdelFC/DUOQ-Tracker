@@ -1,13 +1,13 @@
 /**
  * Calcul du score de résultat de partie
- * Formules (SPECIFICATIONS.md v2.1 - Section 2):
- * - Victoire standard: +5 points
- * - Victoire rapide (< 25 min): +8 points
- * - Défaite: -5 points
- * - FF/Surrender: -10 points
- * - Remake: 0 points
+ * Formules (v3.0 - Refonte scoring):
+ * - Victoire rapide (< 20 min): +25 points
+ * - Victoire standard: +20 points
+ * - Défaite standard: -20 points
+ * - FF/Surrender: -30 points
+ * - Remake ou < 5 min: 0 points (cas spécial: arrêt du calcul)
  *
- * Priorité: Remake > FF > Win <25min > Win > Loss
+ * Priorité: Remake/5min > FF > Win <20min > Win > Loss
  *
  * NOTE: Les streaks sont calculés séparément (module streaks)
  */
@@ -31,22 +31,22 @@ export function calculateGameResult(input: GameResultInput): GameResultScore {
 
   let basePoints: number
 
-  // Priorité d'application (selon spec)
+  // Priorité d'application (selon spec v3.0)
   if (remake) {
-    // Remake = 0 points (priorité max)
+    // Remake = 0 points (priorité max, arrêt du calcul dans engine)
     basePoints = 0
   } else if (surrender && !win) {
-    // FF/Surrender = -10 points (uniquement sur défaite)
-    basePoints = -10
-  } else if (win && duration < 1500) {
-    // Victoire rapide < 25:00 (1500 sec) = +8 points
-    basePoints = 8
+    // FF/Surrender = -30 points (uniquement sur défaite)
+    basePoints = -30
+  } else if (win && duration < 1200) {
+    // Victoire rapide < 20:00 (1200 sec) = +25 points
+    basePoints = 25
   } else if (win) {
-    // Victoire standard = +5 points
-    basePoints = 5
+    // Victoire standard = +20 points
+    basePoints = 20
   } else {
-    // Défaite standard = -5 points
-    basePoints = -5
+    // Défaite standard = -20 points
+    basePoints = -20
   }
 
   // Pas de streak bonus ici (calculé séparément)

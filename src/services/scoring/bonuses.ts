@@ -1,6 +1,6 @@
 /**
  * Bonus spéciaux
- * Formules (SPECIFICATIONS.md v2.1 - Section 6):
+ * Formules (v3.0 - Refonte scoring):
  *
  * Bonus Duo "No Death":
  * - Condition: Les 2 joueurs du duo ont 0 death
@@ -8,13 +8,14 @@
  *
  * Bonus Individuels:
  * - Pentakill: +30 pts
- * - Quadrakill: +15 pts
- * - Triple kill: +5 pts
- * - First Blood: +5 pts
- * - Killing Spree (7+ kills sans mourir): +10 pts
+ * - Quadrakill: +15 pts (si pas de penta)
+ * - Triple kill: +5 pts (si pas de quadra/penta)
+ * - First Blood: +5 pts (cumulatif)
+ * - Killing Spree (7+ kills): +10 pts (cumulatif)
  */
 
 import type { PlayerGameStats } from '../../types/game.js'
+import type { SpecialBonuses } from '../../types/scoring.js'
 
 /**
  * Calcule le bonus "No Death" si les deux joueurs n'ont aucune mort
@@ -34,35 +35,48 @@ export function calculateNoDeathBonus(noobDeaths: number, carryDeaths: number): 
  * (Pentakill, Quadra, Triple, First Blood, Killing Spree)
  *
  * @param stats - Stats du joueur
- * @returns Points de bonus spéciaux
+ * @returns SpecialBonuses avec breakdown détaillé
  */
-export function calculatePlayerSpecialBonus(stats: PlayerGameStats): number {
-  let bonus = 0
+export function calculatePlayerSpecialBonus(stats: PlayerGameStats): SpecialBonuses {
+  let pentakill = 0
+  let quadrakill = 0
+  let tripleKill = 0
+  let firstBlood = 0
+  let killingSpree = 0
 
   // Pentakill: +30 pts (max prioritaire)
   if (stats.pentaKills && stats.pentaKills > 0) {
-    bonus += 30 * stats.pentaKills
+    pentakill = 30 * stats.pentaKills
   }
 
   // Quadrakill: +15 pts (ne compte pas si pentakill car déjà récompensé)
   else if (stats.quadraKills && stats.quadraKills > 0) {
-    bonus += 15 * stats.quadraKills
+    quadrakill = 15 * stats.quadraKills
   }
 
   // Triple kill: +5 pts (ne compte pas si quadra/penta)
   else if (stats.tripleKills && stats.tripleKills > 0) {
-    bonus += 5 * stats.tripleKills
+    tripleKill = 5 * stats.tripleKills
   }
 
-  // First Blood: +5 pts
+  // First Blood: +5 pts (cumulatif)
   if (stats.firstBloodKill) {
-    bonus += 5
+    firstBlood = 5
   }
 
-  // Killing Spree (7+ kills d'affilée): +10 pts
+  // Killing Spree (7+ kills d'affilée): +10 pts (cumulatif)
   if (stats.largestKillingSpree && stats.largestKillingSpree >= 7) {
-    bonus += 10
+    killingSpree = 10
   }
 
-  return bonus
+  const total = pentakill + quadrakill + tripleKill + firstBlood + killingSpree
+
+  return {
+    pentakill,
+    quadrakill,
+    tripleKill,
+    firstBlood,
+    killingSpree,
+    total,
+  }
 }

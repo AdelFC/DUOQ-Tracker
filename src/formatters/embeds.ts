@@ -91,8 +91,24 @@ export function formatGameScored(payload: {
   carryKDA: string
   duration: number
   totalPoints?: number
+  breakdown?: any // ScoreBreakdown détaillé
+  alerts?: Array<{ type: string; player?: string; message: string }>
+  isRemakeOrEarlyGame?: boolean
 }): DiscordEmbed {
-  const { noobName, carryName, win, noobPoints, carryPoints, noobKDA, carryKDA, duration, totalPoints } = payload
+  const {
+    noobName,
+    carryName,
+    win,
+    noobPoints,
+    carryPoints,
+    noobKDA,
+    carryKDA,
+    duration,
+    totalPoints,
+    breakdown,
+    alerts,
+    isRemakeOrEarlyGame,
+  } = payload
 
   const resultEmoji = win ? EMOJIS.victory : EMOJIS.defeat
   const resultText = win ? '**VICTOIRE**' : '**DÉFAITE**'
@@ -106,7 +122,14 @@ export function formatGameScored(payload: {
   const noobPointsStr = noobPoints > 0 ? `+${noobPoints}` : `${noobPoints}`
   const carryPointsStr = carryPoints > 0 ? `+${carryPoints}` : `${carryPoints}`
 
+  // Alertes spéciales en haut si présentes
+  let alertsText = ''
+  if (alerts && alerts.length > 0) {
+    alertsText = alerts.map((a) => a.message).join('\n') + '\n\n'
+  }
+
   const description = [
+    alertsText,
     `${resultEmoji} ${resultText}`,
     '',
     `**${noobName}** ${EMOJIS.duo} **${carryName}**`,
@@ -116,29 +139,95 @@ export function formatGameScored(payload: {
     '─────────────────────',
   ].join('\n')
 
+  // Champs de base
+  const fields: Array<{ name: string; value: string; inline?: boolean }> = [
+    {
+      name: `${EMOJIS.noob} ${noobName}`,
+      value: `💎 **${noobPointsStr}** pts\n⚔️ KDA: \`${noobKDA}\``,
+      inline: true,
+    },
+    {
+      name: `${EMOJIS.carry} ${carryName}`,
+      value: `💎 **${carryPointsStr}** pts\n⚔️ KDA: \`${carryKDA}\``,
+      inline: true,
+    },
+    {
+      name: `${EMOJIS.clock} Durée`,
+      value: `\`${durationMin}:${durationSec.toString().padStart(2, '0')}\``,
+      inline: true,
+    },
+  ]
+
+  // Détails du calcul (en italique, petit texte)
+  if (breakdown && !isRemakeOrEarlyGame) {
+    const noob = breakdown.noob
+    const carry = breakdown.carry
+    const duo = breakdown.duo
+
+    const formatNum = (n: number) => (n > 0 ? `+${n}` : `${n}`)
+
+    const noobDetails = [
+      `*KDA: ${formatNum(Math.round(noob.kda.final))}*`,
+      `*Résultat: ${formatNum(noob.gameResult.final)}*`,
+      `*Streak: ${formatNum(noob.streak.total)}${noob.streak.milestone ? ` (${formatNum(noob.streak.progressive)}+${formatNum(noob.streak.milestone)})` : ''}*`,
+      noob.specialBonuses.total > 0 ? `*Bonus: ${formatNum(noob.specialBonuses.total)}*` : null,
+      `*Cap: ${formatNum(noob.capped)}*`,
+      noob.peakMultiplier.multiplier !== 1.0 ? `*Peak: ×${noob.peakMultiplier.multiplier.toFixed(2)}*` : null,
+    ]
+      .filter(Boolean)
+      .join(' | ')
+
+    const carryDetails = [
+      `*KDA: ${formatNum(Math.round(carry.kda.final))}*`,
+      `*Résultat: ${formatNum(carry.gameResult.final)}*`,
+      `*Streak: ${formatNum(carry.streak.total)}${carry.streak.milestone ? ` (${formatNum(carry.streak.progressive)}+${formatNum(carry.streak.milestone)})` : ''}*`,
+      carry.specialBonuses.total > 0 ? `*Bonus: ${formatNum(carry.specialBonuses.total)}*` : null,
+      `*Cap: ${formatNum(carry.capped)}*`,
+      carry.peakMultiplier.multiplier !== 1.0 ? `*Peak: ×${carry.peakMultiplier.multiplier.toFixed(2)}*` : null,
+    ]
+      .filter(Boolean)
+      .join(' | ')
+
+    const duoDetails = [
+      `*Somme: ${formatNum(duo.sum)}*`,
+      duo.riskBonus.final > 0 ? `*Risque: ${formatNum(duo.riskBonus.final)}*` : null,
+      duo.noDeathBonus > 0 ? `*No Death: ${formatNum(duo.noDeathBonus)}*` : null,
+      `*Cap: ${formatNum(duo.capped)}*`,
+    ]
+      .filter(Boolean)
+      .join(' | ')
+
+    fields.push(
+      {
+        name: '📊 Détail Noob',
+        value: noobDetails,
+        inline: false,
+      },
+      {
+        name: '📊 Détail Carry',
+        value: carryDetails,
+        inline: false,
+      },
+      {
+        name: '📊 Détail Duo',
+        value: duoDetails,
+        inline: false,
+      }
+    )
+  }
+
+  let footerText = 'GG WP !'
+  if (isRemakeOrEarlyGame) {
+    footerText = '⚠️ Remake ou partie < 5 min : 0 points attribués'
+  } else if (totalPoints !== undefined) {
+    footerText = `💰 Total du duo : ${totalPoints > 0 ? '+' : ''}${totalPoints} pts | GG WP !`
+  }
+
   return {
     description,
-    fields: [
-      {
-        name: `${EMOJIS.noob} ${noobName}`,
-        value: `💎 **${noobPointsStr}** pts\n⚔️ KDA: \`${noobKDA}\``,
-        inline: true,
-      },
-      {
-        name: `${EMOJIS.carry} ${carryName}`,
-        value: `💎 **${carryPointsStr}** pts\n⚔️ KDA: \`${carryKDA}\``,
-        inline: true,
-      },
-      {
-        name: `${EMOJIS.clock} Durée`,
-        value: `\`${durationMin}:${durationSec.toString().padStart(2, '0')}\``,
-        inline: true,
-      },
-    ],
-    color,
-    footer: totalPoints !== undefined
-      ? { text: `💰 Total du duo : ${totalPoints > 0 ? '+' : ''}${totalPoints} pts | GG WP !` }
-      : { text: 'GG WP !' },
+    fields,
+    color: isRemakeOrEarlyGame ? COLORS.warning : color,
+    footer: { text: footerText },
     timestamp: new Date(),
   }
 }

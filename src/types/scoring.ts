@@ -1,6 +1,6 @@
 /**
  * Types pour le système de scoring
- * Basé sur SPECIFICATIONS.md v2.1
+ * Basé sur v3.0 - Refonte scoring
  */
 
 import type { Role, RankInfo } from './player.js'
@@ -24,11 +24,24 @@ export interface GameResultScore {
   final: number
 }
 
-export interface RankChangeScore {
-  lpChange: number // LP gagnés/perdus
-  multiplier: number // x1 à x3 selon rang
-  tierBonus: number // +10 tier up, -5 tier down
-  final: number
+export interface StreakScore {
+  progressive: number // Bonus/malus progressif (+2 à +7 ou -2 à -5)
+  milestone: number // Bonus/malus ponctuel (paliers 3/5/7)
+  total: number // Somme des deux
+}
+
+export interface SpecialBonuses {
+  pentakill: number // +30
+  quadrakill: number // +15
+  tripleKill: number // +5
+  firstBlood: number // +5
+  killingSpree: number // +10
+  total: number // Somme
+}
+
+export interface PeakEloMultiplier {
+  multiplier: number // 0.70 à 1.20
+  tierDiff: number // Différence en tiers avec le peak
 }
 
 export interface RiskBonus {
@@ -46,10 +59,12 @@ export interface BonusPoints {
 export interface PlayerScore {
   kda: KDAScore
   gameResult: GameResultScore
-  rankChange: RankChangeScore
-  subtotal: number // Somme des 3
-  capped: number // Après plafond individuel [-40, 80]
-  final: number // Arrondi
+  streak: StreakScore
+  specialBonuses: SpecialBonuses
+  subtotal: number // Somme avant cap
+  capped: number // Après plafond individuel [-40, 60]
+  peakMultiplier: PeakEloMultiplier // Multiplicateur anti-smurf
+  final: number // Arrondi après multiplicateur
 }
 
 export interface DuoScore {
@@ -63,11 +78,19 @@ export interface DuoScore {
   final: number // Arrondi
 }
 
+export interface SpecialAlert {
+  type: 'pentakill' | 'no_death' | 'surrender'
+  player?: 'noob' | 'carry' // Pour pentakill
+  message: string
+}
+
 export interface ScoreBreakdown {
   noob: PlayerScore
   carry: PlayerScore
   duo: DuoScore
   total: number // Points finaux attribués au duo
+  alerts: SpecialAlert[] // Alertes spéciales
+  isRemakeOrEarlyGame: boolean // true si remake ou <5min (0 points)
 }
 
 export interface ScoringContext {

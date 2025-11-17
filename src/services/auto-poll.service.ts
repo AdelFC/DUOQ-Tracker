@@ -513,7 +513,8 @@ export class AutoPollService {
         noobPoints,
         carryPoints,
         duoPoints,
-        matchDetails.gameDuration
+        matchDetails.gameDuration,
+        scoreResult
       )
     } catch (error) {
       console.error('[AutoPoll] Error scoring game:', error)
@@ -534,7 +535,8 @@ export class AutoPollService {
     noobPoints: number,
     carryPoints: number,
     duoPoints: number,
-    duration: number
+    duration: number,
+    scoreBreakdown: any
   ): Promise<void> {
     const trackerChannelId =
       typeof this.state.config === 'object' && 'getSync' in this.state.config
@@ -559,6 +561,9 @@ export class AutoPollService {
         carryPoints,
         totalPoints: duoPoints,
         duration,
+        breakdown: scoreBreakdown,
+        alerts: scoreBreakdown.alerts,
+        isRemakeOrEarlyGame: scoreBreakdown.isRemakeOrEarlyGame,
       })
 
       const embedBuilder = new EmbedBuilder()
