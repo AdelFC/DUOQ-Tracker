@@ -19,8 +19,8 @@ export interface KDAScore {
 }
 
 export interface GameResultScore {
-  basePoints: number // +30 victoire, -15 défaite
-  streakBonus: number // 0 à +15
+  basePoints: number // v3.0: +25 victoire rapide, +20 victoire, -20 défaite, -30 surrender
+  streakBonus: number // Deprecated v3.0 (toujours 0, streaks calculés séparément)
   final: number
 }
 
@@ -74,7 +74,7 @@ export interface DuoScore {
   riskBonus: RiskBonus
   noDeathBonus: number
   subtotal: number // sum + risk + noDeathBonus
-  capped: number // Après plafond duo [-50, 120]
+  capped: number // Après plafond duo [-70, 120]
   final: number // Arrondi
 }
 
