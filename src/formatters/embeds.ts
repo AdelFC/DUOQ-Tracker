@@ -183,54 +183,137 @@ export function formatGameScored(payload: {
       return `*Peak: ${mult}*`
     }
 
-    const noobDetails = [
-      `*KDA: ${formatNum(Math.round(noob.kda.final))}*`,
-      `*Résultat: ${formatNum(noob.gameResult.final)}*`,
-      `*Streak: ${formatNum(noob.streak.total)}${noob.streak.milestone ? ` (${formatNum(noob.streak.progressive)}+${formatNum(noob.streak.milestone)})` : ''}*`,
-      noob.specialBonuses.total > 0 ? `*Bonus: ${formatNum(noob.specialBonuses.total)}*` : null,
-      `*Cap: ${formatNum(noob.capped)}*`,
-      formatPeakMultiplier(noob.peakMultiplier),
-    ]
-      .filter(Boolean)
-      .join(' | ')
+    // NOOB: Affichage transparent étape par étape
+    const noobParts: string[] = []
 
-    const carryDetails = [
-      `*KDA: ${formatNum(Math.round(carry.kda.final))}*`,
-      `*Résultat: ${formatNum(carry.gameResult.final)}*`,
-      `*Streak: ${formatNum(carry.streak.total)}${carry.streak.milestone ? ` (${formatNum(carry.streak.progressive)}+${formatNum(carry.streak.milestone)})` : ''}*`,
-      carry.specialBonuses.total > 0 ? `*Bonus: ${formatNum(carry.specialBonuses.total)}*` : null,
-      `*Cap: ${formatNum(carry.capped)}*`,
-      formatPeakMultiplier(carry.peakMultiplier),
-    ]
-      .filter(Boolean)
-      .join(' | ')
+    // Étapes 1-3: KDA + Streak + Bonus spéciaux
+    noobParts.push(`*KDA ${formatNum(Math.round(noob.kda.final))}*`)
+    if (noob.streak.total !== 0) {
+      noobParts.push(`*Streak ${formatNum(noob.streak.total)}${noob.streak.milestone ? ` (${formatNum(noob.streak.progressive)}+${formatNum(noob.streak.milestone)})` : ''}*`)
+    }
+    if (noob.specialBonuses.total > 0) {
+      noobParts.push(`*Bonus ${formatNum(noob.specialBonuses.total)}*`)
+    }
 
-    const duoDetails = [
-      `*Somme: ${formatNum(duo.sum)}*`,
-      duo.riskBonus.final > 0 ? `*Risque: ${formatNum(duo.riskBonus.final)}*` : null,
-      duo.noDeathBonus > 0 ? `*No Death: ${formatNum(duo.noDeathBonus)}*` : null,
-      `*Cap: ${formatNum(duo.capped)}*`,
-    ]
-      .filter(Boolean)
-      .join(' | ')
+    // Étape 4: Subtotal (avant cap)
+    const noobSubtotalStr = `*= ${formatNum(noob.subtotal)}*`
 
-    fields.push(
-      {
-        name: '📊 Détail Noob',
-        value: noobDetails,
-        inline: false,
-      },
-      {
-        name: '📊 Détail Carry',
-        value: carryDetails,
-        inline: false,
-      },
-      {
-        name: '📊 Détail Duo',
-        value: duoDetails,
-        inline: false,
-      }
-    )
+    // Étape 5: Cap individuel (si appliqué)
+    let noobCapStr = ''
+    if (noob.subtotal !== noob.capped) {
+      noobCapStr = ` *→ ${formatNum(noob.capped)} (cap)*`
+    }
+
+    // Étape 6: Peak multiplier (si appliqué)
+    const noobPeakStr = formatPeakMultiplier(noob.peakMultiplier)
+
+    // Étape 7: Final
+    const noobFinalStr = `*→ ${formatNum(noob.final)} pts*`
+
+    // Si pas de peak, afficher le final sur la ligne 1
+    // Si peak, afficher le final sur la ligne 2
+    const noobLine1 = noobParts.join(' | ') + ' ' + noobSubtotalStr + noobCapStr + (noobPeakStr ? '' : ' ' + noobFinalStr)
+    const noobLine2 = noobPeakStr ? `${noobPeakStr} ${noobFinalStr}` : null
+
+    // CARRY: Affichage transparent étape par étape
+    const carryParts: string[] = []
+
+    // Étapes 1-3: KDA + Streak + Bonus spéciaux
+    carryParts.push(`*KDA ${formatNum(Math.round(carry.kda.final))}*`)
+    if (carry.streak.total !== 0) {
+      carryParts.push(`*Streak ${formatNum(carry.streak.total)}${carry.streak.milestone ? ` (${formatNum(carry.streak.progressive)}+${formatNum(carry.streak.milestone)})` : ''}*`)
+    }
+    if (carry.specialBonuses.total > 0) {
+      carryParts.push(`*Bonus ${formatNum(carry.specialBonuses.total)}*`)
+    }
+
+    // Étape 4: Subtotal (avant cap)
+    const carrySubtotalStr = `*= ${formatNum(carry.subtotal)}*`
+
+    // Étape 5: Cap individuel (si appliqué)
+    let carryCapStr = ''
+    if (carry.subtotal !== carry.capped) {
+      carryCapStr = ` *→ ${formatNum(carry.capped)} (cap)*`
+    }
+
+    // Étape 6: Peak multiplier (si appliqué)
+    const carryPeakStr = formatPeakMultiplier(carry.peakMultiplier)
+
+    // Étape 7: Final
+    const carryFinalStr = `*→ ${formatNum(carry.final)} pts*`
+
+    // Si pas de peak, afficher le final sur la ligne 1
+    // Si peak, afficher le final sur la ligne 2
+    const carryLine1 = carryParts.join(' | ') + ' ' + carrySubtotalStr + carryCapStr + (carryPeakStr ? '' : ' ' + carryFinalStr)
+    const carryLine2 = carryPeakStr ? `${carryPeakStr} ${carryFinalStr}` : null
+
+    // DUO: Calcul transparent
+    const duoParts: string[] = []
+
+    // Étape 9: Somme
+    duoParts.push(`*Noob ${formatNum(noob.final)}*`)
+    duoParts.push(`*Carry ${formatNum(carry.final)}*`)
+    duoParts.push(`*= ${formatNum(duo.sum)}*`)
+
+    // Étape 10: Résultat de game (comptabilisé ICI, pas au niveau individuel)
+    const gameResult = breakdown.noob.gameResult.final // Même valeur pour noob et carry
+    if (gameResult !== 0) {
+      duoParts.push(`*Résultat ${formatNum(gameResult)}*`)
+    }
+
+    // Étape 11: Risque
+    if (duo.riskBonus.final > 0) {
+      duoParts.push(`*Risque ${formatNum(duo.riskBonus.final)}*`)
+    }
+
+    // Étape 12: No Death
+    if (duo.noDeathBonus > 0) {
+      duoParts.push(`*No Death ${formatNum(duo.noDeathBonus)}*`)
+    }
+
+    // Étape 13: Subtotal duo
+    const duoSubtotalStr = `*= ${formatNum(duo.subtotal)}*`
+
+    // Étape 14: Cap duo (si appliqué)
+    let duoCapStr = ''
+    if (duo.subtotal !== duo.capped) {
+      duoCapStr = ` *→ ${formatNum(duo.capped)} (cap)*`
+    }
+
+    // Étape 15: Final
+    const duoFinalStr = `*→ ${formatNum(duo.final)} pts*`
+
+    const duoLine = duoParts.join(' | ') + ' ' + duoSubtotalStr + duoCapStr + ' ' + duoFinalStr
+
+    // Construire les fields
+    const detailFields: Array<{ name: string; value: string; inline?: boolean }> = []
+
+    // Noob
+    let noobValue = noobLine1
+    if (noobLine2) noobValue += `\n${noobLine2}`
+    detailFields.push({
+      name: '📊 Détail Noob',
+      value: noobValue,
+      inline: false,
+    })
+
+    // Carry
+    let carryValue = carryLine1
+    if (carryLine2) carryValue += `\n${carryLine2}`
+    detailFields.push({
+      name: '📊 Détail Carry',
+      value: carryValue,
+      inline: false,
+    })
+
+    // Duo
+    detailFields.push({
+      name: '📊 Détail Duo',
+      value: duoLine,
+      inline: false,
+    })
+
+    fields.push(...detailFields)
   }
 
   let footerText = 'GG WP !'
