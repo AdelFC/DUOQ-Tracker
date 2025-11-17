@@ -268,6 +268,9 @@ export async function handleRecalculate(
       player.losses = 0
       player.streaks = { current: 0, longestWin: 0, longestLoss: 0 }
       player.lastGameAt = null
+      // Reset currentRank to initialRank for better previousRank approximation
+      // Note: This is still an approximation since we don't have historical ranks
+      player.currentRank = player.initialRank
     }
 
     for (const duo of duos) {
@@ -449,8 +452,8 @@ export async function handleRecalculate(
     // ========================================
     const successTitle = teamName ? `✅ Recalcul terminé pour ${teamName}` : '✅ Recalcul terminé'
     const successDesc = teamName
-      ? `Les scores de la team **${teamName}** ont été recalculés avec le système v3.0`
-      : `Tous les scores ont été recalculés avec le système v3.0`
+      ? `Les scores de la team **${teamName}** ont été recalculés avec le système v3.0\n\n⚠️ Note: Les ranks utilisés sont une approximation (initialRank → rank actuel API)`
+      : `Tous les scores ont été recalculés avec le système v3.0\n\n⚠️ Note: Les ranks utilisés sont une approximation (initialRank → rank actuel API)`
 
     responses.push({
       type: MessageType.SUCCESS,
