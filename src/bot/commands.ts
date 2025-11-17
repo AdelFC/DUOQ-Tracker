@@ -326,5 +326,16 @@ export const adminCommand = {
             .setDescription('Rang initial (ex: G2, P4, D1, M, GM, C)')
             .setRequired(true)
         )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('recalculate')
+        .setDescription('Re-poll et recalcule tous les scores depuis une date avec v3.0')
+        .addStringOption((option) =>
+          option
+            .setName('start-date')
+            .setDescription('Date de début (format: 14/11/2024) - défaut: 14/11/2024')
+            .setRequired(false)
+        )
     ),
 }

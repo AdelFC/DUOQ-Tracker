@@ -31,6 +31,7 @@ import { handleKeySet } from '../handlers/dev/key-set.handler'
 import { handleKeyShow } from '../handlers/dev/key-show.handler'
 import { handleAddPoints } from '../handlers/admin/add-points.handler'
 import { handleSetInitialRank } from '../handlers/admin/set-initial-rank.handler' // TEMP
+import { handleRecalculate } from '../handlers/admin/recalculate.handler' // TEMP
 
 type CommandName =
   | 'register'
@@ -252,6 +253,10 @@ class DiscordRouter {
 
       case MessageType.ADMIN_SET_INITIAL_RANK: // TEMP - À SUPPRIMER
         await handleSetInitialRank(msg, this.state, responses)
+        break
+
+      case MessageType.ADMIN_RECALCULATE: // TEMP - Recalcul scoring v3.0
+        await handleRecalculate(msg, this.state, responses)
         break
 
       default:
@@ -476,17 +481,31 @@ class DiscordRouter {
 
       case 'admin': { // TEMP - À SUPPRIMER
         const subcommand = interaction.options.getSubcommand()
-        if (subcommand === 'set-initial-rank') {
-          messageType = MessageType.ADMIN_SET_INITIAL_RANK
-          const user = interaction.options.getUser('joueur', true)
-          const rank = interaction.options.getString('rank', true)
-          payload = {
-            userId: user.id,
-            rank,
+
+        switch (subcommand) {
+          case 'set-initial-rank': {
+            messageType = MessageType.ADMIN_SET_INITIAL_RANK
+            const user = interaction.options.getUser('joueur', true)
+            const rank = interaction.options.getString('rank', true)
+            payload = {
+              userId: user.id,
+              rank,
+            }
+            break
           }
-        } else {
-          messageType = MessageType.ERROR
-          payload = { error: 'Unknown admin subcommand' }
+
+          case 'recalculate': {
+            messageType = MessageType.ADMIN_RECALCULATE
+            const startDate = interaction.options.getString('start-date')
+            payload = {
+              startDate,
+            }
+            break
+          }
+
+          default:
+            messageType = MessageType.ERROR
+            payload = { error: 'Unknown admin subcommand' }
         }
         break
       }
