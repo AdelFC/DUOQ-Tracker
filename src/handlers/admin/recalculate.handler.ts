@@ -261,6 +261,7 @@ export async function handleRecalculate(
     // 4. RESCORE ALL GAMES WITH V3.0
     // ========================================
     let gamesProcessed = 0
+    const gamePoints = new Map<string, number>() // Store duo points per matchId
 
     for (const gameData of sortedGames) {
       const duo = state.duos.get(gameData.duoId)
@@ -364,6 +365,9 @@ export async function handleRecalculate(
       noob.lastGameAt = gameData.endTime
       carry.lastGameAt = gameData.endTime
 
+      // Store points for this game
+      gamePoints.set(gameData.matchId, duoPoints)
+
       gamesProcessed++
     }
 
@@ -392,7 +396,7 @@ export async function handleRecalculate(
         carryChampion: gameData.carryStats.championName,
         duration: gameData.duration,
         scored: true,
-        pointsAwarded: 0, // We don't have duo points per game here
+        pointsAwarded: gamePoints.get(matchId) || 0,
       })
     }
 
