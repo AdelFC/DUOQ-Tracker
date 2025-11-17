@@ -302,8 +302,11 @@ export async function handleRecalculate(
         carry.currentRank = gameData.carryStats.newRank
       }
 
-      // Update streaks
-      if (gameData.win) {
+      // Update streaks - Remake games don't affect streaks, wins, or losses
+      if (gameData.remake) {
+        // Remake : 0 points déjà appliqués, pas d'impact sur streaks/wins/losses
+        // Les joueurs ne sont pas pénalisés par un remake
+      } else if (gameData.win) {
         noob.wins += 1
         noob.streaks.current += 1
         if (noob.streaks.current > noob.streaks.longestWin) {
@@ -320,6 +323,7 @@ export async function handleRecalculate(
           duo.longestWinStreak = duo.currentStreak
         }
       } else {
+        // Défaite normale : casse la streak
         noob.losses += 1
         // Track loss streak
         if (noob.streaks.current <= 0) {

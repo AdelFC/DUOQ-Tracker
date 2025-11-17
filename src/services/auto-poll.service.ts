@@ -466,7 +466,11 @@ export class AutoPollService {
       noob.currentRank = noobNewRank
       carry.currentRank = carryNewRank
 
-      if (gameData.win) {
+      // Remake games don't affect streaks, wins, or losses
+      if (gameData.remake) {
+        // Remake : 0 points déjà appliqués, pas d'impact sur streaks/wins/losses
+        // Les joueurs ne sont pas pénalisés par un remake
+      } else if (gameData.win) {
         noob.wins += 1
         noob.streaks.current += 1
         if (noob.streaks.current > noob.streaks.longestWin) {
@@ -483,6 +487,7 @@ export class AutoPollService {
           duo.longestWinStreak = duo.currentStreak
         }
       } else {
+        // Défaite normale : casse la streak
         noob.losses += 1
         noob.streaks.current = 0
         carry.losses += 1
