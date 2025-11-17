@@ -358,10 +358,18 @@ export class GameDataBuilder {
     return this
   }
 
+  withRemake(): this {
+    return this.asRemake()
+  }
+
   asSurrender(): this {
     this.game.surrender = true
     this.game.win = false // Surrenders are always defeats
     return this
+  }
+
+  withSurrender(): this {
+    return this.asSurrender()
   }
 
   withNoobStats(stats: PlayerGameStats): this {
