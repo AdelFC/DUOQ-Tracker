@@ -343,53 +343,70 @@ export async function handleRecalculate(
         // Les joueurs ne sont pas pénalisés par un remake
       } else if (gameData.win) {
         noob.wins += 1
-        noob.streaks.current += 1
+        // Si on sort d'une loss streak, reset à 1, sinon incrémenter
+        if (noob.streaks.current <= 0) {
+          noob.streaks.current = 1 // Reset depuis loss streak
+        } else {
+          noob.streaks.current += 1 // Continue win streak
+        }
         if (noob.streaks.current > noob.streaks.longestWin) {
           noob.streaks.longestWin = noob.streaks.current
         }
+
         carry.wins += 1
-        carry.streaks.current += 1
+        // Si on sort d'une loss streak, reset à 1, sinon incrémenter
+        if (carry.streaks.current <= 0) {
+          carry.streaks.current = 1 // Reset depuis loss streak
+        } else {
+          carry.streaks.current += 1 // Continue win streak
+        }
         if (carry.streaks.current > carry.streaks.longestWin) {
           carry.streaks.longestWin = carry.streaks.current
         }
+
         duo.wins += 1
-        duo.currentStreak += 1
+        // Si on sort d'une loss streak, reset à 1, sinon incrémenter
+        if (duo.currentStreak <= 0) {
+          duo.currentStreak = 1 // Reset depuis loss streak
+        } else {
+          duo.currentStreak += 1 // Continue win streak
+        }
         if (duo.currentStreak > duo.longestWinStreak) {
           duo.longestWinStreak = duo.currentStreak
         }
       } else {
         // Défaite normale : casse la streak
         noob.losses += 1
-        // Track loss streak
-        if (noob.streaks.current <= 0) {
-          noob.streaks.current -= 1
-          if (Math.abs(noob.streaks.current) > noob.streaks.longestLoss) {
-            noob.streaks.longestLoss = Math.abs(noob.streaks.current)
-          }
+        // Si on sort d'une win streak, reset à -1, sinon décrémenter
+        if (noob.streaks.current >= 0) {
+          noob.streaks.current = -1 // Reset depuis win streak
         } else {
-          noob.streaks.current = -1
+          noob.streaks.current -= 1 // Continue loss streak
+        }
+        if (Math.abs(noob.streaks.current) > noob.streaks.longestLoss) {
+          noob.streaks.longestLoss = Math.abs(noob.streaks.current)
         }
 
         carry.losses += 1
-        // Track loss streak
-        if (carry.streaks.current <= 0) {
-          carry.streaks.current -= 1
-          if (Math.abs(carry.streaks.current) > carry.streaks.longestLoss) {
-            carry.streaks.longestLoss = Math.abs(carry.streaks.current)
-          }
+        // Si on sort d'une win streak, reset à -1, sinon décrémenter
+        if (carry.streaks.current >= 0) {
+          carry.streaks.current = -1 // Reset depuis win streak
         } else {
-          carry.streaks.current = -1
+          carry.streaks.current -= 1 // Continue loss streak
+        }
+        if (Math.abs(carry.streaks.current) > carry.streaks.longestLoss) {
+          carry.streaks.longestLoss = Math.abs(carry.streaks.current)
         }
 
         duo.losses += 1
-        // Track loss streak
-        if (duo.currentStreak <= 0) {
-          duo.currentStreak -= 1
-          if (Math.abs(duo.currentStreak) > duo.longestLossStreak) {
-            duo.longestLossStreak = Math.abs(duo.currentStreak)
-          }
+        // Si on sort d'une win streak, reset à -1, sinon décrémenter
+        if (duo.currentStreak >= 0) {
+          duo.currentStreak = -1 // Reset depuis win streak
         } else {
-          duo.currentStreak = -1
+          duo.currentStreak -= 1 // Continue loss streak
+        }
+        if (Math.abs(duo.currentStreak) > duo.longestLossStreak) {
+          duo.longestLossStreak = Math.abs(duo.currentStreak)
         }
       }
 
