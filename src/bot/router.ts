@@ -497,8 +497,10 @@ class DiscordRouter {
           case 'recalculate': {
             messageType = MessageType.ADMIN_RECALCULATE
             const startDate = interaction.options.getString('start-date')
+            const team = interaction.options.getString('team')
             payload = {
               startDate,
+              team,
             }
             break
           }

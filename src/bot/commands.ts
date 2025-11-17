@@ -337,5 +337,11 @@ export const adminCommand = {
             .setDescription('Date de début (format: 14/11/2024) - défaut: 14/11/2024')
             .setRequired(false)
         )
+        .addStringOption((option) =>
+          option
+            .setName('team')
+            .setDescription('Nom de la team (optionnel, si vide = tous les duos)')
+            .setRequired(false)
+        )
     ),
 }

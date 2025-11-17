@@ -14,7 +14,7 @@ export async function handleRecalculate(
   state: State,
   responses: Response[]
 ): Promise<void> {
-  const { startDate: startDateStr } = message.payload
+  const { startDate: startDateStr, team: teamName } = message.payload
 
   // Parse start date (default: 14/11/2024)
   let startDate: Date
@@ -26,7 +26,25 @@ export async function handleRecalculate(
     startDate = new Date(2024, 10, 14) // month is 0-indexed
   }
 
-  const duos = Array.from(state.duos.values())
+  // Filter duos by team name if provided
+  let duos = Array.from(state.duos.values())
+  if (teamName) {
+    const targetDuo = duos.find((d) => d.name.toLowerCase() === teamName.toLowerCase())
+    if (!targetDuo) {
+      responses.push({
+        type: MessageType.ERROR,
+        targetId: message.sourceId,
+        content: JSON.stringify({
+          title: 'Erreur',
+          description: `Aucune team trouvée avec le nom "${teamName}"\n\nTeams disponibles:\n${duos.map((d) => `• ${d.name}`).join('\n')}`,
+          color: 0xff0000,
+        }),
+        ephemeral: true,
+      })
+      return
+    }
+    duos = [targetDuo]
+  }
 
   if (duos.length === 0) {
     responses.push({
@@ -58,12 +76,16 @@ export async function handleRecalculate(
   }
 
   // Send initial response
+  const targetDescription = teamName
+    ? `Début du recalcul des scores pour la team **${teamName}** depuis le ${startDate.toLocaleDateString('fr-FR')}.\n\nCela peut prendre quelques instants...`
+    : `Début du recalcul de tous les scores depuis le ${startDate.toLocaleDateString('fr-FR')}.\n\n**Duos à traiter:** ${duos.length}\n\nCela peut prendre plusieurs minutes...`
+
   responses.push({
     type: MessageType.INFO,
     targetId: message.sourceId,
     content: JSON.stringify({
       title: '🔄 Recalcul en cours...',
-      description: `Début du recalcul de tous les scores depuis le ${startDate.toLocaleDateString('fr-FR')}.\n\n**Duos à traiter:** ${duos.length}\n\nCela peut prendre plusieurs minutes...`,
+      description: targetDescription,
       color: 0x5865f2,
     }),
     ephemeral: true,
@@ -228,9 +250,18 @@ export async function handleRecalculate(
     }
 
     // ========================================
-    // 2. RESET ALL PLAYER AND DUO STATS
+    // 2. RESET PLAYER AND DUO STATS
     // ========================================
-    for (const player of state.players.values()) {
+    // Reset only the players/duos we're recalculating
+    const playerIdsToReset = new Set<string>()
+    for (const duo of duos) {
+      playerIdsToReset.add(duo.noobId)
+      playerIdsToReset.add(duo.carryId)
+    }
+
+    for (const playerId of playerIdsToReset) {
+      const player = state.players.get(playerId)
+      if (!player) continue
       player.totalPoints = 0
       player.gamesPlayed = 0
       player.wins = 0
@@ -374,7 +405,20 @@ export async function handleRecalculate(
     // ========================================
     // 5. UPDATE STATE.GAMES
     // ========================================
-    state.games.clear()
+    // If recalculating specific team, only clear/update those games
+    if (teamName) {
+      // Remove games from this duo
+      const duoIds = new Set(duos.map((d) => d.id))
+      for (const [matchId, game] of state.games) {
+        if (duoIds.has(game.duoId)) {
+          state.games.delete(matchId)
+        }
+      }
+    } else {
+      // Clear all if recalculating everything
+      state.games.clear()
+    }
+
     for (const [matchId, gameData] of allGames) {
       state.games.set(matchId, {
         id: matchId,
@@ -403,12 +447,17 @@ export async function handleRecalculate(
     // ========================================
     // 6. SEND SUCCESS RESPONSE
     // ========================================
+    const successTitle = teamName ? `✅ Recalcul terminé pour ${teamName}` : '✅ Recalcul terminé'
+    const successDesc = teamName
+      ? `Les scores de la team **${teamName}** ont été recalculés avec le système v3.0`
+      : `Tous les scores ont été recalculés avec le système v3.0`
+
     responses.push({
       type: MessageType.SUCCESS,
       targetId: message.sourceId,
       content: JSON.stringify({
-        title: '✅ Recalcul terminé',
-        description: `Tous les scores ont été recalculés avec le système v3.0`,
+        title: successTitle,
+        description: successDesc,
         fields: [
           {
             name: 'Période',
@@ -426,8 +475,8 @@ export async function handleRecalculate(
             inline: true,
           },
           {
-            name: 'Duos traités',
-            value: `${duos.length} duo(s)`,
+            name: teamName ? 'Team traitée' : 'Duos traités',
+            value: teamName ? teamName : `${duos.length} duo(s)`,
             inline: true,
           },
         ],
